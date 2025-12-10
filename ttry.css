@@ -1,0 +1,117 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+body {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f9f4e3;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  color: #444;
+}
+
+/* --- Left Navigation Bar --- */
+.leftnav {
+  width: 280px;
+  height: 100vh;
+  background-color: #27512b;
+  padding: 1.5rem;
+  color: #f9f4e3;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* --- Logo Section in Sidebar --- */
+
+.leftnav .logo {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-left: -8px;
+  margin-bottom: 2.5rem;
+  text-decoration: none;
+  color: #f9f4e3;
+}
+
+.leftnav .logo img {
+  max-width: 80px;
+  height: auto;
+}
+
+.leftnav .logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.leftnav .logo-text strong {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.leftnav .logo-text span {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: #f9f4e3;
+  white-space: nowrap;
+}
+
+.leftnav .nav-links {
+  list-style-type: none;
+}
+
+.leftnav .nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.5rem;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  color: #f9f4e3;
+}
+
+.leftnav .nav-link i {
+  width: 20px;
+  margin-right: 1rem;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  color: #f9f4e3;
+}
+
+.leftnav .nav-link.active,
+.leftnav .nav-link:hover {
+  background-color: #9cb89dd3;
+}
+
+.leftnav .nav-link.active i,
+.leftnav .nav-link:hover i {
+  color: #ffca05;
+}
+/* --- END HOVER/ACTIVE EFFECT --- */
+
+.nav-logout {
+  margin-top: auto; /* Pushes logout to the bottom */
+}

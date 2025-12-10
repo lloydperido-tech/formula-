@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="s_dashboard.css" />
+  </head>
+
+  <body>
+    <nav class="leftnav">
+      <a href="dashboard.html" class="logo">
+        <img src="logo\c_logoo.svg" alt="CvSU Logo" />
+        <div class="logo-text">
+          <strong>CvSU - DRS</strong>
+          <span>Document Request System</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li class="nav-item">
+          <a href="s_dashboard.html" class="nav-link active">
+            <i class="fa-solid fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_request.html" class="nav-link">
+            <i class="fa-solid fa-file-alt"></i>
+            <span>Request Document</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_track.html" class="nav-link">
+            <i class="fa-solid fa-clock"></i>
+            <span>Track Requests</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_fees.html" class="nav-link">
+            <i class="fa-solid fa-money-bill"></i>
+            <span>Document Fees</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_profile.html" class="nav-link">
+            <i class="fa-solid fa-user"></i>
+            <span>My Profile</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-logout">
+        <button onclick="logout()" class="nav-link">
+          <i class="fa-solid fa-sign-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </nav>
+    <div class="page-content">
+      <header class="topbar">
+        <h1>Dashboard</h1>
+        <div class="user-profile">
+          <button class="notifs" aria-label="View notifications" onclick="toggleNotifications()">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
+          </button>
+          <button class="user" aria-label="User menu" onclick="window.location.href='s_profile.html'">
+            <i class="fa-regular fa-user"></i>
+          </button>
+          <span class="username" id="userName">User</span>
+        </div>
+        
+        <!-- Notifications Dropdown -->
+        <div class="notifications-dropdown" id="notificationsDropdown" style="display: none;">
+          <div class="notif-header">
+            <h4>Notifications</h4>
+            <button onclick="markAllAsRead()" class="mark-read-btn">Mark all as read</button>
+          </div>
+          <div class="notif-list" id="notifList">
+            <div class="notif-empty">No new notifications</div>
+          </div>
+        </div>
+      </header>
+      <main>
+        <div class="container-grid">
+          <section class="main-column">
+            <h2 class="welcome-header">Welcome, Alelhy!</h2>
+
+            <div class="card-row">
+              <article class="details-card card">
+                <h3>Student Details</h3>
+                <dl>
+                  <dt>Name:</dt>
+                  <dd>&nbsp;</dd>
+                  <dt>Student Number:</dt>
+                  <dd>&nbsp;</dd>
+                  <dt>Program:</dt>
+                  <dd>&nbsp;</dd>
+                </dl>
+              </article>
+
+              <article class="tracker-card card">
+                <h3>Tracker</h3>
+                <p>Reference ID #00123</p>
+
+                <ol class="tracker-steps">
+                  <li class="completed">
+                    <span>Requested</span>
+                  </li>
+                  <li class="completed">
+                    <span>Verifying</span>
+                  </li>
+                  <li class="completed">
+                    <span>Processing</span>
+                  </li>
+                  <li class="active">
+                    <span>For Release</span>
+                  </li>
+                  <li>
+                    <span>Completed</span>
+                  </li>
+                </ol>
+              </article>
+            </div>
+
+            <section class="recent-requests">
+              <h2>Recent Requests</h2>
+              <div class="card">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Request ID</th>
+                      <th>Document</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </section>
+
+          <aside class="sidebar-column">
+            <section class="calendar-card card">
+              <div class="calendar-header">
+                <button class="calendar-nav" id="prevMonth" onclick="changeMonth(-1)">
+                  <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <h3 id="currentMonthYear">December 2025</h3>
+                <button class="calendar-nav" id="nextMonth" onclick="changeMonth(1)">
+                  <i class="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+              
+              <div class="calendar-container">
+                <div class="calendar-headers">
+                  <div class="calendar-day-header">Sun</div>
+                  <div class="calendar-day-header">Mon</div>
+                  <div class="calendar-day-header">Tue</div>
+                  <div class="calendar-day-header">Wed</div>
+                  <div class="calendar-day-header">Thu</div>
+                  <div class="calendar-day-header">Fri</div>
+                  <div class="calendar-day-header">Sat</div>
+                </div>
+                <div class="calendar-grid" id="calendarDays"></div>
+              </div>
+              
+              <div class="calendar-legend">
+                <div class="legend-item">
+                  <span class="legend-dot today"></span>
+                  <span>Today</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot event"></span>
+                  <span>Event</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="notifications-card card">
+              <div class="notif-card-header">
+                <h3>Notifications</h3>
+                <button class="view-all-btn" onclick="window.location.href='s_track.html'">View All</button>
+              </div>
+              
+              <div class="dashboard-notif-list" id="dashboardNotifList">
+                <div class="dashboard-notif-item">
+                  <div class="notif-icon success">
+                    <i class="fa-solid fa-check-circle"></i>
+                  </div>
+                  <div class="notif-content">
+                    <p class="notif-title">Document Ready</p>
+                    <p class="notif-desc">Your Transcript of Records is ready for pickup</p>
+                    <span class="notif-time">2 hours ago</span>
+                  </div>
+                </div>
+                
+                <div class="dashboard-notif-item">
+                  <div class="notif-icon info">
+                    <i class="fa-solid fa-info-circle"></i>
+                  </div>
+                  <div class="notif-content">
+                    <p class="notif-title">Payment Verified</p>
+                    <p class="notif-desc">Payment for request #2025-REG-00002 has been verified</p>
+                    <span class="notif-time">1 day ago</span>
+                  </div>
+                </div>
+                
+                <div class="dashboard-notif-item">
+                  <div class="notif-icon warning">
+                    <i class="fa-solid fa-clock"></i>
+                  </div>
+                  <div class="notif-content">
+                    <p class="notif-title">Pending Action</p>
+                    <p class="notif-desc">Please submit payment for your document request</p>
+                    <span class="notif-time">2 days ago</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // Calendar variables
+      let currentDate = new Date();
+      const eventDates = [
+        { date: '2025-12-15', title: 'Document Deadline' },
+        { date: '2025-12-20', title: 'Office Closed - Holiday' },
+        { date: '2025-12-25', title: 'Christmas Day' },
+        { date: '2026-01-01', title: 'New Year' }
+      ];
+      
+      // Load user info on page load
+      document.addEventListener('DOMContentLoaded', () => {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        
+        const firstName = userInfo.firstName || user.name?.split(' ')[0] || '';
+        const lastName = userInfo.lastName || user.name?.split(' ').slice(1).join(' ') || '';
+        const displayName = user.name || `${firstName} ${lastName}`.trim() || 'User';
+        
+        document.getElementById('userName').textContent = displayName;
+        loadNotifications();
+        generateCalendar();
+      });
+      
+      // Calendar functions
+      function generateCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        
+        // Update header
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
+        document.getElementById('currentMonthYear').textContent = `${monthNames[month]} ${year}`;
+        
+        // Get first day of month and number of days
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        // Get today's date for highlighting
+        const today = new Date();
+        const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+        const todayDate = today.getDate();
+        
+        // Generate calendar days
+        const calendarDays = document.getElementById('calendarDays');
+        calendarDays.innerHTML = '';
+        
+        // Empty cells before first day
+        for (let i = 0; i < firstDay; i++) {
+          const emptyDay = document.createElement('div');
+          emptyDay.className = 'calendar-day empty';
+          calendarDays.appendChild(emptyDay);
+        }
+        
+        // Days of month
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dayCell = document.createElement('div');
+          dayCell.className = 'calendar-day';
+          dayCell.textContent = day;
+          
+          // Highlight today
+          if (isCurrentMonth && day === todayDate) {
+            dayCell.classList.add('today');
+          }
+          
+          // Check for events
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+          const event = eventDates.find(e => e.date === dateStr);
+          if (event) {
+            dayCell.classList.add('has-event');
+            dayCell.title = event.title;
+          }
+          
+          calendarDays.appendChild(dayCell);
+        }
+      }
+      
+      function changeMonth(direction) {
+        currentDate.setMonth(currentDate.getMonth() + direction);
+        generateCalendar();
+      }
+      
+      // Notification functions
+      function toggleNotifications() {
+        const dropdown = document.getElementById('notificationsDropdown');
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      }
+      
+      function loadNotifications() {
+        const notifications = [
+          { id: 1, message: 'Your document request #2025-REG-00001 is ready for pickup', time: '2 hours ago', read: false },
+          { id: 2, message: 'Payment verified for request #2025-REG-00002', time: '1 day ago', read: false }
+        ];
+        
+        const notifList = document.getElementById('notifList');
+        const badge = document.getElementById('notifBadge');
+        const unreadCount = notifications.filter(n => !n.read).length;
+        
+        if (unreadCount > 0) {
+          badge.textContent = unreadCount;
+          badge.style.display = 'block';
+        }
+        
+        if (notifications.length === 0) {
+          notifList.innerHTML = '<div class="notif-empty">No new notifications</div>';
+        } else {
+          notifList.innerHTML = notifications.map(n => `
+            <div class="notif-item ${n.read ? 'read' : ''}">
+              <p>${n.message}</p>
+              <span class="notif-time">${n.time}</span>
+            </div>
+          `).join('');
+        }
+      }
+      
+      function markAllAsRead() {
+        document.getElementById('notifBadge').style.display = 'none';
+        document.querySelectorAll('.notif-item').forEach(item => {
+          item.classList.add('read');
+        });
+      }
+      
+      document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('notificationsDropdown');
+        const notifBtn = document.querySelector('.notifs');
+        if (!dropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+      
+      // Handle logout
+      function logout() {
+        localStorage.clear();
+        window.location.href = 'login.html';
+      }
+    </script>
+  </body>
+</html>

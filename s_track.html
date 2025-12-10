@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Track Requests - CvSU DRS</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="s_track.css" />
+  </head>
+
+  <body>
+    <nav class="leftnav">
+      <a href="s_dashboard.html" class="logo">
+        <img src="logo\c_logoo.svg" alt="CvSU Logo" />
+        <div class="logo-text">
+          <strong>CvSU - DRS</strong>
+          <span>Document Request System</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li class="nav-item">
+          <a href="s_dashboard.html" class="nav-link">
+            <i class="fa-solid fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_request.html" class="nav-link">
+            <i class="fa-solid fa-file-alt"></i>
+            <span>Request Document</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_track.html" class="nav-link active">
+            <i class="fa-solid fa-clock"></i>
+            <span>Track Requests</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_fees.html" class="nav-link">
+            <i class="fa-solid fa-money-bill"></i>
+            <span>Document Fees</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_profile.html" class="nav-link">
+            <i class="fa-solid fa-user"></i>
+            <span>My Profile</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-logout">
+        <button onclick="logout()" class="nav-link">
+          <i class="fa-solid fa-sign-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </nav>
+    <div class="page-content">
+      <header class="topbar">
+        <h1>Track Request</h1>
+
+        <!-- search moved into the table card header (top-right) -->
+
+        <div class="user-profile">
+          <button class="notifs" aria-label="View notifications" onclick="toggleNotifications()">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
+          </button>
+          <button class="user" aria-label="User menu" onclick="window.location.href='s_profile.html'">
+            <i class="fa-regular fa-user"></i>
+          </button>
+          <span class="username" id="userName">User</span>
+        </div>
+        
+        <!-- Notifications Dropdown -->
+        <div class="notifications-dropdown" id="notificationsDropdown" style="display: none;">
+          <div class="notif-header">
+            <h4>Notifications</h4>
+            <button onclick="markAllAsRead()" class="mark-read-btn">Mark all as read</button>
+          </div>
+          <div class="notif-list" id="notifList">
+            <div class="notif-empty">No new notifications</div>
+          </div>
+        </div>
+      </header>
+      <main>
+        <section class="track-section">
+          <div class="left-column">
+            <div class="card">
+              <div class="card-header">
+                <h3>Requests</h3>
+                <div class="search-card">
+                  <label for="track-input-card" class="sr-only"
+                    >Search Reference</label
+                  >
+                  <div class="search-box">
+                    <input
+                      type="text"
+                      id="track-input-card"
+                      placeholder="Reference or document"
+                    />
+                    <button class="search-btn" aria-label="Search">
+                      <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <table class="requests-table">
+                <thead>
+                  <tr>
+                    <th>Reference ID</th>
+                    <th>Document Type</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="requestsTableBody">
+                  <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem; color: #999;">Loading your requests...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <aside class="right-column">
+            <div class="card details-card" aria-hidden="true">
+              <div class="details-header">
+                <h3>Request Details</h3>
+                <button class="close-details" aria-label="Close details">
+                  ✕
+                </button>
+              </div>
+
+              <div class="details-body">
+                <p>
+                  <strong>Reference ID:</strong>
+                  <span class="detail-ref">—</span>
+                </p>
+                <p>
+                  <strong>Student:</strong>
+                  <span class="detail-student">—</span>
+                </p>
+                <p>
+                  <strong>Document:</strong> <span class="detail-type">—</span>
+                </p>
+                <p>
+                  <strong>Amount:</strong> <span class="detail-amount">—</span>
+                </p>
+                <p>
+                  <strong>Date Requested:</strong>
+                  <span class="detail-date">—</span>
+                </p>
+                <p>
+                  <strong>Notes:</strong> <span class="detail-notes">—</span>
+                </p>
+
+                <h4>Status Progress</h4>
+                <div id="statusProgress" class="status-progress">
+                  <!-- Status progress will be injected here -->
+                </div>
+
+                <h4>Status History</h4>
+                <ol class="details-tracker" id="statusHistory">
+                  <!-- Status history will be injected here -->
+                </ol>
+
+                <div id="paymentSection" style="display: none;">
+                  <h4>Payment Receipt</h4>
+                  <div class="receipt-upload-area">
+                    <p id="receiptStatus" class="receipt-status-text">Waiting for payment...</p>
+                    <div id="receiptPreview" style="display: none; margin: 1rem 0;">
+                      <img id="receiptImage" src="" alt="Payment Receipt" class="receipt-preview-img">
+                      <p id="receiptVerificationStatus" class="verification-status"></p>
+                    </div>
+                    <div id="uploadWidget" style="display: none;">
+                      <label class="upload-label">
+                        <input type="file" id="receiptFile" accept="image/jpg,image/jpeg,image/png,application/pdf" style="display: none;">
+                        <span class="upload-btn">Choose Receipt Image</span>
+                      </label>
+                      <p class="upload-hint">JPG, PNG, or PDF • Max 5MB</p>
+                      <button id="submitReceiptBtn" class="btn-primary" style="margin-top: 1rem; width: 100%; display: none;">Submit Receipt</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="details-actions">
+                  <button id="downloadReceiptBtn" class="btn-secondary" style="display: none;">Download Receipt</button>
+                  <button id="closeDetailsBtn" class="btn-secondary">Close</button>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </section>
+      </main>
+      <script src="s_track.js"></script>
+    </div>
+    
+    <script>
+      // Load user info on page load
+      document.addEventListener('DOMContentLoaded', () => {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        
+        const firstName = userInfo.firstName || user.name?.split(' ')[0] || '';
+        const lastName = userInfo.lastName || user.name?.split(' ').slice(1).join(' ') || '';
+        const displayName = user.name || `${firstName} ${lastName}`.trim() || 'User';
+        
+        document.getElementById('userName').textContent = displayName;
+        loadNotifications();
+      });
+      
+      // Notification functions
+      function toggleNotifications() {
+        const dropdown = document.getElementById('notificationsDropdown');
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      }
+      
+      function loadNotifications() {
+        const notifications = [
+          { id: 1, message: 'Your document request #2025-REG-00001 is ready for pickup', time: '2 hours ago', read: false },
+          { id: 2, message: 'Payment verified for request #2025-REG-00002', time: '1 day ago', read: false }
+        ];
+        
+        const notifList = document.getElementById('notifList');
+        const badge = document.getElementById('notifBadge');
+        const unreadCount = notifications.filter(n => !n.read).length;
+        
+        if (unreadCount > 0) {
+          badge.textContent = unreadCount;
+          badge.style.display = 'block';
+        }
+        
+        if (notifications.length === 0) {
+          notifList.innerHTML = '<div class="notif-empty">No new notifications</div>';
+        } else {
+          notifList.innerHTML = notifications.map(n => `
+            <div class="notif-item ${n.read ? 'read' : ''}">
+              <p>${n.message}</p>
+              <span class="notif-time">${n.time}</span>
+            </div>
+          `).join('');
+        }
+      }
+      
+      function markAllAsRead() {
+        document.getElementById('notifBadge').style.display = 'none';
+        document.querySelectorAll('.notif-item').forEach(item => {
+          item.classList.add('read');
+        });
+      }
+      
+      document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('notificationsDropdown');
+        const notifBtn = document.querySelector('.notifs');
+        if (!dropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+      
+      // Handle logout
+      function logout() {
+        localStorage.clear();
+        window.location.href = 'login.html';
+      }
+    </script>
+  </body>
+</html>

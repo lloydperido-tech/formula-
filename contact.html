@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="contact.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <title>CvSU - Document Request System</title>
+  </head>
+  <body>
+    <!-- NAVBAR - START -->
+    <nav class="navbar">
+      <a href="landing.html" class="logo">
+        <img src="logo\outlined-logo.svg" />
+      </a>
+      <ul>
+        <li><a href="landing.html">Home</a></li>
+        <li><a href="landing.html#whatiscvsu">About</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+        <li><a href="faq.html">FAQs</a></li>
+        <button><a href="login.html">Log-in</a></button>
+      </ul>
+    </nav>
+    <!-- NAVBAR - END -->
+
+    <main>
+      <h2>Thank you for visiting our website.</h2>
+      <br />
+      <h1>Send Us a Message</h1>
+      <h4>Fill out the form below, and we’ll get in touch with you shortly.</h4>
+      <div class="fillup">
+        <form>
+          <label for="fullname">Full Name</label>
+          <input
+            type="text"
+            id="fullname"
+            name="fullname"
+            placeholder="Ex. Juan Dela Cruz"
+          />
+
+          <label for="email">E-mail Address</label>
+          <input
+            type="text"
+            id="email"
+            name="email"
+            placeholder="juan.delacruz@cvsu.edu.ph"
+          />
+
+          <label for="message">Message</label>
+          <textarea
+            id="message"
+            name="message"
+            placeholder="How can we help you?"
+          ></textarea>
+
+          <input type="submit" />
+        </form>
+      </div>
+
+      <div class="contacts">
+        <div class="card">
+          <i class="fa-solid fa-envelope"></i>
+          <div class="text-group">
+            <h4>E-mail Address</h4>
+            <p>registrar@cvsu.edu.ph</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <i class="fa-solid fa-phone-volume"></i>
+          <div class="text-group">
+            <h4>Phone</h4>
+            <p>(046) 481-0279</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <i class="fa-solid fa-clock"></i>
+          <div class="text-group">
+            <h4>Office Hours</h4>
+            <p>Monday - Friday, 8:00 AM - 5:00 PM</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <i class="fa-solid fa-location-dot"></i>
+          <div class="text-group">
+            <h4>Address</h4>
+            <p>Cavite State University, Indang, Cavite, Philippines</p>
+          </div>
+        </div>
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3867.9481152349904!2d120.87672649678956!3d14.1978164!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd821014e92dfd%3A0x6845fb3c06ec30c8!2sCavite%20State%20University%20-%20Don%20Severino%20Delas%20Alas%20Campus!5e0!3m2!1sen!2sph!4v1764159867080!5m2!1sen!2sph"
+          width="400"
+          height="200"
+          style="border: 0"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+    </main>
+  </body>
+</html>

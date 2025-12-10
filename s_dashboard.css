@@ -1,0 +1,721 @@
+/* --- 1. Global & Font Styles --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+body {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f9f4e3;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  color: #444;
+}
+
+/* --- Left Navigation Bar --- */
+.leftnav {
+  width: 280px;
+  height: 100vh;
+  background-color: #27512b;
+  padding: 1.5rem;
+  color: #f9f4e3;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* --- Logo Section in Sidebar --- */
+
+.leftnav .logo {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-left: -8px;
+  margin-bottom: 2.5rem;
+  text-decoration: none;
+  color: #f9f4e3;
+}
+
+.leftnav .logo img {
+  max-width: 80px;
+  height: auto;
+}
+
+.leftnav .logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.leftnav .logo-text strong {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.leftnav .logo-text span {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: #f9f4e3;
+  white-space: nowrap;
+}
+
+.leftnav .nav-links {
+  list-style-type: none;
+}
+
+.leftnav .nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.5rem;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  color: #f9f4e3;
+}
+
+.leftnav .nav-link i {
+  width: 20px;
+  margin-right: 1rem;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  color: #f9f4e3;
+}
+
+.leftnav .nav-link.active,
+.leftnav .nav-link:hover {
+  background-color: #9cb89dd3;
+}
+
+.leftnav .nav-link.active i,
+.leftnav .nav-link:hover i {
+  color: #ffca05;
+}
+/* --- END HOVER/ACTIVE EFFECT --- */
+
+.nav-logout {
+  margin-top: auto; /* Pushes logout to the bottom */
+  padding: 0 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
+  margin-top: 20px;
+}
+
+.nav-logout button {
+  width: 100%;
+  text-align: left;
+}
+
+/* --- 3. Main Page Content (Right Side) --- */
+.page-content {
+  flex: 1; /* Takes up all remaining space */
+  height: 100vh;
+  overflow-y: auto; /* Adds scrollbar ONLY to this area */
+  display: flex;
+  flex-direction: column;
+  background-color: #f9f4e3; /* The cream background */
+}
+
+/* --- 4. Black Top Bar --- */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2.5rem;
+  width: 100%;
+  color: #222; /* White text */
+  flex-shrink: 0; /* Prevents topbar from shrinking */
+}
+
+.topbar h1 {
+  margin: 0;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.user-profile .notifs,
+.user-profile .user {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #222;
+  position: relative;
+}
+
+.user-profile .username {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #222;
+}
+
+/* Notification Badge */
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #c0392b;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Notifications Dropdown */
+.notifications-dropdown {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  width: 360px;
+  max-height: 480px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notif-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e6e3d8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafaf8;
+}
+
+.notif-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #27231b;
+}
+
+.mark-read-btn {
+  background: none;
+  border: none;
+  color: #0f5d27;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.mark-read-btn:hover {
+  background: #e8f5ec;
+}
+
+.notif-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notif-item {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f0ede4;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.notif-item:hover {
+  background: #fafaf8;
+}
+
+.notif-item.read {
+  opacity: 0.6;
+}
+
+.notif-item p {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  color: #27231b;
+  line-height: 1.4;
+}
+
+.notif-time {
+  font-size: 12px;
+  color: #6b6558;
+}
+
+.notif-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b6558;
+  font-size: 14px;
+}
+
+/* --- 5. Main Content Area --- */
+main {
+  flex: 1; /* Takes up remaining space in the .page-content */
+  padding: 2.5rem;
+}
+
+.container-grid {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr; /* Main column is wider */
+  gap: 2rem;
+  align-items: start;
+}
+
+.main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sidebar-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  /* Aligns sidebar content with "Welcome, Alelhy!" */
+  padding-top: 4.25rem;
+}
+
+/* --- 6. Card Styling --- */
+.card {
+  background-color: #fff;
+  border-radius: 12px;
+  /* ADJUSTMENT: Increased padding for more breathing room */
+  padding: 1.75rem; /* was 1.5rem */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eee;
+}
+
+.card-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.details-card dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.8rem 1rem;
+  text-align: left;
+}
+.details-card dt {
+  font-weight: bold;
+  color: #555;
+  /* ADJUSTMENT: Made text smaller */
+  font-size: 0.85rem; /* was 0.9rem */
+}
+.details-card dd {
+  color: #333;
+  /* ADJUSTMENT: Made text smaller */
+  font-size: 0.85rem; /* was 0.9rem */
+}
+
+/* --- 6a. Tracker Card --- */
+.tracker-card p {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 1.5rem; /* More space before tracker */
+}
+
+.tracker-steps {
+  list-style-type: none;
+  display: flex;
+  padding-top: 0.5rem;
+  position: relative;
+  margin: 0 auto;
+  width: 98%;
+}
+
+.tracker-steps li {
+  position: relative;
+  flex: 1; /* Each step takes equal width */
+  text-align: center;
+  font-size: 0.7rem; /* Very small labels */
+  color: #999;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.tracker-steps li span {
+  display: block;
+  margin-top: 0.75rem; /* Space below the dot */
+}
+
+/* The dot (default) */
+.tracker-steps li::before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #d1d5db; /* Gray fill */
+  border: 3px solid #d1d5db; /* Gray border */
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* The line (default) */
+.tracker-steps li::after {
+  content: "";
+  position: absolute;
+  display: block;
+  width: 100%;
+  height: 3px;
+  background-color: #d1d5db; /* Gray line */
+  top: 3.5px; /* Aligns with middle of 10px dot */
+  left: 50%; /* Starts from center of this li */
+  z-index: 1;
+}
+
+/* Hide line after the last step */
+.tracker-steps li:last-child::after {
+  display: none;
+}
+
+/* --- Tracker States --- */
+
+/* COMPLETED state (solid green dot, green line) */
+.tracker-steps li.completed {
+  color: #36593a;
+  font-weight: bold;
+}
+.tracker-steps li.completed::before {
+  background-color: #36593a;
+  border-color: #36593a;
+}
+.tracker-steps li.completed::after {
+  background-color: #36593a; /* Green line */
+}
+
+/* ACTIVE state (green outline dot, gray line) */
+.tracker-steps li.active {
+  color: #36593a;
+  font-weight: bold;
+}
+.tracker-steps li.active::before {
+  background-color: #f9f4e3; /* White fill */
+  border-color: #36593a; /* Green border */
+}
+/* The line after an active step is still gray */
+.tracker-steps li.active::after {
+  background-color: #d1d5db;
+}
+
+/* --- 6b. Recent Requests (Original styles) --- */
+.recent-requests h2 {
+  font-size: 1.5rem;
+}
+
+.recent-requests table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.recent-requests th,
+.recent-requests td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.recent-requests th {
+  /* ADJUSTMENT: Made text smaller */
+  font-size: 0.85rem; /* was 0.9rem */
+  color: #777;
+  text-transform: uppercase;
+}
+
+.recent-requests td {
+  /* ADJUSTMENT: Made text smaller */
+  font-size: 0.9rem; /* was 1rem */
+  color: #333;
+  height: 2.5rem;
+}
+
+/* --- 7. Calendar Styling --- */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0ede4;
+}
+
+.calendar-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #27231b;
+}
+
+.calendar-nav {
+  background: #fafaf8;
+  border: 1px solid #d8d0b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: #3a352d;
+}
+
+.calendar-nav:hover {
+  background: #0f5d27;
+  color: white;
+  border-color: #0f5d27;
+}
+
+.calendar-container {
+  margin-bottom: 1rem;
+}
+
+.calendar-headers {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.calendar-day-header {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6b6558;
+  padding: 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: #27231b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.calendar-day:not(.empty):hover {
+  background: #f5f2e8;
+}
+
+.calendar-day.empty {
+  cursor: default;
+}
+
+.calendar-day.today {
+  background: #0f5d27;
+  color: white;
+  font-weight: 700;
+}
+
+.calendar-day.today:hover {
+  background: #0b4a1f;
+}
+
+.calendar-day.has-event::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  width: 4px;
+  height: 4px;
+  background: #ffc107;
+  border-radius: 50%;
+}
+
+.calendar-day.today.has-event::after {
+  background: white;
+}
+
+.calendar-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f0ede4;
+  font-size: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #6b6558;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-dot.today {
+  background: #0f5d27;
+}
+
+.legend-dot.event {
+  background: #ffc107;
+}
+
+/* --- 8. Notification Dashboard Styling --- */
+.notif-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0ede4;
+}
+
+.notif-card-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #27231b;
+}
+
+.view-all-btn {
+  background: none;
+  border: none;
+  color: #0f5d27;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.view-all-btn:hover {
+  background: #e8f5ec;
+}
+
+.dashboard-notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboard-notif-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: #fafaf8;
+  border-radius: 10px;
+  border: 1px solid #e6e3d8;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.dashboard-notif-item:hover {
+  background: #f5f2e8;
+  border-color: #d8d0b8;
+  transform: translateX(2px);
+}
+
+.notif-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.notif-icon.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.notif-icon.info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.notif-icon.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.notif-icon.error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.notif-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-title {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #27231b;
+}
+
+.notif-desc {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  color: #6b6558;
+  line-height: 1.4;
+}
+
+.notif-time {
+  font-size: 11px;
+  color: #999;
+  font-weight: 500;
+}

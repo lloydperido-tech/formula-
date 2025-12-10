@@ -1,0 +1,738 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+body {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f3eedf;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: #27231b;
+}
+
+h4 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  color: #3a352d;
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #3a352d;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+input[readonly] {
+  background: #fafaf8 !important;
+  color: #6b6558;
+  cursor: not-allowed;
+  border-color: #e6e3d8 !important;
+}
+
+.request-section {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 2px solid #f0ede4;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.required {
+  color: #c0392b;
+  font-weight: 700;
+}
+
+/* Modal Styling */
+#confirmModal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+#confirmModal.active {
+  display: flex;
+}
+
+#modalContent {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 32px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.review-text {
+  font-size: 16px;
+  color: #27231b;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.warning-text {
+  background: #fff9e6;
+  border: 1px solid #f5d76e;
+  color: #8c6a00;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin: 20px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  justify-content: center;
+}
+
+.modal-btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+#goBack {
+  background: #f0ede4;
+  color: #3a352d;
+}
+
+#goBack:hover {
+  background: #e6e3d8;
+  transform: translateY(-1px);
+}
+
+#understand {
+  background: #0f5d27;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 93, 39, 0.2);
+}
+
+#understand:hover {
+  background: #0b4a1f;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 93, 39, 0.25);
+}
+
+/* Add document link styling */
+.add-document-link {
+  color: #0f5d27;
+  cursor: pointer;
+  font-weight: 600;
+  margin: 20px 0 10px;
+  display: inline-block;
+  transition: color 0.2s ease;
+}
+
+.add-document-link:hover {
+  color: #178b3a;
+}
+
+/* Remove button styling */
+.remove-btn {
+  background: #f8f8f6;
+  border: 1px solid #d8d0b8;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.remove-btn:hover {
+  background: #ffe8e8;
+  color: #c0392b;
+  border-color: #f5b5b5;
+}
+
+/* Notification Badge */
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #c0392b;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Notifications Dropdown */
+.notifications-dropdown {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  width: 360px;
+  max-height: 480px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notif-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e6e3d8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafaf8;
+}
+
+.notif-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #27231b;
+}
+
+.mark-read-btn {
+  background: none;
+  border: none;
+  color: #0f5d27;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.mark-read-btn:hover {
+  background: #e8f5ec;
+}
+
+.notif-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notif-item {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f0ede4;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.notif-item:hover {
+  background: #fafaf8;
+}
+
+.notif-item.read {
+  opacity: 0.6;
+}
+
+.notif-item p {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  color: #27231b;
+  line-height: 1.4;
+}
+
+.notif-time {
+  font-size: 12px;
+  color: #6b6558;
+}
+
+.notif-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b6558;
+  font-size: 14px;
+}
+
+/* ------------------------------------------- */
+/* --- 1. Left Navigation Bar (Existing CSS) --- */
+/* ------------------------------------------- */
+.leftnav {
+  width: 280px;
+  height: 100vh;
+  background-color: #27512b;
+  padding: 1.5rem;
+  color: #f9f4e3;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.leftnav .logo {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-left: -8px;
+  margin-bottom: 2.5rem;
+  text-decoration: none;
+  color: #f9f4e3;
+}
+
+.leftnav .logo img {
+  max-width: 80px;
+  height: auto;
+}
+
+.leftnav .logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.leftnav .logo-text strong {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.leftnav .logo-text span {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: #f9f4e3;
+  white-space: nowrap;
+}
+
+.leftnav .nav-links {
+  list-style-type: none;
+}
+
+.leftnav .nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.5rem;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  color: #f9f4e3;
+}
+
+.leftnav .nav-link i {
+  width: 20px;
+  margin-right: 1rem;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  color: #f9f4e3;
+}
+
+.leftnav .nav-link.active,
+.leftnav .nav-link:hover {
+  background-color: #9cb89dd3;
+}
+
+.leftnav .nav-link.active i,
+.leftnav .nav-link:hover i {
+  color: #ffca05;
+}
+
+.nav-logout {
+  margin-top: auto; /* Pushes logout to the bottom */
+  padding: 0 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
+  margin-top: 20px;
+}
+
+.nav-logout button {
+  width: 100%;
+  text-align: left;
+}
+
+/* ------------------------------------------- */
+/* --- 2. Main Page Content (New CSS) --- */
+/* ------------------------------------------- */
+
+.page-content {
+  /* Takes up the remaining width */
+  flex-grow: 1;
+  padding: 16px 40px; /* Space around the content */
+  background-color: #f9f4e3; /* Background color of the main column */
+  overflow-y: auto; /* Allows scrolling if content overflows */
+}
+
+/* --- Top Bar / Header Section --- */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid #e6e3d8;
+}
+
+.topbar h1 {
+  font-weight: 700;
+  font-size: 1.75rem;
+  color: #27231b;
+  letter-spacing: -0.02em;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.user-profile button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  font-size: 1.5rem;
+  color: #222;
+  padding: 0;
+  margin: 0;
+}
+
+.user-profile .username {
+  margin-left: 0;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #222;
+}
+
+.cost-summary {
+  background: #f8faf8;
+  border: 1px solid #e6e3d8;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 20px;
+}
+
+.cost-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 15px;
+}
+
+.cost-line.total {
+  border-top: 2px solid #d8d0b8;
+  margin-top: 8px;
+  padding-top: 12px;
+  font-weight: 700;
+  font-size: 17px;
+  color: #0f5d27;
+}
+
+/* --- Form Card Container --- */
+.card {
+  background-color: #ffffff;
+  padding: 32px;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  border: none;
+  margin-bottom: 30px;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Form Inputs and Labels --- */
+.card label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.card input[type="text"],
+.card input[type="email"],
+.card input[type="tel"],
+.card input[type="number"],
+.card select,
+.doc-row select {
+  padding: 11px 14px;
+  border: 1px solid #d8d0b8;
+  border-radius: 10px;
+  font-size: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+  background: #fafaf8;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card input:focus,
+.card select:focus {
+  outline: none;
+  border-color: #0f5d27;
+  box-shadow: 0 0 0 3px rgba(15, 93, 39, 0.1);
+  background: #ffffff;
+}
+
+/* ------------------------------------------- */
+/* --- 3. CSS Grid Layouts (The Wireframe Look) --- */
+/* ------------------------------------------- */
+
+.grid {
+  display: grid;
+  column-gap: 18px;
+  row-gap: 18px;
+  margin-bottom: 20px;
+}
+
+/* First Name, Middle Name, Last Name, Program (4 Columns) */
+.info-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* CvSU Email, Student Number, Reminder (3 Columns) */
+.contact-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Complete Address must span two columns on the contact grid */
+.address-group {
+  grid-column: span 2;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1024px) {
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .contact-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .address-group {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .info-grid,
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+  .address-group {
+    grid-column: span 1;
+  }
+  .doc-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+/* Spacing correction for the single-line address and contact number inputs */
+.card > label {
+  margin-top: 10px;
+}
+
+/* Styling for the Important Reminder text */
+.reminder {
+  padding: 10px 0;
+  align-self: flex-start; /* Aligns the reminder to the top of its cell */
+}
+
+.error-message {
+  background: #fde8e8;
+  border: 1px solid #f5b5b5;
+  color: #8c1d1d;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.reminder h4 {
+  font-size: 13px;
+  color: #c47b08;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.reminder p {
+  font-size: 12px;
+  color: #8d6e63;
+  font-style: italic;
+  line-height: 1.4;
+  margin-bottom: 0;
+}
+
+/* ------------------------------------------- */
+/* --- 4. Dynamic Document Rows Styling --- */
+/* ------------------------------------------- */
+
+.add-document-link {
+  color: #27512b; /* Using a darker green from your branding for link */
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 25px;
+  display: inline-block;
+  padding: 5px 0;
+}
+
+#documentsContainer {
+  margin-top: 15px;
+}
+
+.doc-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 140px 50px;
+  align-items: center;
+  gap: 12px;
+  padding: 18px;
+  background: #fafaf8;
+  border: 1px solid #e6e3d8;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  transition: background 0.15s ease;
+}
+
+.doc-row:hover {
+  background: #f5f2e8;
+}
+
+.doc-row select {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.qty-box {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 100px;
+}
+
+.qty-box input[type="number"] {
+  text-align: center;
+  width: 30px;
+  border-left: none;
+  border-right: none;
+  padding: 10px 0;
+  margin-bottom: 0;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
+  margin: 0;
+  height: 40px;
+}
+
+.quantity-btn {
+  background-color: #fafaf8;
+  border: 1px solid #d8d0b8;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  height: 40px;
+  transition: background 0.15s ease;
+}
+
+.quantity-btn:hover {
+  background-color: #eee9dc;
+}
+
+.minus-btn {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  margin-right: -1px;
+}
+
+.plus-btn {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  margin-left: -1px;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px 10px;
+  height: 40px;
+  line-height: 1;
+}
+
+/* ------------------------------------------- */
+/* --- 5. Action Button --- */
+/* ------------------------------------------- */
+
+.confirm-button {
+  background-color: #0f5d27;
+  color: #ffffff;
+  border: none;
+  padding: 13px 32px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  float: right;
+  margin-top: 20px;
+  box-shadow: 0 12px 24px rgba(15, 93, 39, 0.2);
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.confirm-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(15, 93, 39, 0.25);
+  background-color: #0b4a1f;
+}

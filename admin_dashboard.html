@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - CvSU DRS</title>
+    <link rel="stylesheet" href="admin_dashboard.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <img src="logo/outlined-logo.svg" alt="CvSU DRS" class="header-logo" />
+                    <div class="title-group">
+                        <h1>CvSU DRS Admin</h1>
+                        <p class="subtitle">Document Request Management</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="user-info">
+                        <span id="adminName">Loading...</span>
+                        <button id="logoutBtn" class="logout-btn">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Statistics Cards -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon pending">PP</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Pending Payment</p>
+                            <p class="stat-value" id="statPending">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon submitted">PS</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Payment Submitted</p>
+                            <p class="stat-value" id="statSubmitted">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon verified">PV</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Payment Verified</p>
+                            <p class="stat-value" id="statVerified">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon processing">PR</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Processing</p>
+                            <p class="stat-value" id="statProcessing">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon ready">FR</div>
+                        <div class="stat-info">
+                            <p class="stat-label">For Release</p>
+                            <p class="stat-value" id="statReady">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon completed">CD</div>
+                        <div class="stat-info">
+                            <p class="stat-label">Completed</p>
+                            <p class="stat-value" id="statCompleted">0</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filters & Search -->
+            <section class="filters-section">
+                <div class="filter-group">
+                    <div class="search-box">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search by reference number, student name, or email..."
+                            class="search-input"
+                        >
+                        <span class="search-icon">Search</span>
+                    </div>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="Pending Payment">Pending Payment</option>
+                        <option value="Payment Submitted">Payment Submitted</option>
+                        <option value="Payment Verified">Payment Verified</option>
+                        <option value="Processing">Processing</option>
+                        <option value="For Release">For Release</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                    <select id="dateFilter" class="filter-select">
+                        <option value="">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                    <button id="resetFiltersBtn" class="btn-secondary">Reset Filters</button>
+                </div>
+            </section>
+
+            <!-- Request Queue Table -->
+            <section class="queue-section">
+                <div class="section-header">
+                    <h2>Request Queue</h2>
+                    <div class="header-actions">
+                        <span class="total-count">Total: <span id="totalCount">0</span></span>
+                        <button id="refreshBtn" class="btn-refresh">Refresh</button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="queue-table">
+                        <thead>
+                            <tr>
+                                <th>Reference #</th>
+                                <th>Student Name</th>
+                                <th>Document</th>
+                                <th>Quantity</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                                <th>Receipt</th>
+                                <th>Submitted</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="queueTableBody">
+                            <tr class="loading-row">
+                                <td colspan="9" class="loading-message">Loading requests...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button id="prevPageBtn" class="btn-pagination">← Previous</button>
+                    <span id="pageInfo" class="page-info">Page 1</span>
+                    <button id="nextPageBtn" class="btn-pagination">Next →</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Status Update Modal -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Update Request Status</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Reference Number:</label>
+                    <p id="modalRefNum" class="info-text">-</p>
+                </div>
+                <div class="form-group">
+                    <label>Current Status:</label>
+                    <p id="modalCurrentStatus" class="info-text">-</p>
+                </div>
+                <div class="form-group">
+                    <label for="newStatus">New Status:</label>
+                    <select id="newStatus" class="form-select">
+                        <option value="">Select new status</option>
+                        <option value="Payment Verified">Payment Verified</option>
+                        <option value="Processing">Processing</option>
+                        <option value="For Release">For Release</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="statusNotes">Notes:</label>
+                    <textarea id="statusNotes" class="form-textarea" placeholder="Add any notes about this status change..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelStatusBtn" class="btn-secondary">Cancel</button>
+                <button id="confirmStatusBtn" class="btn-primary">Update Status</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Verification Modal -->
+    <div id="receiptModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Receipt Verification</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="receipt-content">
+                    <div class="receipt-preview">
+                        <div class="preview-title">Receipt Image</div>
+                        <img id="receiptImage" src="" alt="Receipt" class="receipt-image">
+                    </div>
+                    <div class="receipt-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Reference #:</span>
+                            <span id="receiptRefNum" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Amount:</span>
+                            <span id="receiptAmount" class="detail-value">₱0.00</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Uploaded:</span>
+                            <span id="receiptUploadDate" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span id="receiptStatus" class="detail-value status-badge">Pending</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="verificationNotes">Verification Notes:</label>
+                            <textarea id="verificationNotes" class="form-textarea" placeholder="Add verification notes or rejection reason..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="rejectReceiptBtn" class="btn-danger">Reject</button>
+                <button id="approveReceiptBtn" class="btn-success">Approve</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Request Details</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="details-section">
+                    <h4>Request Information</h4>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Reference Number:</span>
+                            <span id="detailRefNum" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span id="detailStatus" class="detail-value status-badge">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Document Template:</span>
+                            <span id="detailTemplate" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Quantity:</span>
+                            <span id="detailQuantity" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total Amount:</span>
+                            <span id="detailAmount" class="detail-value">₱0.00</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Submitted Date:</span>
+                            <span id="detailSubmitDate" class="detail-value">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h4>Student Information</h4>
+                    <div class="details-grid">
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Name:</span>
+                            <span id="detailStudentName" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Email:</span>
+                            <span id="detailStudentEmail" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Student ID:</span>
+                            <span id="detailStudentId" class="detail-value">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h4>Request Purpose</h4>
+                    <p id="detailPurpose" class="detail-value detail-text">-</p>
+                </div>
+
+                <div class="details-section">
+                    <h4>Status History</h4>
+                    <div id="statusHistory" class="status-timeline">
+                        <p class="loading-message">Loading status history...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeDetailsBtn" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Error</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessage">An error occurred. Please try again.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary modal-close">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin_dashboard.js"></script>
+</body>
+</html>

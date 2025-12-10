@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CvSU - Document Request System</title>
+    <link rel="stylesheet" href="faq.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+    />
+  </head>
+  <body>
+    <!-- NAVBAR - START -->
+    <nav class="navbar">
+      <a href="landing.html" class="logo">
+        <img src="logo\outlined-logo.svg" />
+      </a>
+      <ul>
+        <li><a href="landing.html">Home</a></li>
+        <li><a href="landing.html#whatiscvsu">About</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+        <li><a href="faq.html">FAQs</a></li>
+        <button><a href="login.html">Log-in</a></button>
+      </ul>
+    </nav>
+    <!-- NAVBAR - END -->
+
+    <div class="wrapper">
+      <h1>Frequently Asked Questions</h1>
+
+      <div class="faq">
+        <button class="question">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="answer">
+          Cras enim ante, accumsan sit amet lorem sit amet, vehicula semper
+          lacus. Nullam tincidunt elit id sem porta, quis rutrum orci tincidunt.
+          Quisque commodo, justo id fermentum imperdiet, enim sapien sodales
+          libero,
+        </div>
+      </div>
+
+      <div class="faq">
+        <button class="question">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="answer">
+          Cras enim ante, accumsan sit amet lorem sit amet, vehicula semper
+          lacus. Nullam tincidunt elit id sem porta, quis rutrum orci tincidunt.
+          Quisque commodo, justo id fermentum imperdiet, enim sapien sodales
+          libero,
+        </div>
+      </div>
+
+      <div class="faq">
+        <button class="question">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="answer">
+          Cras enim ante, accumsan sit amet lorem sit amet, vehicula semper
+          lacus. Nullam tincidunt elit id sem porta, quis rutrum orci tincidunt.
+          Quisque commodo, justo id fermentum imperdiet, enim sapien sodales
+          libero,
+        </div>
+      </div>
+
+      <div class="faq">
+        <button class="question">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="answer">
+          Cras enim ante, accumsan sit amet lorem sit amet, vehicula semper
+          lacus. Nullam tincidunt elit id sem porta, quis rutrum orci tincidunt.
+          Quisque commodo, justo id fermentum imperdiet, enim sapien sodales
+          libero,
+        </div>
+      </div>
+
+      <div class="faq">
+        <button class="question">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit?
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="answer">
+          Cras enim ante, accumsan sit amet lorem sit amet, vehicula semper
+          lacus. Nullam tincidunt elit id sem porta, quis rutrum orci tincidunt.
+          Quisque commodo, justo id fermentum imperdiet, enim sapien sodales
+          libero,
+        </div>
+      </div>
+      <p class="contact-note">
+        Couldn't find a specific question?
+        <a href="contact.html">Contact us!</a>
+      </p>
+    </div>
+
+    <script>
+      var acc = document.getElementsByClassName("question");
+      var i;
+
+      for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function () {
+          this.classList.toggle("active");
+          this.parentElement.classList.toggle("active");
+
+          var answer = this.nextElementSibling;
+
+          if (answer.style.display == "block") {
+            answer.style.display = "none";
+          } else {
+            answer.style.display = "block";
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

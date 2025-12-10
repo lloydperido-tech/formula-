@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CvSU - DRS</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="login.css" />
+  </head>
+  <body>
+    <!-- NAVBAR - START -->
+    <nav class="navbar">
+      <a href="landing.html" class="logo">
+        <img src="logo/outlined-logo.svg" />
+      </a>
+      <ul>
+        <li><a href="landing.html">Home</a></li>
+        <li><a href="landing.html#whatiscvsu">About</a></li>
+        <li><a href="contact.html">Contact Us</a></li>
+        <li><a href="faq.html">FAQs</a></li>
+        <button><a href="#">Log-in</a></button>
+      </ul>
+    </nav>
+    <!-- NAVBAR - END -->
+
+    <main class="centered">
+      <section class="auth-card compact" aria-label="Login form">
+        <img class="form-logo" src="logo/outlined-logo.svg" alt="CvSU DRS logo" />
+        <h2>Log in</h2>
+        <p class="muted">Choose account type and sign in with your CvSU email.</p>
+
+        <div class="account-toggle" role="radiogroup" aria-label="Account type">
+          <label class="account-chip active">
+            <input type="radio" name="accountType" value="student" checked />
+            <span>Student</span>
+          </label>
+          <label class="account-chip">
+            <input type="radio" name="accountType" value="admin" />
+            <span>Admin</span>
+          </label>
+        </div>
+
+        <div id="errorMessage" class="alert error" role="alert"></div>
+        <div id="successMessage" class="alert success" role="status"></div>
+
+        <form id="loginForm" class="form-group">
+          <input type="email" id="email" placeholder="CvSU Email" autocomplete="username" required />
+          <input type="password" id="password" placeholder="Password" autocomplete="current-password" required />
+          <input type="text" id="adminSecret" placeholder="Admin secret code" autocomplete="off" style="display: none;" />
+          <button type="submit" class="primary-btn">Log In</button>
+        </form>
+
+        <div class="or-row"><span>or</span></div>
+        <button id="googleBtn" class="google-btn" type="button">
+          <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24">
+            <path fill="#EA4335" d="M12 10.2v3.6h5.1c-.2 1.2-.9 2.2-1.9 2.9l3.1 2.4c1.8-1.7 2.8-4.1 2.8-7 0-.7-.1-1.4-.2-1.9H12z"/>
+            <path fill="#34A853" d="M6.8 14.3l-.9.7-2.5 1.9C4.8 19.8 8.1 21.5 12 21.5c2.4 0 4.4-.8 5.9-2.2l-3.1-2.4c-.8.6-1.8 1-2.8 1-2.2 0-4.1-1.5-4.8-3.6z"/>
+            <path fill="#4A90E2" d="M4.3 6.1 1.8 4.2C.7 6.2.7 8.6 1.8 10.6l2.5-1.9c-.3-.9-.3-1.7 0-2.6z"/>
+            <path fill="#FBBC05" d="M12 4.5c1.3 0 2.5.5 3.4 1.4l2.5-2.5C16.4 1.6 14.4.8 12 .8 8.1.8 4.8 2.5 2.6 5.2L5.1 7c.7-2.1 2.6-3.6 4.9-3.6z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+
+        <div class="links-row single">
+          <a href="#">Forgot password?</a>
+          <a href="register.html">Student Sign Up</a>
+        </div>
+        <div class="demo-block">
+          <p class="muted note">Demo accounts</p>
+          <ul>
+            <li><strong>Student</strong>: student@cvsu.edu.ph / StudentPass123</li>
+            <li><strong>Admin</strong>: admin@cvsu.edu.ph / AdminPass123 + secret code DRS-ADMIN-2025</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <!-- Google account chooser mock modal -->
+    <div id="googleModal" class="modal-overlay" aria-hidden="true">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="googleModalTitle">
+        <div class="modal-header">
+          <h3 id="googleModalTitle">Choose a Google account</h3>
+          <button type="button" class="modal-close" id="googleModalClose">×</button>
+        </div>
+        <p class="muted" style="margin: 0 0 12px;">Sign in with your @cvsu.edu.ph Google account.</p>
+        <div id="googleModalError" class="alert error" role="alert"></div>
+        <div class="form-group" style="margin-top: 8px;">
+          <input type="email" id="googleEmail" placeholder="you@cvsu.edu.ph" autocomplete="email" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="googleModalCancel">Cancel</button>
+          <button type="button" class="btn-primary" id="googleModalContinue">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById('loginForm');
+      const errorMessage = document.getElementById('errorMessage');
+      const accountChips = document.querySelectorAll('.account-chip');
+      const adminSecretInput = document.getElementById('adminSecret');
+      const googleBtn = document.getElementById('googleBtn');
+      const googleModal = document.getElementById('googleModal');
+      const googleModalClose = document.getElementById('googleModalClose');
+      const googleModalCancel = document.getElementById('googleModalCancel');
+      const googleModalContinue = document.getElementById('googleModalContinue');
+      const googleEmail = document.getElementById('googleEmail');
+      const googleModalError = document.getElementById('googleModalError');
+
+      const API_BASE = 'http://localhost:3001/api';
+
+      accountChips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+          accountChips.forEach((c) => c.classList.remove('active'));
+          chip.classList.add('active');
+          chip.querySelector('input').checked = true;
+
+          const role = chip.querySelector('input').value;
+          if (role === 'admin') {
+            adminSecretInput.style.display = 'block';
+            adminSecretInput.setAttribute('required', 'required');
+          } else {
+            adminSecretInput.style.display = 'none';
+            adminSecretInput.removeAttribute('required');
+            adminSecretInput.value = '';
+          }
+        });
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const role = document.querySelector('input[name="accountType"]:checked').value;
+        const secretCode = role === 'admin' ? adminSecretInput.value.trim() : undefined;
+
+        errorMessage.style.display = 'none';
+
+        const payload = { email, password, role };
+        if (role === 'admin') payload.secretCode = secretCode;
+
+        try {
+          const response = await fetch(`${API_BASE}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+            errorMessage.textContent = data.message || 'Login failed. Please check your credentials.';
+            errorMessage.style.display = 'block';
+            return;
+          }
+
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          
+          // Store userInfo for profile page
+          const userInfo = {
+            firstName: data.user.firstName,
+            lastName: data.user.lastName,
+            middleName: '',
+            email: data.user.email,
+            studentNumber: data.user.studentNumber,
+            program: data.user.program,
+            yearLevel: data.user.yearLevel,
+            contactNumber: '',
+            address: ''
+          };
+          localStorage.setItem('userInfo', JSON.stringify(userInfo));
+
+          if (data.user.role === 'admin') {
+            window.location.href = 'admin_dashboard.html';
+          } else {
+            window.location.href = 's_dashboard.html';
+          }
+        } catch (error) {
+          errorMessage.textContent = 'Server error. Please try again.';
+          errorMessage.style.display = 'block';
+        }
+      });
+
+      const openGoogleModal = () => {
+        googleModalError.style.display = 'none';
+        const existing = document.getElementById('email').value.trim();
+        googleEmail.value = existing;
+        googleModal.setAttribute('aria-hidden', 'false');
+        googleModal.classList.add('open');
+        googleEmail.focus();
+      };
+
+      const closeGoogleModal = () => {
+        googleModal.classList.remove('open');
+        googleModal.setAttribute('aria-hidden', 'true');
+      };
+
+      googleBtn.addEventListener('click', () => {
+        errorMessage.style.display = 'none';
+        openGoogleModal();
+      });
+
+      googleModalClose.addEventListener('click', closeGoogleModal);
+      googleModalCancel.addEventListener('click', closeGoogleModal);
+      googleModal.addEventListener('click', (e) => {
+        if (e.target === googleModal) closeGoogleModal();
+      });
+
+      googleModalContinue.addEventListener('click', async () => {
+        const email = googleEmail.value.trim();
+        googleModalError.style.display = 'none';
+
+        if (!email) {
+          googleModalError.textContent = 'Please enter your Google email.';
+          googleModalError.style.display = 'block';
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE}/auth/google`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+            googleModalError.textContent = data.message || 'Google login failed.';
+            googleModalError.style.display = 'block';
+            return;
+          }
+
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          
+          // Store userInfo for profile page
+          const userInfo = {
+            firstName: data.user.firstName,
+            lastName: data.user.lastName,
+            middleName: '',
+            email: data.user.email,
+            studentNumber: data.user.studentNumber,
+            program: data.user.program,
+            yearLevel: data.user.yearLevel,
+            contactNumber: '',
+            address: ''
+          };
+          localStorage.setItem('userInfo', JSON.stringify(userInfo));
+          
+          closeGoogleModal();
+          window.location.href = data.user.role === 'admin' ? 'admin_dashboard.html' : 's_dashboard.html';
+        } catch (error) {
+          googleModalError.textContent = 'Google login failed. Please try again.';
+          googleModalError.style.display = 'block';
+        }
+      });
+    </script>
+  </body>
+</html>

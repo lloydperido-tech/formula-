@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Registration - CvSU DRS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="landing.html" class="logo">
+      <img src="logo/outlined-logo.svg" alt="CvSU Logo">
+    </a>
+    <ul>
+      <li><a href="landing.html">Home</a></li>
+      <li><a href="landing.html#whatiscvsu">About</a></li>
+      <li><a href="contact.html">Contact Us</a></li>
+      <li><a href="faq.html">FAQs</a></li>
+      <button><a href="login.html">Log-in</a></button>
+    </ul>
+  </nav>
+
+  <main class="auth-layout">
+    <section class="hero-copy">
+      <h1>Student Registration</h1>
+      <p>Create your CvSU DRS account to request, pay, and track documents online.</p>
+      <ul class="hero-bullets">
+        <li>Use your @cvsu.edu.ph email</li>
+        <li>Submit and track requests</li>
+        <li>Get real-time updates</li>
+      </ul>
+    </section>
+
+    <section class="auth-card" aria-label="Student registration form">
+      <h2>Create your account</h2>
+      <p>Enter your student details below.</p>
+
+      <div id="errorMessage" class="alert error"></div>
+      <div id="successMessage" class="alert success"></div>
+
+      <form id="registerForm" class="form-group">
+        <div class="form-row">
+          <input type="text" id="firstName" placeholder="First Name" required>
+          <input type="text" id="middleName" placeholder="Middle Name">
+          <input type="text" id="lastName" placeholder="Last Name" required>
+        </div>
+
+        <div class="form-row">
+          <input type="email" id="email" placeholder="CvSU Email (@cvsu.edu.ph)" required>
+          <input type="text" id="studentNumber" placeholder="Student Number" required>
+        </div>
+
+        <input type="text" id="program" placeholder="Program (e.g., BS Computer Science)" required>
+        <input type="text" id="address" placeholder="Complete Address" required>
+        <input type="tel" id="contactNumber" placeholder="Contact Number" required>
+
+        <div class="form-row">
+          <input type="password" id="password" placeholder="Password (min 8 characters)" required>
+          <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+        </div>
+
+        <button type="submit" class="primary-btn">Create Account</button>
+
+        <div class="switch-row">
+          Already have an account? <a href="login.html">Login</a>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('registerForm');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const API_BASE = 'http://localhost:3001/api';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        email: document.getElementById('email').value.trim(),
+        password: document.getElementById('password').value,
+        firstName: document.getElementById('firstName').value.trim(),
+        middleName: document.getElementById('middleName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        studentNumber: document.getElementById('studentNumber').value.trim(),
+        program: document.getElementById('program').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        contactNumber: document.getElementById('contactNumber').value.trim(),
+        role: 'student'
+      };
+
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      errorMessage.style.display = 'none';
+      successMessage.style.display = 'none';
+
+      if (!formData.email.endsWith('@cvsu.edu.ph')) {
+        errorMessage.textContent = 'Please use a valid @cvsu.edu.ph email address';
+        errorMessage.style.display = 'block';
+        return;
+      }
+
+      if (formData.password.length < 8) {
+        errorMessage.textContent = 'Password must be at least 8 characters';
+        errorMessage.style.display = 'block';
+        return;
+      }
+
+      if (formData.password !== confirmPassword) {
+        errorMessage.textContent = 'Passwords do not match';
+        errorMessage.style.display = 'block';
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          errorMessage.textContent = data.message || 'Registration failed';
+          errorMessage.style.display = 'block';
+          return;
+        }
+
+        successMessage.textContent = 'Registration successful! Redirecting to login...';
+        successMessage.style.display = 'block';
+        form.reset();
+        
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1800);
+      } catch (error) {
+        errorMessage.textContent = 'Server error. Please try again.';
+        errorMessage.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

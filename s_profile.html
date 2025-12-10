@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile - CvSU DRS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="s_profile.css" />
+  </head>
+  <body>
+    <nav class="leftnav">
+      <a href="s_dashboard.html" class="logo">
+        <img src="logo/c_logoo.svg" alt="CvSU Logo" />
+        <div class="logo-text">
+          <strong>CvSU - DRS</strong>
+          <span>Document Request System</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li class="nav-item">
+          <a href="s_dashboard.html" class="nav-link">
+            <i class="fa-solid fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_request.html" class="nav-link">
+            <i class="fa-solid fa-file-alt"></i>
+            <span>Request Document</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_track.html" class="nav-link">
+            <i class="fa-solid fa-clock"></i>
+            <span>Track Requests</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_fees.html" class="nav-link">
+            <i class="fa-solid fa-money-bill"></i>
+            <span>Document Fees</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_profile.html" class="nav-link active">
+            <i class="fa-solid fa-user"></i>
+            <span>My Profile</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-logout">
+        <button onclick="logout()" class="nav-link">
+          <i class="fa-solid fa-sign-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="page-content">
+      <header class="topbar">
+        <h1>My Profile</h1>
+        <div class="user-profile">
+          <button class="notifs" aria-label="View notifications" onclick="window.location.href='s_request.html'">
+            <i class="fa-solid fa-bell"></i>
+          </button>
+          <button class="user" aria-label="User menu">
+            <i class="fa-regular fa-user"></i>
+          </button>
+          <span class="username" id="userName">User</span>
+        </div>
+      </header>
+
+      <main class="main-column">
+        <!-- Profile Header Card -->
+        <div class="profile-header-card">
+          <div class="profile-avatar">
+            <div class="avatar-circle" id="avatarCircle">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <button class="change-photo-btn" onclick="changePhoto()">
+              <i class="fa-solid fa-camera"></i> Change Photo
+            </button>
+          </div>
+          <div class="profile-header-info">
+            <h2 id="profileName">Loading...</h2>
+            <p class="profile-email" id="profileEmail">email@cvsu.edu.ph</p>
+            <span class="profile-badge">Student</span>
+          </div>
+        </div>
+
+        <!-- Personal Information Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Personal Information</h3>
+            <button class="edit-btn" id="editPersonalBtn" onclick="toggleEdit('personal')">
+              <i class="fa-solid fa-pen"></i> Edit
+            </button>
+          </div>
+
+          <form id="personalInfoForm">
+            <div class="grid info-grid">
+              <div class="form-group">
+                <label for="firstName">First Name <span class="required">*</span></label>
+                <input type="text" id="firstName" name="firstName" required disabled />
+              </div>
+              <div class="form-group">
+                <label for="middleName">Middle Name</label>
+                <input type="text" id="middleName" name="middleName" disabled />
+              </div>
+              <div class="form-group">
+                <label for="lastName">Last Name <span class="required">*</span></label>
+                <input type="text" id="lastName" name="lastName" required disabled />
+              </div>
+              <div class="form-group">
+                <label for="studentNumber">Student Number</label>
+                <input type="text" id="studentNumber" name="studentNumber" disabled />
+              </div>
+            </div>
+
+            <div class="grid contact-grid">
+              <div class="form-group">
+                <label for="program">Program</label>
+                <input type="text" id="program" name="program" disabled />
+              </div>
+              <div class="form-group">
+                <label for="yearLevel">Year Level</label>
+                <select id="yearLevel" name="yearLevel" disabled>
+                  <option value="">Select Year</option>
+                  <option value="1">1st Year</option>
+                  <option value="2">2nd Year</option>
+                  <option value="3">3rd Year</option>
+                  <option value="4">4th Year</option>
+                  <option value="5">5th Year</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions" id="personalActions" style="display: none;">
+              <button type="button" class="btn-secondary" onclick="cancelEdit('personal')">Cancel</button>
+              <button type="submit" class="btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Contact Information Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Contact Information</h3>
+            <button class="edit-btn" id="editContactBtn" onclick="toggleEdit('contact')">
+              <i class="fa-solid fa-pen"></i> Edit
+            </button>
+          </div>
+
+          <form id="contactInfoForm">
+            <div class="grid contact-grid">
+              <div class="form-group">
+                <label for="cvsuEmail">CvSU Email</label>
+                <input type="email" id="cvsuEmail" name="cvsuEmail" disabled />
+              </div>
+              <div class="form-group">
+                <label for="personalEmail">Personal Email</label>
+                <input type="email" id="personalEmail" name="personalEmail" disabled />
+              </div>
+              <div class="form-group">
+                <label for="contactNumber">Contact Number <span class="required">*</span></label>
+                <input type="tel" id="contactNumber" name="contactNumber" required disabled />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="address">Complete Address <span class="required">*</span></label>
+              <textarea id="address" name="address" rows="3" required disabled></textarea>
+            </div>
+
+            <div class="form-actions" id="contactActions" style="display: none;">
+              <button type="button" class="btn-secondary" onclick="cancelEdit('contact')">Cancel</button>
+              <button type="submit" class="btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Account Security Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Account Security</h3>
+          </div>
+
+          <div class="security-section">
+            <div class="security-item">
+              <div class="security-info">
+                <i class="fa-solid fa-lock"></i>
+                <div>
+                  <h4>Password</h4>
+                  <p>Last changed 30 days ago</p>
+                </div>
+              </div>
+              <button class="btn-secondary" onclick="changePassword()">Change Password</button>
+            </div>
+            <div class="security-item">
+              <div class="security-info">
+                <i class="fa-solid fa-shield-halved"></i>
+                <div>
+                  <h4>Two-Factor Authentication</h4>
+                  <p>Not enabled</p>
+                </div>
+              </div>
+              <button class="btn-secondary" disabled>Enable 2FA</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Success Message Toast -->
+    <div class="toast" id="successToast" style="display: none;">
+      <i class="fa-solid fa-check-circle"></i>
+      <span id="toastMessage">Changes saved successfully!</span>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="passwordModal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Change Password</h3>
+          <button class="modal-close" onclick="closePasswordModal()">&times;</button>
+        </div>
+        <form id="passwordForm">
+          <div class="form-group">
+            <label for="currentPassword">Current Password <span class="required">*</span></label>
+            <input type="password" id="currentPassword" required />
+          </div>
+          <div class="form-group">
+            <label for="newPassword">New Password <span class="required">*</span></label>
+            <input type="password" id="newPassword" required minlength="8" />
+            <small>Must be at least 8 characters</small>
+          </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirm New Password <span class="required">*</span></label>
+            <input type="password" id="confirmPassword" required />
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" onclick="closePasswordModal()">Cancel</button>
+            <button type="submit" class="btn-primary">Update Password</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="s_profile.js"></script>
+  </body>
+</html>

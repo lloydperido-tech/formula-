@@ -1,0 +1,300 @@
+/*----------- GENERAL STYLING -----------*/
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #f9f6e8;
+  color: #222;
+  margin: 0;
+  padding: 0;
+}
+
+main {
+  max-width: 1000px;
+  margin: 60px auto;
+  padding: 0 40px;
+}
+
+/*----------- PAGE TITLE -----------*/
+h1 {
+  font-family: "Roboto", sans-serif;
+  font-size: 34px;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+h4 {
+  font-family: "Roboto", sans-serif;
+  font-size: 17px;
+  font-weight: 300;
+  margin-top: 0;
+  padding-bottom: 13px;
+}
+
+h2 {
+  font-family: "Roboto", sans-serif;
+  margin-top: 130px;
+  margin-bottom: 10px;
+  font-size: 28px;
+  font-weight: 10;
+}
+/*----------- FORM SECTION -----------*/
+.fillup {
+  width: 50%;
+  float: left;
+}
+
+/* 🎯 Changed the height of the message box to 100px */
+#message {
+  height: 100px;
+}
+
+.fillup h2 {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #f11c1c;
+}
+
+.fillup p {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 25px;
+}
+
+.fillup form {
+  display: flex;
+  flex-direction: column;
+}
+
+.fillup label {
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: #000000;
+  margin-bottom: 3px;
+}
+
+.fillup input[type="text"],
+.fillup textarea {
+  padding: 10px 12px;
+  border: 1.3px solid #269932;
+  border-radius: 10px;
+  font-size: 13.5px;
+  outline: none;
+  resize: none;
+  font-family: "Roboto", sans-serif;
+  margin-bottom: 20px;
+}
+
+.fillup input[type="text"]:focus,
+.fillup textarea:focus {
+  border-color: #f4c842;
+}
+
+.fillup ::placeholder {
+  color: #a0a0a0;
+  font-size: 13.5px;
+}
+.fillup ::-webkit-input-placeholder {
+  color: #a0a0a0;
+  font-size: 13.5px;
+}
+.fillup ::-moz-placeholder {
+  color: #a0a0a0;
+  font-size: 13.5px;
+}
+.fillup :-ms-input-placeholder {
+  color: #a0a0a0;
+  font-size: 13.5px;
+}
+.fillup :-ms-input-placeholder {
+  color: #a0a0a0;
+  font-size: 13.5px;
+}
+
+/*----------- SUBMIT BUTTON -----------*/
+.fillup input[type="submit"] {
+  background-color: #f4c842;
+  border: none;
+  color: #222;
+  font-weight: 500;
+  padding: 6px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 90px;
+  transition: background-color 0.2s ease;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.fillup input[type="submit"]::before {
+  content: "★";
+  font-size: 12px;
+  color: #fff;
+}
+
+.fillup input[type="submit"]:hover {
+  background-color: #e3b631;
+}
+
+/*----------- CONTACT DETAILS SECTION -----------*/
+.contacts {
+  width: 40%;
+  float: right;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  margin-top: -90px;
+}
+
+.contacts .card {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+}
+
+.contacts .card i {
+  color: #3a7840;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* ... (Existing styles for .contacts, .card, etc.) ... */
+
+.contacts .text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+}
+
+.contacts h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: -23px;
+}
+
+.contacts p {
+  font-size: 13px;
+  color: #333;
+}
+/*----------- GREEN BOX PLACEHOLDER -----------*/
+.contacts img:last-child {
+  width: 100%;
+  height: 150px;
+  background-color: #7da87a;
+  border-radius: 3px;
+  margin-top: 10px;
+}
+
+/*----------- CLEAR FLOATS -----------*/
+main::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+/*----------- RESPONSIVE DESIGN -----------*/
+@media (max-width: 900px) {
+  main {
+    padding: 0 25px;
+  }
+
+  .fillup,
+  .contacts {
+    float: none;
+    width: 100%;
+  }
+
+  .contacts {
+    margin-top: 40px;
+  }
+}
+
+@media (max-width: 600px) {
+  main h1 {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .fillup h2 {
+    text-align: center;
+  }
+
+  .fillup input[type="text"],
+  .fillup textarea,
+  .fillup input[type="submit"] {
+    width: 100%;
+  }
+
+  .contacts .card {
+    flex-direction: row;
+  }
+
+  .contacts .card::before {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* ------------------- NAVBAR ------------------- */
+.navbar {
+  font-family: "Outfit", sans-serif;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #0f5d27;
+  padding: 0 80px;
+  height: 110px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.navbar .logo img {
+  height: 110px;
+  margin-top: 10px;
+  width: auto;
+  object-fit: contain;
+}
+
+.navbar ul {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 35px;
+}
+
+.navbar ul li a {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  text-transform: lowercase;
+  transition: color 0.3s ease;
+}
+
+.navbar ul li a:hover {
+  color: #ffca00;
+}
+
+.navbar ul button {
+  background-color: #178b3a;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: lowercase;
+  transition: background-color 0.3s ease;
+}
+
+.navbar ul button:hover {
+  background-color: #1ea94a;
+}
+
+.navbar ul button a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
