@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Profile - CvSU DRS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-    <link rel="stylesheet" href="s_profile.css" />
+    <link rel="stylesheet" href="public/css/s_profile.css" />
   </head>
   <body>
     <nav class="leftnav">
       <a href="s_dashboard.html" class="logo">
-        <img src="logo/c_logoo.svg" alt="CvSU Logo" />
+        <img src="public/assets/logo/c_logoo.svg" alt="CvSU Logo" />
         <div class="logo-text">
           <strong>CvSU - DRS</strong>
           <span>Document Request System</span>
@@ -20,31 +20,31 @@
       <ul class="nav-links">
         <li class="nav-item">
           <a href="s_dashboard.html" class="nav-link">
-            <i class="fa-solid fa-home"></i>
+            <i class="fa-solid fa-star"></i>
             <span>Dashboard</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="s_request.html" class="nav-link">
-            <i class="fa-solid fa-file-alt"></i>
+            <i class="fa-solid fa-star"></i>
             <span>Request Document</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="s_track.html" class="nav-link">
-            <i class="fa-solid fa-clock"></i>
+            <i class="fa-solid fa-star"></i>
             <span>Track Requests</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="s_fees.html" class="nav-link">
-            <i class="fa-solid fa-money-bill"></i>
+            <i class="fa-solid fa-star"></i>
             <span>Document Fees</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="s_profile.html" class="nav-link active">
-            <i class="fa-solid fa-user"></i>
+            <i class="fa-solid fa-star"></i>
             <span>My Profile</span>
           </a>
         </li>
@@ -62,13 +62,37 @@
       <header class="topbar">
         <h1>My Profile</h1>
         <div class="user-profile">
-          <button class="notifs" aria-label="View notifications" onclick="window.location.href='s_request.html'">
+          <button class="notifs" aria-label="View notifications" onclick="toggleNotifications()">
             <i class="fa-solid fa-bell"></i>
+            <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
           </button>
-          <button class="user" aria-label="User menu">
+          <button class="user" aria-label="User menu" onclick="toggleProfileMenu()">
             <i class="fa-regular fa-user"></i>
           </button>
           <span class="username" id="userName">User</span>
+        </div>
+        
+        <!-- Notifications Dropdown -->
+        <div class="notifications-dropdown" id="notificationsDropdown" style="display: none;">
+          <div class="notif-header">
+            <h4>Notifications</h4>
+            <button onclick="markAllAsRead()" class="mark-read-btn">Mark all as read</button>
+          </div>
+          <div class="notif-list" id="notifList">
+            <div class="notif-empty">No new notifications</div>
+          </div>
+        </div>
+        
+        <!-- Profile Menu Dropdown -->
+        <div class="profile-menu-dropdown" id="profileMenuDropdown" style="display: none;">
+          <a href="s_profile.html" class="profile-menu-item">
+            <i class="fa-solid fa-user"></i>
+            <span>My Profile</span>
+          </a>
+          <a href="#" onclick="logout(); return false;" class="profile-menu-item">
+            <i class="fa-solid fa-sign-out"></i>
+            <span>Logout</span>
+          </a>
         </div>
       </header>
 
@@ -248,6 +272,64 @@
       </div>
     </div>
 
-    <script src="s_profile.js"></script>
+    <script>
+      // Notification and Profile Menu Functions
+      function toggleNotifications() {
+        const dropdown = document.getElementById('notificationsDropdown');
+        const profileMenu = document.getElementById('profileMenuDropdown');
+        profileMenu.style.display = 'none';
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      }
+
+      function toggleProfileMenu() {
+        const dropdown = document.getElementById('profileMenuDropdown');
+        const notifDropdown = document.getElementById('notificationsDropdown');
+        notifDropdown.style.display = 'none';
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      }
+
+      function markAllAsRead() {
+        document.getElementById('notifBadge').style.display = 'none';
+        document.getElementById('notifList').innerHTML = '<div class=\"notif-empty\">No new notifications</div>';
+      }
+
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.notifs') && !e.target.closest('.notifications-dropdown')) {
+          document.getElementById('notificationsDropdown').style.display = 'none';
+        }
+        if (!e.target.closest('.user') && !e.target.closest('.profile-menu-dropdown')) {
+          document.getElementById('profileMenuDropdown').style.display = 'none';
+        }
+      });
+
+      // Load notifications
+      window.addEventListener('DOMContentLoaded', () => {
+        const notifications = [
+          { id: 1, message: 'Your Transcript of Records request is ready for pickup', time: '2 hours ago', unread: true },
+          { id: 2, message: 'Payment confirmed for Certificate of Enrollment', time: '1 day ago', unread: true }
+        ];
+
+        if (notifications.length > 0) {
+          const badge = document.getElementById('notifBadge');
+          const unreadCount = notifications.filter(n => n.unread).length;
+          if (unreadCount > 0) {
+            badge.textContent = unreadCount;
+            badge.style.display = 'flex';
+          }
+
+          const notifList = document.getElementById('notifList');
+          notifList.innerHTML = notifications.map(n => `
+            <div class=\"notif-item ${n.unread ? 'unread' : ''}\">
+              <div class=\"notif-content\">
+                <p>${n.message}</p>
+                <span class=\"notif-time\">${n.time}</span>
+              </div>
+            </div>
+          `).join('');
+        }
+      });
+    </script>
+    <script src=\"s_profile.js\"></script>
   </body>
 </html>

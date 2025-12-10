@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - CvSU DRS</title>
-    <link rel="stylesheet" href="admin_dashboard.css">
+    <link rel="stylesheet" href="public/css/admin_dashboard.css">
 </head>
 <body>
     <div class="container">
@@ -12,7 +12,7 @@
         <header class="header">
             <div class="header-content">
                 <div class="logo-section">
-                    <img src="logo/outlined-logo.svg" alt="CvSU DRS" class="header-logo" />
+                    <img src="public/assets/logo/outlined-logo.svg" alt="CvSU DRS" class="header-logo" />
                     <div class="title-group">
                         <h1>CvSU DRS Admin</h1>
                         <p class="subtitle">Document Request Management</p>
@@ -21,7 +21,10 @@
                 <div class="header-actions">
                     <div class="user-info">
                         <span id="adminName">Loading...</span>
-                        <button id="logoutBtn" class="logout-btn">Logout</button>
+                        <button id="logoutBtn" class="logout-btn">
+                          <i class="fa-solid fa-sign-out"></i>
+                          Logout
+                        </button>
                     </div>
                 </div>
             </div>
@@ -328,6 +331,6 @@
         </div>
     </div>
 
-    <script src="admin_dashboard.js"></script>
+    <script src="public/js/admin_dashboard.js"></script>
 </body>
 </html>

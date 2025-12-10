@@ -131,9 +131,8 @@ h3 {
   flex: 1;
   height: 100vh;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  background-color: #f9f4e3;
+  padding: 30px 40px;
+  background-color: #f3eedf;
 }
 
 /* --- 4. Top Bar --- */
@@ -141,14 +140,17 @@ h3 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2.5rem;
-  width: 100%;
-  color: #222;
-  flex-shrink: 0;
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid #e6e3d8;
 }
 
 .topbar h1 {
   margin: 0;
+  font-weight: 700;
+  font-size: 1.75rem;
+  color: #27231b;
+  letter-spacing: -0.02em;
 }
 
 .user-profile {
@@ -157,35 +159,45 @@ h3 {
   gap: 1.5rem;
 }
 
-.user-profile .notifs,
-.user-profile .user {
+.user-profile button {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.5rem;
-  color: #222;
+  font-size: 1.2rem;
+  color: #555;
+  transition: color 0.2s;
+}
+
+.user-profile button:hover {
+  color: #0f5d27;
+}
+
+.user-profile .notifs {
   position: relative;
 }
 
-.user-profile .username {
-  font-weight: bold;
-  font-size: 1.1rem;
-  color: #222;
+.username {
+  font-weight: 600;
+  color: #27231b;
+  font-size: 15px;
 }
 
 /* Notification Badge */
 .notif-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  background: #c0392b;
+  top: -5px;
+  right: -5px;
+  background: #dc2626;
   color: white;
   border-radius: 10px;
   padding: 2px 6px;
   font-size: 11px;
   font-weight: 700;
   min-width: 18px;
-  text-align: center;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Notifications Dropdown */
@@ -291,207 +303,14 @@ main {
   padding: 2.5rem;
 }
 
-.track-section {
+.fees-container {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
+  align-items: start;
 }
 
-.left-column {
-  display: block;
-}
-
-.right-column {
-  display: block;
-}
-
-.details-card {
-  display: none;
-  position: relative;
-}
-
-.details-card.visible {
-  display: block;
-}
-
-.details-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.details-header h3 {
-  margin: 0;
-}
-
-.close-details {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-}
-
-.details-body p {
-  margin: 0.6rem 0;
-  color: #333;
-}
-
-.details-tracker {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-}
-
-.details-tracker li {
-  padding: 0.35rem 0.6rem;
-  border-radius: 18px;
-  background: #f0f0f0;
-  color: #666;
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.details-tracker li.completed {
-  background: #d4edda;
-  color: #155724;
-}
-
-.details-tracker li.active {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.details-actions {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.btn-primary {
-  background-color: #0f5d27;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 0.9rem;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.btn-secondary {
-  background-color: #f0f0f0;
-  color: #333;
-  border: none;
-  padding: 0.5rem 0.9rem;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.requests-table tr.highlight {
-  background-color: #fff8e1;
-}
-
-/* --- 6. Search Box --- */
-.track-search {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.track-search label {
-  font-weight: 600;
-  color: #333;
-  font-size: 0.95rem;
-}
-
-.search-box {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.search-box input {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border: 1.5px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  transition: border-color 0.3s ease;
-}
-
-.search-box input:focus {
-  outline: none;
-  border-color: #0f5d27;
-}
-
-.search-btn {
-  padding: 0.75rem 1.5rem;
-  background-color: #0f5d27;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.search-btn:hover {
-  background-color: #0d4d20;
-}
-
-/* --- Top-right compact search in header --- */
-
-/* card header: title left, search right */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  gap: 1rem;
-}
-
-.card-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #222;
-}
-
-.search-card {
-  min-width: 220px;
-  max-width: 360px;
-}
-
-.search-card .search-box {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-}
-
-.search-card .search-box input {
-  width: 220px;
-  padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  border: 1.5px solid #ddd;
-  font-size: 0.95rem;
-}
-
-.search-card .search-box .search-btn {
-  padding: 0.48rem 0.75rem;
-}
-
-.sr-only {
-  position: absolute !important;
-  height: 1px;
-  width: 1px;
-  overflow: hidden;
-  clip: rect(1px, 1px, 1px, 1px);
-  white-space: nowrap;
-  border: 0;
-  padding: 0;
-  margin: -1px;
-}
-
-/* --- 7. Card Styling --- */
+/* --- 6. Card Styling --- */
 .card {
   background-color: #fff;
   border-radius: 12px;
@@ -500,17 +319,36 @@ main {
   border: 1px solid #eee;
 }
 
-/* --- 8. Table Styling --- */
-.requests-table {
+/* --- 7. Fees Info Section --- */
+.fees-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.intro-text {
+  color: #666;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* --- 8. Fees Table --- */
+.fee-table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
+.fees-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.requests-table thead {
+.fees-table thead {
   background-color: #f8f8f8;
 }
 
-.requests-table th {
+.fees-table th {
   padding: 1rem;
   text-align: left;
   font-weight: 600;
@@ -520,71 +358,115 @@ main {
   border-bottom: 2px solid #eee;
 }
 
-.requests-table td {
+.fees-table td {
   padding: 1.2rem 1rem;
   border-bottom: 1px solid #f0f0f0;
   color: #333;
   font-size: 0.95rem;
 }
 
-.requests-table tbody tr:hover {
+.fees-table tbody tr:hover {
   background-color: #fafafa;
 }
 
-/* --- 9. Status Badges --- */
-.status-completed,
-.status-pending,
-.status-processing {
+.fees-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* --- 9. Sidebar Card Styling --- */
+.fees-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.notes-list li,
+.payment-methods li {
+  padding: 0.5rem 0;
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.notes-list li::before {
+  content: "✓";
   display: inline-block;
-  padding: 0.35rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.status-completed {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status-pending {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.status-processing {
-  background-color: #d1ecf1;
-  color: #0c5460;
-}
-
-/* --- 10. Action Button --- */
-.action-btn {
-  background: none;
-  border: none;
+  width: 20px;
   color: #0f5d27;
-  cursor: pointer;
-  font-size: 1.1rem;
-  transition: color 0.3s ease;
-  padding: 0.5rem;
+  font-weight: bold;
+  margin-right: 0.5rem;
 }
 
-.action-btn:hover {
+.payment-methods li strong {
+  color: #333;
+}
+
+.card p {
+  color: #666;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.card p:last-child {
+  margin-bottom: 0;
+}
+
+.contact-link {
+  color: #0f5d27;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.contact-link:hover {
   color: #178b3a;
 }
 
-/* --- 11. Responsive Design --- */
+/* --- CTA Button under fees table --- */
+.fees-cta {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: center;
+}
+
+.request-now-btn {
+  background-color: #0f5d27;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.65rem 1.1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(15, 93, 39, 0.12);
+  transition: background-color 0.2s ease, transform 0.12s ease;
+}
+
+.request-now-btn:hover {
+  background-color: #0d4d20;
+  transform: translateY(-2px);
+}
+
+/* --- 10. Responsive Design --- */
 @media (max-width: 1024px) {
+  .fees-container {
+    grid-template-columns: 1fr;
+  }
+
   main {
     padding: 1.5rem;
   }
 
-  .requests-table {
+  .fees-table {
     font-size: 0.85rem;
   }
 
-  .requests-table th,
-  .requests-table td {
+  .fees-table th,
+  .fees-table td {
     padding: 0.75rem;
   }
 }
@@ -601,42 +483,52 @@ main {
     justify-content: space-between;
   }
 
-  .search-box {
-    flex-direction: column;
-  }
-
-  .search-btn {
-    width: 100%;
-  }
-
-  /* Make header search full-width on small screens */
-  .track-top-search {
-    width: 100%;
-  }
-
-  .search-box.top {
-    width: 100%;
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .search-box.top input {
-    width: 100%;
-  }
-
-  .requests-table {
+  .fees-table {
     font-size: 0.75rem;
   }
 
-  .requests-table th,
-  .requests-table td {
+  .fees-table th,
+  .fees-table td {
     padding: 0.5rem;
   }
 
-  .status-completed,
-  .status-pending,
-  .status-processing {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.7rem;
+  main {
+    padding: 1rem;
   }
+}
+
+/* Profile Menu Dropdown */
+.profile-menu-dropdown {
+  position: absolute;
+  top: 70px;
+  right: 40px;
+  width: 200px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  padding: 8px;
+  animation: slideDown 0.2s ease;
+}
+
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #27231b;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.2s;
+  font-size: 14px;
+}
+
+.profile-menu-item:hover {
+  background: #f9f7f0;
+}
+
+.profile-menu-item i {
+  width: 18px;
+  text-align: center;
+  color: #6b6558;
 }

@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Request a Document</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-    <link rel="stylesheet" href="s_request.css" />
+    <link rel="stylesheet" href="public/css/s_request.css" />
   </head>
   <body>
     <nav class="leftnav">
       <a href="s_dashboard.html" class="logo">
-        <img src="logo/c_logoo.svg" alt="CvSU Logo" />
+        <img src="public/assets/logo/c_logoo.svg" alt="CvSU Logo" />
         <div class="logo-text">
           <strong>CvSU - DRS</strong>
           <span>Document Request System</span>
@@ -20,31 +20,31 @@
       <ul class="nav-links">
         <li class="nav-item">
           <a href="s_dashboard.html" class="nav-link">
-            <i class="fa-solid fa-home"></i>
+            <i class="fa-solid fa-star"></i>
             <span>Dashboard</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="s_request.html" class="nav-link active">
-            <i class="fa-solid fa-file-alt"></i>
+            <i class="fa-solid fa-star"></i>
             <span>Request Document</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="s_track.html" class="nav-link">
-            <i class="fa-solid fa-clock"></i>
+            <i class="fa-solid fa-star"></i>
             <span>Track Requests</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="s_fees.html" class="nav-link">
-            <i class="fa-solid fa-money-bill"></i>
+            <i class="fa-solid fa-star"></i>
             <span>Document Fees</span>
           </a>
         </li>
         <li class="nav-item">
           <a href="s_profile.html" class="nav-link">
-            <i class="fa-solid fa-user"></i>
+            <i class="fa-solid fa-star"></i>
             <span>My Profile</span>
           </a>
         </li>
@@ -66,7 +66,7 @@
             <i class="fa-solid fa-bell"></i>
             <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
           </button>
-          <button class="user" aria-label="User menu" onclick="window.location.href='s_profile.html'">
+          <button class="user" aria-label="User menu" onclick="toggleProfileMenu()">
             <i class="fa-regular fa-user"></i>
           </button>
           <span class="username" id="userName">User</span>
@@ -81,6 +81,18 @@
           <div class="notif-list" id="notifList">
             <div class="notif-empty">No new notifications</div>
           </div>
+        </div>
+        
+        <!-- Profile Menu Dropdown -->
+        <div class="profile-menu-dropdown" id="profileMenuDropdown" style="display: none;">
+          <a href="s_profile.html" class="profile-menu-item">
+            <i class="fa-solid fa-user"></i>
+            <span>My Profile</span>
+          </a>
+          <a href="#" onclick="logout(); return false;" class="profile-menu-item">
+            <i class="fa-solid fa-sign-out"></i>
+            <span>Logout</span>
+          </a>
         </div>
       </header>
 
@@ -180,7 +192,7 @@
       </main>
     </div>
 
-    <script src="s_request.js"></script>
+    <script src="public/js/s_request.js"></script>
     <script>
       // Load user info on page load
       document.addEventListener('DOMContentLoaded', () => {
@@ -207,6 +219,15 @@
       // Notification functions
       function toggleNotifications() {
         const dropdown = document.getElementById('notificationsDropdown');
+        const profileMenu = document.getElementById('profileMenuDropdown');
+        profileMenu.style.display = 'none';
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      }
+      
+      function toggleProfileMenu() {
+        const dropdown = document.getElementById('profileMenuDropdown');
+        const notifDropdown = document.getElementById('notificationsDropdown');
+        notifDropdown.style.display = 'none';
         dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
       }
       
@@ -293,7 +314,7 @@
       </div>
     </div>
 
-    <script src="s_request.js"></script>
+    <script src="public/js/s_request.js"></script>
   </body>
 </html>
         </div>
@@ -316,6 +337,6 @@
         </div>
       </div>
     </div>
-    <script src="s_request.js"></script>
+    <script src="public/js/s_request.js"></script>
   </body>
 </html>

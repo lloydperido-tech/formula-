@@ -112,6 +112,10 @@ body {
     transition: all 0.3s ease;
 }
 
+.logout-btn i {
+    margin-right: 8px;
+}
+
 .logout-btn:hover {
     background-color: rgba(255, 255, 255, 0.3);
     border-color: white;

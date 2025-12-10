@@ -1,80 +1,152 @@
-# 📖 SmartQ Implementation README
+# 📖 CvSU Document Request System
 
-## Quick Navigation
+## 🚀 Quick Start
 
-### 📚 Documentation Files (Start Here!)
+A modern, full-stack web application for managing academic document requests at Cavite State University with role-based authentication, real-time tracking, and payment verification.
 
-1. **[PHASE4_SUMMARY.md](./PHASE4_SUMMARY.md)** ⭐ START HERE
-   - Overview of what was built
-   - Feature list
-   - File inventory
-   - Success metrics
+## 📁 Project Structure
 
-2. **[STUDENT_WORKFLOW.md](./STUDENT_WORKFLOW.md)**
+```
+cvsu-document-request-system/
+├── public/                  # Frontend assets
+│   ├── css/                # Stylesheets
+│   ├── js/                 # Client-side JavaScript
+│   └── assets/             # Images, icons, logos
+├── server/                  # Backend application
+│   ├── config/             # Configuration files
+│   ├── controllers/        # Request handlers
+│   ├── routes/             # API routes
+│   ├── middleware/         # Authentication & validation
+│   └── database/           # Database migrations
+├── docs/                    # Documentation
+│   ├── API_DOCUMENTATION.md
+│   ├── STUDENT_WORKFLOW.md
+│   ├── INTEGRATION_GUIDE.md
+│   └── SETUP.md
+├── *.html                   # Frontend pages
+└── README.md
+```
+
+## 📚 Documentation
+
+### Essential Guides
+
+1. **[docs/PHASE5_QUICK_START.md](./docs/PHASE5_QUICK_START.md)** ⭐ START HERE
+   - Quick setup and deployment
+   - Environment configuration
+   - Running the application
+
+2. **[docs/STUDENT_WORKFLOW.md](./docs/STUDENT_WORKFLOW.md)**
    - Complete student request workflow
    - Database schema explanation
    - Admin workflow guide
-   - API request/response examples
    - Testing procedures
-   - Troubleshooting
 
-3. **[API_DOCUMENTATION.md](./API_DOCUMENTATION.md)**
+3. **[docs/API_DOCUMENTATION.md](./docs/API_DOCUMENTATION.md)**
    - All endpoint specifications
    - Request/response formats
-   - Error codes
-   - JWT payload structure
+   - Authentication details
    - cURL examples
 
-4. **[INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md)**
-   - Quick start guide
+4. **[docs/INTEGRATION_GUIDE.md](./docs/INTEGRATION_GUIDE.md)**
    - Component overview
-   - Database reference
-   - Testing workflow
-   - Common issues & solutions
+   - Integration patterns
 
-5. **[PHASE4_CHECKLIST.md](./PHASE4_CHECKLIST.md)**
-   - Implementation verification
-   - Testing checklist
-   - Deployment preparation
-   - Support guide
+## 🌟 Features
 
-### 📂 Project Structure
+### Student Portal
+- ✅ Document request submission
+- ✅ Real-time request tracking
+- ✅ Payment status monitoring
+- ✅ Receipt upload
+- ✅ Document fee reference
+- ✅ User profile management
+
+### Admin Dashboard
+- ✅ Request queue management
+- ✅ Receipt verification
+- ✅ Status updates
+- ✅ Statistics overview
+- ✅ Document template management
+
+## 🛠️ Tech Stack
+
+**Frontend:**
+- HTML5, CSS3, JavaScript (Vanilla)
+- Font Awesome 6.5.2
+- Responsive design
+
+**Backend:**
+- Node.js + Express.js
+- Supabase (PostgreSQL)
+- JWT Authentication
+- Multer (File uploads)
+
+## 📦 Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/Niiflheim01/cvsu-document-request-system.git
+cd cvsu-document-request-system
+```
+
+2. **Install dependencies**
+```bash
+cd server
+npm install
+```
+
+3. **Configure environment**
+```bash
+cp .env.example .env
+# Edit .env with your Supabase credentials
+```
+
+4. **Start the server**
+```bash
+npm start
+# Server runs on http://localhost:3001
+```
+
+5. **Open the application**
+- Navigate to `http://localhost:3001` or open `index.html`
+- Demo credentials in [docs/PHASE5_QUICK_START.md](./docs/PHASE5_QUICK_START.md)
+
+## 📄 Pages
+
+- `index.html` - Entry point (redirects to landing)
+- `landing.html` - Homepage
+- `login.html` - Authentication
+- `register.html` - User registration
+- `s_dashboard.html` - Student dashboard
+- `s_request.html` - Document request form
+- `s_track.html` - Request tracking
+- `s_fees.html` - Fee reference
+- `s_profile.html` - User profile
+- `admin_dashboard.html` - Admin panel
+- `contact.html` - Contact page
+- `faq.html` - FAQ page
+
+## 🔐 Authentication
+
+**Demo Accounts:**
+- **Student:** student@cvsu.edu.ph / StudentPass123
+- **Admin:** admin@cvsu.edu.ph / AdminPass123 + Secret: DRS-ADMIN-2025
+
+## 🗂️ File Structure
 
 ```
-COSC75/
-├── server/
-│   ├── config/
-│   │   └── db.js                      (Supabase client setup)
-│   ├── controllers/
-│   │   ├── authController.js          (User auth)
-│   │   ├── templateController.js      (Document templates)
-│   │   ├── requestController.js       (Request CRUD) ⭐ NEW
-│   │   └── receiptController.js       (Receipt handling) ⭐ NEW
-│   ├── middleware/
-│   │   ├── authMiddleware.js
-│   │   └── uploadMiddleware.js
-│   ├── routes/
-│   │   ├── authRoutes.js
-│   │   ├── templateRoutes.js
-│   │   ├── requestRoutes.js           ⭐ NEW
-│   │   ├── receiptRoutes.js           ⭐ NEW
-│   │   └── adminRoutes.js
-│   ├── database/
-│   │   ├── supabase-schema.sql        (Database DDL)
-│   │   └── supabase-seed.sql          (Test data)
-│   ├── uploads/                       (File storage)
-│   ├── .env                           (Configuration)
-│   ├── .env.example                   (Template)
-│   ├── package.json
-│   └── index.js                       (Server entry point)
-│
-├── admin/
-│   ├── dashboard.html                 (To be built in Phase 5)
-│   ├── templates.html                 (Template management)
-│   └── templates.js
-│
-├── s_request.html                     (Request form) ⭐ REDESIGNED
-├── s_request.js                       (Request logic) ⭐ REWRITTEN
+├── public/                    # Static assets
+│   ├── css/                  # All stylesheets
+│   ├── js/                   # Client-side scripts
+│   └── assets/               # Images, icons, logos
+├── server/                    # Backend API
+│   ├── controllers/          # Business logic
+│   ├── routes/               # API endpoints
+│   ├── middleware/           # Auth & validation
+│   └── database/             # Schema & migrations
+├── docs/                      # Documentation
+└── *.html                     # Frontend pages
 ├── success.html                       (Confirmation page) ⭐ NEW
 ├── s_track.html                       (Track requests - to update)
 ├── s_track.js                         (Track logic - to update)
