@@ -1,12 +1,12 @@
 // Admin Routes
 const express = require('express');
 const router = express.Router();
-const { verifyToken, verifyAdmin } = require('../middleware/authMiddleware');
+const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
 const requestController = require('../controllers/requestController');
 const receiptController = require('../controllers/receiptController');
 
 // Middleware to verify admin access on this route
-router.use(verifyToken, verifyAdmin);
+router.use(verifyToken, isAdmin);
 
 // Request Management Routes (Admin Only)
 router.get('/queue', requestController.getRequestQueue);
@@ -18,3 +18,4 @@ router.patch('/receipts/:id/verify', receiptController.verifyReceipt);
 router.get('/receipts/:id/download', receiptController.downloadReceipt);
 
 module.exports = router;
+

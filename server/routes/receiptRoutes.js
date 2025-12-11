@@ -8,7 +8,7 @@ const { uploadReceipt } = require('../middleware/uploadMiddleware');
 router.use(authMiddleware.verifyToken);
 
 // Student routes
-router.post('/:requestId/receipt', uploadReceipt.single('receipt'), receiptController.uploadReceipt);
+router.post('/:requestId/receipt', uploadReceipt, receiptController.uploadReceipt);
 router.get('/:requestId/receipt', receiptController.getReceipt);
 
 // Admin routes
@@ -16,3 +16,4 @@ router.patch('/:requestId/receipt/verify', authMiddleware.isAdmin, receiptContro
 router.get('/:requestId/receipt/download', authMiddleware.isAdmin, receiptController.downloadReceipt);
 
 module.exports = router;
+
