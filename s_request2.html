@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Request Summary</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="public/css/s_request.css" />
+</head>
+<body>
+    
+    <nav class="leftnav">
+      <a href="s_dashboard.html" class="logo">
+        <img src="public/assets/logo/c_logoo.svg" alt="CvSU Logo" />
+        <div class="logo-text">
+          <strong>CvSU - DRS</strong>
+          <span>Document Request System</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li class="nav-item">
+          <a href="s_dashboard.html" class="nav-link">
+            <i class="fa-solid fa-star"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_request.html" class="nav-link active">
+            <i class="fa-solid fa-star"></i>
+            <span>Request Document</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_track.html" class="nav-link">
+            <i class="fa-solid fa-star"></i>
+            <span>Track Requests</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_fees.html" class="nav-link">
+            <i class="fa-solid fa-star"></i>
+            <span>Document Fees</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-logout">
+        <button onclick="logout()" class="nav-link">
+          <i class="fa-solid fa-sign-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="page-content">
+      <header class="topbar">
+        <h1>Request Summary</h1>
+        <div class="user-profile">
+          <button class="notifs" aria-label="View notifications" onclick="toggleNotifications()">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
+          </button>
+          <button class="user" aria-label="User menu" onclick="toggleProfileMenu()">
+            <i class="fa-regular fa-user"></i>
+          </button>
+          <span class="username" id="userName">User</span>
+        </div>
+        
+        <!-- Notifications Dropdown -->
+        <div class="notifications-dropdown" id="notificationsDropdown" style="display: none;">
+          <div class="notif-header">
+            <h4>Notifications</h4>
+            <button onclick="markAllAsRead()" class="mark-read-btn">Mark all as read</button>
+          </div>
+          <div class="notif-list" id="notifList">
+            <div class="notif-empty">No new notifications</div>
+          </div>
+        </div>
+        
+        <!-- Profile Menu Dropdown -->
+        <div class="profile-menu-dropdown" id="profileMenuDropdown" style="display: none;">
+          <a href="#" onclick="logout(); return false;" class="profile-menu-item">
+            <i class="fa-solid fa-sign-out"></i>
+            <span>Logout</span>
+          </a>
+        </div>
+      </header>
+
+      <main class="main-column">
+        <div class="card">
+
+          <h3>Request and Payment Summary</h3>
+          <p style="font-size: 14px; color: #666; margin-bottom: 20px;">Please review your request details and payment instructions.</p>
+
+          <!-- ---------- STUDENT INFO ---------- -->
+          <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
+              <tr><td colspan="2" style="background: #f0f0f0; padding: 10px; font-weight: bold; border: 1px solid #ddd;">Student Information</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">Full Name:</td><td style="padding: 8px; border: 1px solid #ddd;" id="fullName">—</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">Student Number:</td><td style="padding: 8px; border: 1px solid #ddd;" id="studentNum">—</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">CvSU Email:</td><td style="padding: 8px; border: 1px solid #ddd;" id="email">—</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">Program:</td><td style="padding: 8px; border: 1px solid #ddd;" id="program">—</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">Contact Number:</td><td style="padding: 8px; border: 1px solid #ddd;" id="contact">—</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">Complete Address:</td><td style="padding: 8px; border: 1px solid #ddd;" id="address">—</td></tr>
+          </table>
+
+          <!-- ---------- REFERENCE INFO ---------- -->
+          <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
+              <tr><td colspan="2" style="background: #f0f0f0; padding: 10px; font-weight: bold; border: 1px solid #ddd;">Reference Information</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">Reference ID:</td><td style="padding: 8px; border: 1px solid #ddd;" id="refId">2025-1230-00001</td></tr>
+          </table>
+
+          <!-- ---------- REQUEST DETAILS ---------- -->
+          <div style="font-weight: bold; margin: 20px 0 10px 0;">>>> Request Details <<<</div>
+
+          <table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <tr style="background: #f0f0f0;">
+                  <td style="padding: 10px; border: 1px solid #ddd;">Document Type</td>
+                  <td style="padding: 10px; border: 1px solid #ddd;">Purpose</td>
+                  <td style="padding: 10px; border: 1px solid #ddd;">QTY</td>
+                  <td style="padding: 10px; border: 1px solid #ddd;">Price</td>
+                  <td style="padding: 10px; border: 1px solid #ddd;">Total</td>
+              </tr>
+              <tbody id="requestDetailsBody">
+              </tbody>
+          </table>
+
+          <!-- ---------- TOTAL SECTION ---------- -->
+          <div style="background: #f5f1e8; padding: 15px 16px; border-radius: 6px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <p style="margin: 0; font-size: 13px; color: #666; line-height: 1.5;">
+                <b>Note:</b> Each official document requested includes a ₱30 Documentary Stamp Tax (DST)<br>
+                as required by Republic Act (RA) 8424, Sec. 188. This tax applies to all certificates and<br>
+                official school records issued by the university.
+              </p>
+            </div>
+            <div style="text-align: right; white-space: nowrap;">
+              <span style="font-size: 14px; color: #666; font-weight: 600;">Total Amount Due:</span>
+              <p style="margin: 0; font-size: 24px; font-weight: 700; color: #000;">₱<span id="totalAmount">0.00</span></p>
+            </div>
+          </div>
+
+          <div style="margin-top: 30px; text-align: center;">
+            <button class="submit-btn" style="background-color: #f6c300; border: 1px solid #d6a800; color: #2c2418; padding: 12px 28px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: transform 0.1s ease, box-shadow 0.15s ease, background-color 0.15s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);" onmouseover="this.style.backgroundColor='#0b4a1f'; this.style.color='#ffffff'; this.style.transform='translateY(-1px)'" onmouseout="this.style.backgroundColor='#f6c300'; this.style.color='#2c2418'; this.style.transform='translateY(0)'">Submit</button>
+          </div>
+
+        </div>
+      </main>
+    </div>
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal" style="display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);">
+    <div style="background: #fff; width: 550px; padding: 50px 40px; border-radius: 12px; text-align: center; margin: 10% auto; line-height: 1.8; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <h2 style="margin-bottom: 30px; color: #000; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">Your request has been successfully submitted!</h2>
+
+        <p style="margin-bottom: 20px; color: #4CAF50; font-size: 15px; line-height: 1.7;">Please settle the local amount at the Cashier's Office within 24 hours. After payment, upload your official receipt under the Track Requests section.</p>
+
+        <p style="margin-bottom: 35px; color: #555; font-size: 15px; line-height: 1.7;"><b>Failure to pay within the given time frame will automatically void your request. You will need to submit a new request if this occurs.</b></p>
+
+        <button id="closeModal" style="background: #f6c300; border: 1px solid #d6a800; color: #2c2418; padding: 12px 28px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 15px; width: 100%; transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);" onmouseover="this.style.backgroundColor='#0b4a1f'; this.style.color='#ffffff'; this.style.transform='translateY(-1px)'" onmouseout="this.style.backgroundColor='#f6c300'; this.style.color='#2c2418'; this.style.transform='translateY(0)'">Submit Request</button>
+    </div>
+</div>
+
+<script>
+  // Load user info and request details on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    const requestData = JSON.parse(localStorage.getItem('currentRequest') || '{}');
+    
+    // Handle both user formats (name vs firstName/lastName)
+    const firstName = userInfo.firstName || user.name?.split(' ')[0] || '';
+    const lastName = userInfo.lastName || user.name?.split(' ').slice(1).join(' ') || '';
+    const displayName = user.name || `${firstName} ${lastName}`.trim() || 'User';
+    
+    // Populate user info
+    document.getElementById('userName').textContent = displayName;
+    document.getElementById('fullName').textContent = displayName;
+    document.getElementById('studentNum').textContent = userInfo.studentNumber || user.studentNumber || '—';
+    document.getElementById('email').textContent = userInfo.email || user.email || '—';
+    document.getElementById('program').textContent = userInfo.program || '—';
+    document.getElementById('contact').textContent = userInfo.contactNumber || '—';
+    document.getElementById('address').textContent = userInfo.completeAddress || '—';
+    
+    // Generate reference ID in format YYYY-MMDD-XXXXX
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const datePrefix = `${year}-${month}${day}`;
+    
+    // Fetch the next sequential number from the backend
+    fetch('http://localhost:3000/api/requests/next-reference-number', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.referenceNumber) {
+        document.getElementById('refId').textContent = data.referenceNumber;
+      } else {
+        // Fallback: show placeholder
+        document.getElementById('refId').textContent = `${datePrefix}-00001`;
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching reference number:', error);
+      // Fallback: show placeholder
+      document.getElementById('refId').textContent = `${datePrefix}-00001`;
+    });
+    
+    // Populate request details (from form submission)
+    const detailsBody = document.getElementById('requestDetailsBody');
+    let totalAmount = 0;
+    let totalWithDST = 0;
+    let totalStamps = 0;
+    
+    if (requestData.documents && Array.isArray(requestData.documents)) {
+      requestData.documents.forEach(doc => {
+        const price = 100; // Default price per document
+        const rowTotal = price * doc.quantity;
+        const dstFee = 30 * doc.quantity;
+        const totalWithDSTFee = rowTotal + dstFee;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td style="padding: 8px; border: 1px solid #ddd;">${doc.type || '—'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${doc.purpose || '—'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${doc.quantity || 1}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${price.toFixed(2)}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${rowTotal.toFixed(2)}</td>
+        `;
+        detailsBody.appendChild(row);
+        totalAmount += rowTotal;
+        totalWithDST += totalWithDSTFee;
+        totalStamps += doc.quantity;
+      });
+      // Append Documentary Stamp Tax row (presentation only)
+      if (totalStamps > 0) {
+        const stampPrice = 30;
+        const stampTotal = stampPrice * totalStamps;
+        const stampRow = document.createElement('tr');
+        stampRow.innerHTML = `
+          <td style="padding: 8px; border: 1px solid #ddd;">Documentary Stamp Tax</td>
+          <td style="padding: 8px; border: 1px solid #ddd; color: #666;">Document Tax</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${totalStamps}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${stampPrice.toFixed(2)}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${stampTotal.toFixed(2)}</td>
+        `;
+        detailsBody.appendChild(stampRow);
+      }
+    } else {
+      // Show placeholder if no request data
+      const row = document.createElement('tr');
+      row.innerHTML = `<td colspan="5" style="padding: 10px; border: 1px solid #ddd; text-align: center; color: #999;">No documents requested</td>`;
+      detailsBody.appendChild(row);
+    }
+    
+    document.getElementById('totalAmount').textContent = totalWithDST.toFixed(2);
+    
+    // Load mock notifications
+    loadNotifications();
+  });
+  
+  // Notification functions
+  function toggleNotifications() {
+    const dropdown = document.getElementById('notificationsDropdown');
+    const profileMenu = document.getElementById('profileMenuDropdown');
+    profileMenu.style.display = 'none';
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+  }
+  
+  function toggleProfileMenu() {
+    const dropdown = document.getElementById('profileMenuDropdown');
+    const notifDropdown = document.getElementById('notificationsDropdown');
+    notifDropdown.style.display = 'none';
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+  }
+  
+  function loadNotifications() {
+    // Student notifications now handled by public/js/student_notifications.js
+  }
+  
+  function markAllAsRead() {
+    document.getElementById('notifBadge').style.display = 'none';
+    document.querySelectorAll('.notif-item').forEach(item => {
+      item.classList.add('read');
+    });
+  }
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('notificationsDropdown');
+    const notifBtn = document.querySelector('.notifs');
+    if (!dropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+      dropdown.style.display = 'none';
+    }
+  });
+
+  // Logout function
+  function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+  }
+
+  // API Base URL
+  const API_BASE = 'http://localhost:3000/api';
+
+  // Submit button and modal handling
+  const submitBtn = document.querySelector(".submit-btn");
+  const modal = document.getElementById("confirmationModal");
+  const closeModal = document.getElementById("closeModal");
+
+  submitBtn.addEventListener("click", () => {
+    modal.style.display = "flex";
+    modal.style.justifyContent = "center";
+    modal.style.alignItems = "center";
+  });
+
+  closeModal.addEventListener("click", async () => {
+    // Submit the request to the database
+    const requestData = JSON.parse(localStorage.getItem('currentRequest') || '{}');
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      alert('Authentication token not found. Please login again.');
+      return;
+    }
+    
+    if (!requestData.documents || requestData.documents.length === 0) {
+      alert('No documents in request. Please go back and add documents.');
+      return;
+    }
+
+    try {
+      // Disable button to prevent double submission
+      closeModal.disabled = true;
+      closeModal.textContent = 'Submitting...';
+      
+      // Map document type names to template IDs
+      const documentTypeMap = {
+        'Certificate of Enrollment': 'COE',
+        'Certificate of Grades': 'COG',
+        'Transcript of Records': 'TOR',
+        'Certificate of Registration': 'COR',
+        'Diploma/Degree Certificate': 'DDC',
+        'Good Moral Certificate': 'CGM',
+        'Certificate of Good Moral': 'CGM',
+        'Honorable Dismissal': 'HD',
+        'Course Description': 'CD',
+        'Certification of Units Earned': 'CUE'
+      };
+      
+      // First, fetch available templates to get their IDs
+      const templatesResponse = await fetch(`${API_BASE}/templates/active`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!templatesResponse.ok) {
+        throw new Error('Failed to fetch document templates');
+      }
+      
+      const templatesData = await templatesResponse.json();
+      const templates = templatesData.templates || [];
+      
+      // Create a map of document_code to template id
+      const templateIdMap = {};
+      templates.forEach(template => {
+        templateIdMap[template.document_code] = template.id;
+      });
+      
+      console.log('Template ID Map:', templateIdMap);
+      console.log('Documents to submit:', requestData.documents);
+      
+      // Submit each document as a separate request
+      const promises = requestData.documents.map(doc => {
+        const documentCode = documentTypeMap[doc.type];
+        const templateId = templateIdMap[documentCode];
+        
+        console.log(`Processing ${doc.type}: code=${documentCode}, templateId=${templateId}`);
+        
+        if (!templateId) {
+          console.error(`No template found for document type: ${doc.type}`);
+          return Promise.resolve({ success: false, error: `Unknown document type: ${doc.type}` });
+        }
+        
+        return fetch(`${API_BASE}/requests`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            templateId: templateId,
+            quantity: doc.quantity || 1,
+            purpose: doc.purpose || '',
+            formData: {
+              documentType: doc.type,
+              purpose: doc.purpose
+            }
+          })
+        }).then(response => {
+          return response.json().then(data => {
+            if (!response.ok) {
+              console.error(`Failed to create request for ${doc.type}:`, data);
+              return { success: false, error: data.message || `HTTP ${response.status}` };
+            }
+            return data;
+          });
+        }).catch(err => {
+          console.error(`Network error for ${doc.type}:`, err);
+          return { success: false, error: err.message };
+        });
+      });
+
+      const results = await Promise.all(promises);
+      
+      // Check if all requests were successful
+      const allSuccess = results.every(r => r.success);
+      
+      if (allSuccess) {
+        // Clear the current request from localStorage
+        localStorage.removeItem('currentRequest');
+        
+        modal.style.display = "none";
+        // Redirect to track requests page
+        window.location.href = "s_track.html";
+      } else {
+        const failedRequests = results.filter((r, i) => !r.success);
+        console.error('Failed requests:', failedRequests);
+        const failedDocs = failedRequests.map((r, i) => {
+          const doc = requestData.documents[results.findIndex(res => res === r)];
+          return `${doc?.type || 'Unknown'}: ${r.error || 'Unknown error'}`;
+        }).join('\n');
+        alert(`Failed to submit some documents:\n\n${failedDocs}\n\nPlease check browser console for details.`);
+        closeModal.disabled = false;
+        closeModal.textContent = 'Submit Request';
+      }
+    } catch (error) {
+      console.error('Error submitting request:', error);
+      alert(`Failed to submit request: ${error.message}. Please check the console and try again.`);
+      closeModal.disabled = false;
+      closeModal.textContent = 'Submit Request';
+    }
+  });
+
+  window.onclick = function(e) {
+    if (e.target == modal) {
+      modal.style.display = "none";
+    }
+  }
+</script>
+
+<script src="public/js/student_notifications.js"></script>
+
+</body>
+</html>

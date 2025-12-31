@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document Fees - CvSU DRS</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="public/css/s_fees.css" />
+  </head>
+
+  <body>
+    <nav class="leftnav">
+      <a href="s_dashboard.html" class="logo">
+        <img src="public/assets/logo/c_logoo.svg" alt="CvSU Logo" />
+        <div class="logo-text">
+          <strong>CvSU - DRS</strong>
+          <span>Document Request System</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li class="nav-item">
+          <a href="s_dashboard.html" class="nav-link">
+            <i class="fa-solid fa-star"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_request.html" class="nav-link">
+            <i class="fa-solid fa-star"></i>
+            <span>Request Document</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_track.html" class="nav-link">
+            <i class="fa-solid fa-star"></i>
+            <span>Track Requests</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="s_fees.html" class="nav-link active">
+            <i class="fa-solid fa-star"></i>
+            <span>Document Fees</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="nav-logout">
+        <button onclick="logout()" class="nav-link">
+          <i class="fa-solid fa-sign-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </nav>
+    <div class="page-content">
+      <header class="topbar">
+        <h1>Document Fees</h1>
+        <div class="user-profile">
+          <button class="notifs" aria-label="View notifications" onclick="toggleNotifications()">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
+          </button>
+          <button class="user" aria-label="User menu" onclick="toggleProfileMenu()">
+            <i class="fa-regular fa-user"></i>
+          </button>
+          <span class="username" id="userName">User</span>
+        </div>
+        
+        <!-- Notifications Dropdown -->
+        <div class="notifications-dropdown" id="notificationsDropdown" style="display: none;">
+          <div class="notif-header">
+            <h4>Notifications</h4>
+            <button onclick="markAllAsRead()" class="mark-read-btn">Mark all as read</button>
+          </div>
+          <div class="notif-list" id="notifList">
+            <div class="notif-empty">No new notifications</div>
+          </div>
+        </div>
+        
+        <!-- Profile Menu Dropdown -->
+        <div class="profile-menu-dropdown" id="profileMenuDropdown" style="display: none;">
+          <a href="#" onclick="logout(); return false;" class="profile-menu-item">
+            <i class="fa-solid fa-sign-out"></i>
+            <span>Logout</span>
+          </a>
+        </div>
+      </header>
+      <main>
+        <div class="fees-container">
+          <section class="fees-info card">
+            <h2>CvSU Document Request Fees</h2>
+
+            <p class="intro-text">
+              Below is the complete fee schedule for various academic documents.
+              Additional copies may incur separate charges. Payment is required
+              at the CvSU Cashier Office.
+            </p>
+
+            <div class="fee-table-wrapper">
+              <table class="fees-table">
+                <thead>
+                  <tr>
+                    <th>Document Type</th>
+                    <th>First Copy</th>
+                    <th>Additional Copies</th>
+                    <th>Processing Time</th>
+                  </tr>
+                </thead>
+                <tbody id="feesTableBody">
+                  <tr>
+                    <td colspan="4" style="text-align: center; padding: 20px;">
+                      <i class="fa-solid fa-spinner fa-spin"></i> Loading document fees...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="fees-cta">
+              <a href="s_request.html" class="request-now-btn"
+                >Request Documents Now</a
+              >
+            </div>
+          </section>
+
+          <aside class="fees-sidebar">
+            <div class="card">
+              <h3>Important Notes</h3>
+              <ul class="notes-list">
+                <li>All prices are in Philippine Pesos (₱)</li>
+                <li>Payment must be made at the CvSU Cashier Office</li>
+                <li>Prices are subject to change without notice</li>
+                <li>Rush requests may have additional charges</li>
+                <li>Bring your payment receipt when claiming documents</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Payment Methods</h3>
+              <p>
+                Currently, payments are accepted at the CvSU Cashier Office
+                during office hours:
+              </p>
+              <ul class="payment-methods">
+                <li><strong>Cash:</strong> Direct payment at the cashier</li>
+                <li>
+                  <strong>Bank Transfer:</strong> Via CvSU Official Account
+                </li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <h3>Office Hours</h3>
+              <p>
+                <strong>Registrar's Office:</strong><br />
+                Monday to Friday<br />
+                8:00 AM - 5:00 PM<br />
+                (Closed on Weekends & Holidays)
+              </p>
+            </div>
+
+            <div class="card">
+              <h3>Need Help?</h3>
+              <p>
+                If you have questions about fees or document requests,
+                <a href="contact.html" class="contact-link"
+                  >contact our support team</a
+                >
+              </p>
+            </div>
+          </aside>
+        </div>
+      </main>
+    </div>
+    
+    <script>
+      // DOM Elements
+      const feesTableBody = document.getElementById('feesTableBody');
+
+      // Load user info on page load
+      document.addEventListener('DOMContentLoaded', () => {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        
+        const firstName = userInfo.firstName || user.name?.split(' ')[0] || '';
+        const lastName = userInfo.lastName || user.name?.split(' ').slice(1).join(' ') || '';
+        const displayName = user.name || `${firstName} ${lastName}`.trim() || 'User';
+        
+        document.getElementById('userName').textContent = displayName;
+        loadNotifications();
+        loadDocumentFees();
+      });
+
+      // Load document fees from API
+      async function loadDocumentFees() {
+        try {
+          const response = await fetch('/api/templates/active', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to load document fees');
+          }
+
+          const data = await response.json();
+          const templates = data.templates || [];
+
+          if (templates.length === 0) {
+            feesTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No documents available</td></tr>';
+            return;
+          }
+
+          // Sort templates alphabetically by document name
+          templates.sort((a, b) => a.document_name.localeCompare(b.document_name));
+
+          // Build table rows
+          feesTableBody.innerHTML = templates.map(template => {
+            const basePrice = parseFloat(template.base_price || 0).toFixed(2);
+            const additionalPrice = parseFloat(template.price_per_copy || 0).toFixed(2);
+            const processingDays = formatProcessingDays(template.processing_days);
+
+            return `
+              <tr>
+                <td>${template.document_name}</td>
+                <td>₱${basePrice}</td>
+                <td>₱${additionalPrice} each</td>
+                <td>${processingDays}</td>
+              </tr>
+            `;
+          }).join('');
+
+        } catch (error) {
+          console.error('Error loading document fees:', error);
+          feesTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #d32f2f;">Failed to load document fees. Please refresh the page.</td></tr>';
+        }
+      }
+
+      // Format processing days
+      function formatProcessingDays(days) {
+        if (!days) return 'N/A';
+        
+        // If it's already formatted like "3-5 days", return as is
+        if (typeof days === 'string' && days.includes('-')) {
+          return days;
+        }
+
+        // If it's a number, format it
+        const daysNum = parseInt(days);
+        if (isNaN(daysNum)) return 'N/A';
+
+        // Return range based on number (e.g., 3 days = "2-3 days")
+        const minDays = Math.max(1, daysNum - 1);
+        const maxDays = daysNum + 1;
+        return `${minDays}-${maxDays} days`;
+      }
+      
+      // Notification functions
+      function toggleNotifications() {
+        const dropdown = document.getElementById('notificationsDropdown');
+        const profileMenu = document.getElementById('profileMenuDropdown');
+        profileMenu.style.display = 'none';
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      }
+      
+      function toggleProfileMenu() {
+        const dropdown = document.getElementById('profileMenuDropdown');
+        const notifDropdown = document.getElementById('notificationsDropdown');
+        notifDropdown.style.display = 'none';
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      }
+      
+      function loadNotifications() {
+        // Student notifications now handled by public/js/student_notifications.js
+      }
+      
+      function markAllAsRead() {
+        document.getElementById('notifBadge').style.display = 'none';
+        document.querySelectorAll('.notif-item').forEach(item => {
+          item.classList.add('read');
+        });
+      }
+      
+      document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('notificationsDropdown');
+        const notifBtn = document.querySelector('.notifs');
+        if (!dropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+      
+      // Handle logout
+      function logout() {
+        localStorage.clear();
+        window.location.href = 'login.html';
+      }
+    </script>
+    <script src="public/js/student_notifications.js"></script>
+  </body>
+</html>

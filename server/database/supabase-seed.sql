@@ -19,7 +19,11 @@ INSERT INTO document_templates (document_name, document_code, template_file_path
 ('Certificate of Grades', 'COG', 'uploads/templates/cog-template.pdf', '{"predefined":["student_name","student_number","program","purpose","quantity"],"custom":["semester","school_year"]}', 50.00, 10.00, 3, TRUE),
 ('Certificate of Good Moral', 'CGM', 'uploads/templates/cgm-template.pdf', '{"predefined":["student_name","student_number","program","purpose"],"custom":[]}', 50.00, 0.00, 3, TRUE),
 ('Certificate of Enrollment', 'COE', 'uploads/templates/coe-template.pdf', '{"predefined":["student_name","student_number","program","purpose"],"custom":["semester","school_year"]}', 30.00, 0.00, 1, TRUE),
-('Honorable Dismissal', 'HD', 'uploads/templates/hd-template.pdf', '{"predefined":["student_name","student_number","program","purpose"],"custom":["last_semester_attended"]}', 100.00, 0.00, 5, TRUE);
+('Honorable Dismissal', 'HD', 'uploads/templates/hd-template.pdf', '{"predefined":["student_name","student_number","program","purpose"],"custom":["last_semester_attended"]}', 100.00, 0.00, 5, TRUE),
+('Certificate of Registration', 'COR', 'uploads/templates/cor-template.pdf', '{"predefined":["student_name","student_number","program","purpose"],"custom":["semester","school_year"]}', 30.00, 0.00, 1, TRUE),
+('Diploma/Degree Certificate', 'DDC', 'uploads/templates/ddc-template.pdf', '{"predefined":["student_name","student_number","program","purpose"],"custom":["graduation_date","degree"]}', 200.00, 0.00, 14, TRUE),
+('Course Description', 'CD', 'uploads/templates/cd-template.pdf', '{"predefined":["student_name","student_number","program","purpose","quantity"],"custom":["course_code","course_title"]}', 50.00, 30.00, 5, TRUE),
+('Certification of Units Earned', 'CUE', 'uploads/templates/cue-template.pdf', '{"predefined":["student_name","student_number","program","purpose"],"custom":["units_earned"]}', 50.00, 0.00, 3, TRUE);
 
 -- Note: To insert requests with proper foreign keys, you'll need to:
 -- 1. First get the actual UUIDs of inserted students and templates

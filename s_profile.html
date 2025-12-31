@@ -66,9 +66,6 @@
             <i class="fa-solid fa-bell"></i>
             <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
           </button>
-          <button class="user" aria-label="User menu" onclick="toggleProfileMenu()">
-            <i class="fa-regular fa-user"></i>
-          </button>
           <span class="username" id="userName">User</span>
         </div>
         
@@ -303,33 +300,9 @@
         }
       });
 
-      // Load notifications
-      window.addEventListener('DOMContentLoaded', () => {
-        const notifications = [
-          { id: 1, message: 'Your Transcript of Records request is ready for pickup', time: '2 hours ago', unread: true },
-          { id: 2, message: 'Payment confirmed for Certificate of Enrollment', time: '1 day ago', unread: true }
-        ];
-
-        if (notifications.length > 0) {
-          const badge = document.getElementById('notifBadge');
-          const unreadCount = notifications.filter(n => n.unread).length;
-          if (unreadCount > 0) {
-            badge.textContent = unreadCount;
-            badge.style.display = 'flex';
-          }
-
-          const notifList = document.getElementById('notifList');
-          notifList.innerHTML = notifications.map(n => `
-            <div class=\"notif-item ${n.unread ? 'unread' : ''}\">
-              <div class=\"notif-content\">
-                <p>${n.message}</p>
-                <span class=\"notif-time\">${n.time}</span>
-              </div>
-            </div>
-          `).join('');
-        }
-      });
+      // Notifications now handled by public/js/student_notifications.js
     </script>
-    <script src=\"s_profile.js\"></script>
+    <script src="public/js/s_profile.js"></script>
+    <script src="public/js/student_notifications.js"></script>
   </body>
 </html>

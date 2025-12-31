@@ -116,14 +116,19 @@ h3 {
 .nav-logout {
   margin-top: auto;
   padding: 0 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 20px;
-  margin-top: 20px;
 }
 
 .nav-logout button {
   width: 100%;
   text-align: left;
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+
+.nav-logout button:hover {
+  background-color: #9cb89dd3;
+  cursor: pointer;
 }
 
 /* --- 3. Main Page Content (Right Side) --- */
@@ -159,27 +164,20 @@ h3 {
   gap: 1.5rem;
 }
 
-.user-profile button {
+.user-profile .notifs,
+.user-profile .user {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem;
-  color: #555;
-  transition: color 0.2s;
-}
-
-.user-profile button:hover {
-  color: #0f5d27;
-}
-
-.user-profile .notifs {
+  font-size: 1.5rem;
+  color: #222;
   position: relative;
 }
 
-.username {
-  font-weight: 600;
-  color: #27231b;
-  font-size: 15px;
+.user-profile .username {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #222;
 }
 
 /* Notification Badge */

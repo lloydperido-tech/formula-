@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Requests - Admin | CvSU DRS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="public/css/admin_dashboard.css">
+    <link rel="stylesheet" href="public/css/admin_manage_requests.css">
+</head>
+<body>
+    <nav class="leftnav">
+        <a href="admin_dashboard.html" class="logo">
+            <img src="public/assets/logo/c_logoo.svg" alt="CvSU Logo" />
+            <div class="logo-text">
+                <strong>CvSU - DRS</strong>
+                <span>Admin Portal</span>
+            </div>
+        </a>
+
+        <ul class="nav-links">
+            <li class="nav-item">
+                <a href="admin_dashboard.html" class="nav-link">
+                    <i class="fa-solid fa-star"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="admin_manage_requests.html" class="nav-link active">
+                    <i class="fa-solid fa-star"></i>
+                    <span>Manage Requests</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="admin_fees.html" class="nav-link">
+                    <i class="fa-solid fa-star"></i>
+                    <span>Document Fees</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="nav-logout">
+            <button onclick="logout()" class="nav-link">
+                <i class="fa-solid fa-sign-out"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="page-content">
+        <header class="topbar">
+            <h1>Manage Requests</h1>
+            <div class="user-profile">
+                <button class="notifs" aria-label="View notifications" onclick="toggleNotifications()">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
+                </button>
+                <span class="username" id="adminName">Loading...</span>
+            </div>
+
+            <div class="notifications-dropdown" id="notificationsDropdown" style="display: none;">
+                <div class="notif-header">
+                    <h4>Notifications</h4>
+                    <button onclick="markAllAsRead()" class="mark-read-btn">Mark all as read</button>
+                </div>
+                <div class="notif-list" id="notifList">
+                    <div class="notif-empty">No new notifications</div>
+                </div>
+            </div>
+        </header>
+
+        <main class="manage-requests">
+            <div class="card controls-card">
+                <div class="search-group">
+                    <label for="searchRef" class="visually-hidden">Search by Reference ID</label>
+                    <input type="text" id="searchRef" placeholder="Search reference ID..." autocomplete="off" />
+                    <button id="clearSearch" class="ghost-btn" type="button">Clear</button>
+                </div>
+                <div class="summary" id="summaryText">Showing 0 requests</div>
+            </div>
+
+            <div class="card table-card">
+                <div class="table-wrapper">
+                    <table class="requests-table">
+                        <thead>
+                            <tr>
+                                <th>Reference #</th>
+                                <th>Student Name</th>
+                                <th>Student Number</th>
+                                <th>Program</th>
+                                <th>Document</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestsBody">
+                            <tr><td colspan="8" class="loading-row">Loading requests...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Request Details Modal -->
+    <div id="requestDetailsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Request Details</h3>
+                <button class="modal-close" onclick="closeDetailsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="details-section">
+                    <h4>Request Information</h4>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Reference Number:</span>
+                            <span id="detailRefNum" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Status:</span>
+                            <span id="detailStatus" class="detail-value status-badge">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Document Type:</span>
+                            <span id="detailDocument" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Quantity:</span>
+                            <span id="detailQuantity" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Total Amount:</span>
+                            <span id="detailAmount" class="detail-value">₱0.00</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Submitted Date:</span>
+                            <span id="detailSubmitDate" class="detail-value">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h4>Student Information</h4>
+                    <div class="details-grid">
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Name:</span>
+                            <span id="detailStudentName" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item full-width">
+                            <span class="detail-label">Email:</span>
+                            <span id="detailStudentEmail" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Student ID:</span>
+                            <span id="detailStudentId" class="detail-value">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Program:</span>
+                            <span id="detailProgram" class="detail-value">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-section" id="receiptSection">
+                    <h4>Payment Receipt</h4>
+                    <div class="receipt-panel">
+                        <div class="receipt-preview-box">
+                            <div id="receiptPlaceholder" class="receipt-placeholder">No receipt uploaded yet.</div>
+                            <img id="receiptImage" alt="Payment receipt preview" class="receipt-image" style="display: none;" />
+                        </div>
+                        <div class="receipt-meta">
+                            <div class="detail-item">
+                                <span class="detail-label">Status:</span>
+                                <span id="receiptStatusText" class="detail-value status-pill receipt-status-pill neutral">No receipt</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Uploaded:</span>
+                                <span id="receiptUploadedAt" class="detail-value">—</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Verification Notes:</span>
+                                <span id="receiptNotes" class="detail-value">—</span>
+                            </div>
+                            <div class="receipt-actions">
+                                <a id="viewReceiptLink" class="action-link" href="#" target="_blank" rel="noopener" style="display: none;">Open receipt</a>
+                                <button id="reloadReceiptBtn" class="ghost-btn" type="button">Reload receipt</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="details-section">
+                    <h4>Update Status</h4>
+                    <div class="form-group">
+                        <label for="newStatus">Change Status To:</label>
+                        <select id="newStatus" class="form-select">
+                            <option value="">Select new status</option>
+                            <option value="Requested">Requested</option>
+                            <option value="Verifying">Verifying</option>
+                            <option value="Processing">Processing</option>
+                            <option value="For Release">For Release</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="statusNotes">Notes (Optional):</label>
+                        <textarea id="statusNotes" class="form-textarea" placeholder="Add notes about this status change..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeDetailsBtn" class="btn-secondary" onclick="closeDetailsModal()">Close</button>
+                <button id="updateStatusBtn" class="btn-primary">Update Status</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="public/js/admin_manage_requests.js"></script>
+</body>
+</html>

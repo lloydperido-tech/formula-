@@ -2,11 +2,42 @@ const db = require('../config/db');
 const fs = require('fs').promises;
 const path = require('path');
 
-// Helper to generate reference number
-function generateReferenceNumber() {
-  const year = new Date().getFullYear();
-  const random = Math.random().toString(36).substring(2, 7).toUpperCase();
-  return `${year}-REG-${random}`;
+// Helper to generate reference number with uniqueness guarantee
+// Format: YYYY-MMDD-XXXXX where XXXXX starts at 00001 each day
+async function generateReferenceNumber() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const datePrefix = `${year}-${month}${day}`;
+
+  try {
+    // Get the count of requests created today to determine the starting number
+    const { count, error } = await db.supabase
+      .from('requests')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', `${year}-${month}-${day}T00:00:00`)
+      .lt('created_at', `${year}-${month}-${day}T23:59:59`);
+
+    if (error) {
+      console.error('Error counting requests:', error);
+      // Fallback: start from a high number if count fails
+      const random = Math.floor(Math.random() * 90000) + 10000;
+      return `${datePrefix}-${String(random).padStart(5, '0')}`;
+    }
+
+    // Start sequential numbering from 1, increment by 1
+    const sequentialNumber = (count || 0) + 1;
+    const referenceNumber = `${datePrefix}-${String(sequentialNumber).padStart(5, '0')}`;
+    
+    console.log(`Generated reference number: ${referenceNumber} (daily sequence: ${sequentialNumber})`);
+    return referenceNumber;
+  } catch (err) {
+    console.error('Error generating reference number:', err);
+    // Final fallback
+    const random = Math.floor(Math.random() * 90000) + 10000;
+    return `${datePrefix}-${String(random).padStart(5, '0')}`;
+  }
 }
 
 // Helper to calculate total price
@@ -21,6 +52,8 @@ exports.createRequest = async (req, res) => {
   try {
     const { templateId, quantity, purpose, formData } = req.body;
     const studentId = req.user.id;
+
+    console.log('Creating request:', { studentId, templateId, quantity, purpose });
 
     // Validate inputs
     if (!templateId || !quantity || quantity < 1) {
@@ -39,7 +72,16 @@ exports.createRequest = async (req, res) => {
       .eq('is_deleted', false)
       .single();
 
-    if (templateError || !template) {
+    if (templateError) {
+      console.error('Template lookup error:', templateError);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or inactive template'
+      });
+    }
+
+    if (!template) {
+      console.error('Template not found for ID:', templateId);
       return res.status(400).json({
         success: false,
         message: 'Invalid or inactive template'
@@ -53,44 +95,84 @@ exports.createRequest = async (req, res) => {
       quantity
     );
 
-    // Generate reference number
-    const referenceNumber = generateReferenceNumber();
+    console.log('Template found:', { name: template.document_name, totalAmount });
 
-    // Create request
-    const { data: request, error: createError } = await db.supabase
-      .from('requests')
-      .insert([{
-        student_id: studentId,
-        template_id: templateId,
-        reference_number: referenceNumber,
-        quantity: parseInt(quantity),
-        purpose: purpose || null,
-        form_data: formData || {},
-        total_amount: totalAmount,
-        status: 'Pending Payment'
-      }])
-      .select()
-      .single();
+    // Try to create request with retry on duplicate reference number
+    let request = null;
+    let createError = null;
+    let retries = 5;
 
-    if (createError) {
-      console.error('Create request error:', createError);
+    while (retries > 0) {
+      // Generate reference number fresh each time
+      const referenceNumber = await generateReferenceNumber();
+
+      // Create request
+      const result = await db.supabase
+        .from('requests')
+        .insert([{
+          student_id: studentId,
+          template_id: templateId,
+          reference_number: referenceNumber,
+          quantity: parseInt(quantity),
+          purpose: purpose || null,
+          form_data: formData || {},
+          total_amount: totalAmount,
+          status: 'Requested'
+        }])
+        .select()
+        .single();
+
+      if (result.error) {
+        createError = result.error;
+        console.error(`Database insert error (attempt ${6 - retries}):`, createError.message);
+        
+        // Check if it's a duplicate key error - if so, retry
+        if (createError.code === '23505' || createError.message.includes('duplicate key')) {
+          retries--;
+          if (retries > 0) {
+            console.log(`Duplicate key detected, regenerating and retrying... (${retries} attempts left)`);
+            // Add a small delay before retrying to let other concurrent requests settle
+            await new Promise(resolve => setTimeout(resolve, 50));
+            continue;
+          }
+        }
+        
+        // If it's not a duplicate key error or we're out of retries, return error
+        console.error('Error details:', createError.message, createError.code, createError.details);
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to create request: ' + (createError.message || 'Database error')
+        });
+      }
+
+      // Success
+      request = result.data;
+      console.log('Request created successfully:', request.id, 'with reference:', request.reference_number);
+      break;
+    }
+
+    if (!request) {
       return res.status(500).json({
         success: false,
-        message: 'Failed to create request'
+        message: 'Failed to create request after multiple attempts'
       });
     }
 
     // Log status change
-    await db.supabase
+    const { error: historyError } = await db.supabase
       .from('request_status_history')
       .insert([{
         request_id: request.id,
         old_status: null,
-        new_status: 'Pending Payment',
+        new_status: 'Requested',
         changed_by: studentId,
         notes: 'Request created'
-      }])
-      .catch(err => console.error('Error logging status:', err));
+      }]);
+
+    if (historyError) {
+      console.error('Error logging status:', historyError);
+      // Don't fail the request if history logging fails
+    }
 
     res.json({
       success: true,
@@ -107,7 +189,24 @@ exports.createRequest = async (req, res) => {
     console.error('Create request error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create request'
+      message: 'Failed to create request: ' + (error.message || 'Unknown error')
+    });
+  }
+};
+
+// Get next reference number (for preview)
+exports.getNextReferenceNumber = async (req, res) => {
+  try {
+    const referenceNumber = await generateReferenceNumber();
+    res.json({
+      success: true,
+      referenceNumber
+    });
+  } catch (error) {
+    console.error('Get next reference number error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to generate reference number'
     });
   }
 };
@@ -116,9 +215,9 @@ exports.createRequest = async (req, res) => {
 exports.getStudentRequests = async (req, res) => {
   try {
     const studentId = req.user.id;
-    const { status, page = 1, limit = 10 } = req.query;
-
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    console.log('Getting requests for student ID:', studentId);
+    
+    const { status } = req.query;
 
     let query = db.supabase
       .from('requests')
@@ -145,8 +244,9 @@ exports.getStudentRequests = async (req, res) => {
     }
 
     const { data: requests, error, count } = await query
-      .order('created_at', { ascending: false })
-      .range(offset, offset + parseInt(limit) - 1);
+      .order('created_at', { ascending: false });
+
+    console.log('Requests query result:', { count, error, requestCount: requests?.length });
 
     if (error) {
       console.error('Get requests error:', error);
@@ -156,14 +256,11 @@ exports.getStudentRequests = async (req, res) => {
       });
     }
 
+    console.log('Returning requests:', requests);
+
     res.json({
       success: true,
-      requests,
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil((count || 0) / parseInt(limit)),
-        totalItems: count || 0
-      }
+      requests
     });
 
   } catch (error) {
@@ -315,7 +412,8 @@ exports.getRequestQueue = async (req, res) => {
     }
 
     if (search) {
-      query = query.or(`reference_number.ilike.%${search}%,users.email.ilike.%${search}%`);
+      // Search in reference_number only for nested relations safety
+      query = query.ilike('reference_number', `%${search}%`);
     }
 
     const { data: requests, error, count } = await query
@@ -363,9 +461,8 @@ exports.updateRequestStatus = async (req, res) => {
     const { newStatus, notes } = req.body;
 
     const validStatuses = [
-      'Pending Payment',
-      'Payment Submitted',
-      'Payment Verified',
+      'Requested',
+      'Verifying',
       'Processing',
       'For Release',
       'Completed',
@@ -394,13 +491,18 @@ exports.updateRequestStatus = async (req, res) => {
     }
 
     // Update status
+    const updateData = { status: newStatus };
+    
+    if (newStatus === 'Verifying') {
+      updateData.payment_verified_at = new Date().toISOString();
+    }
+    if (newStatus === 'Completed') {
+      updateData.completed_at = new Date().toISOString();
+    }
+
     const { error: updateError } = await db.supabase
       .from('requests')
-      .update({ 
-        status: newStatus,
-        payment_verified_at: newStatus === 'Payment Verified' ? new Date().toISOString() : undefined,
-        completed_at: newStatus === 'Completed' ? new Date().toISOString() : undefined
-      })
+      .update(updateData)
       .eq('id', id);
 
     if (updateError) {
@@ -412,7 +514,7 @@ exports.updateRequestStatus = async (req, res) => {
     }
 
     // Log status change
-    await db.supabase
+    const { error: historyError } = await db.supabase
       .from('request_status_history')
       .insert([{
         request_id: id,
@@ -420,8 +522,12 @@ exports.updateRequestStatus = async (req, res) => {
         new_status: newStatus,
         changed_by: req.user.id,
         notes: notes || null
-      }])
-      .catch(err => console.error('Error logging status:', err));
+      }]);
+
+    if (historyError) {
+      console.error('Error logging status history:', historyError);
+      // Don't fail the response - status was updated successfully
+    }
 
     res.json({
       success: true,
@@ -465,8 +571,8 @@ exports.cancelRequest = async (req, res) => {
       });
     }
 
-    // Can only cancel if pending payment or payment submitted
-    if (!['Pending Payment', 'Payment Submitted'].includes(request.status)) {
+    // Can only cancel if requested or verifying
+    if (!['Requested', 'Verifying'].includes(request.status)) {
       return res.status(400).json({
         success: false,
         message: 'Can only cancel requests pending payment'

@@ -80,7 +80,7 @@ const uploadReceipt = multer({
   limits: {
     fileSize: (process.env.MAX_FILE_SIZE_MB || 5) * 1024 * 1024 // 5MB default
   }
-}).single('receipt');
+});
 
 const uploadTemplate = multer({
   storage: templateStorage,
@@ -88,7 +88,7 @@ const uploadTemplate = multer({
   limits: {
     fileSize: (process.env.MAX_TEMPLATE_SIZE_MB || 10) * 1024 * 1024 // 10MB default
   }
-}).single('template');
+});
 
 const uploadDocument = multer({
   storage: documentStorage,
@@ -96,7 +96,7 @@ const uploadDocument = multer({
   limits: {
     fileSize: (process.env.MAX_TEMPLATE_SIZE_MB || 10) * 1024 * 1024
   }
-}).single('document');
+});
 
 module.exports = {
   uploadReceipt,

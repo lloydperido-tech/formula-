@@ -15,7 +15,7 @@
 
   <body>
     <nav class="leftnav">
-      <a href="dashboard.html" class="logo">
+      <a href="s_dashboard.html" class="logo">
         <img src="public/assets/logo/c_logoo.svg" alt="CvSU Logo" />
         <div class="logo-text">
           <strong>CvSU - DRS</strong>
@@ -48,12 +48,6 @@
             <span>Document Fees</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a href="s_profile.html" class="nav-link">
-            <i class="fa-solid fa-star"></i>
-            <span>My Profile</span>
-          </a>
-        </li>
       </ul>
 
       <div class="nav-logout">
@@ -71,9 +65,6 @@
             <i class="fa-solid fa-bell"></i>
             <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
           </button>
-          <button class="user" aria-label="User menu" onclick="toggleProfileMenu()">
-            <i class="fa-regular fa-user"></i>
-          </button>
           <span class="username" id="userName">User</span>
         </div>
         
@@ -90,10 +81,6 @@
         
         <!-- Profile Menu Dropdown -->
         <div class="profile-menu-dropdown" id="profileMenuDropdown" style="display: none;">
-          <a href="s_profile.html" class="profile-menu-item">
-            <i class="fa-solid fa-user"></i>
-            <span>My Profile</span>
-          </a>
           <a href="#" onclick="logout(); return false;" class="profile-menu-item">
             <i class="fa-solid fa-sign-out"></i>
             <span>Logout</span>
@@ -103,7 +90,7 @@
       <main>
         <div class="container-grid">
           <section class="main-column">
-            <h2 class="welcome-header">Welcome, Alelhy!</h2>
+            <h2 class="welcome-header" id="welcomeHeader">Welcome, User!</h2>
 
             <div class="card-row">
               <article class="details-card card">
@@ -120,19 +107,19 @@
 
               <article class="tracker-card card">
                 <h3>Tracker</h3>
-                <p>Reference ID #00123</p>
+                <p id="trackerReferenceId">Reference ID #--</p>
 
-                <ol class="tracker-steps">
+                <ol class="tracker-steps" id="trackerSteps">
                   <li class="completed">
                     <span>Requested</span>
                   </li>
-                  <li class="completed">
+                  <li>
                     <span>Verifying</span>
                   </li>
-                  <li class="completed">
+                  <li>
                     <span>Processing</span>
                   </li>
-                  <li class="active">
+                  <li>
                     <span>For Release</span>
                   </li>
                   <li>
@@ -154,18 +141,11 @@
                       <th>Date</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody id="recentRequestsBody">
                     <tr>
-                      <td>&nbsp;</td>
-                      <td>&nbsp;</td>
-                      <td>&nbsp;</td>
-                      <td>&nbsp;</td>
-                    </tr>
-                    <tr>
-                      <td>&nbsp;</td>
-                      <td>&nbsp;</td>
-                      <td>&nbsp;</td>
-                      <td>&nbsp;</td>
+                      <td colspan="4" style="text-align: center; padding: 15px;">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Loading requests...
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -217,38 +197,7 @@
               </div>
               
               <div class="dashboard-notif-list" id="dashboardNotifList">
-                <div class="dashboard-notif-item">
-                  <div class="notif-icon success">
-                    <i class="fa-solid fa-check-circle"></i>
-                  </div>
-                  <div class="notif-content">
-                    <p class="notif-title">Document Ready</p>
-                    <p class="notif-desc">Your Transcript of Records is ready for pickup</p>
-                    <span class="notif-time">2 hours ago</span>
-                  </div>
-                </div>
-                
-                <div class="dashboard-notif-item">
-                  <div class="notif-icon info">
-                    <i class="fa-solid fa-info-circle"></i>
-                  </div>
-                  <div class="notif-content">
-                    <p class="notif-title">Payment Verified</p>
-                    <p class="notif-desc">Payment for request #2025-REG-00002 has been verified</p>
-                    <span class="notif-time">1 day ago</span>
-                  </div>
-                </div>
-                
-                <div class="dashboard-notif-item">
-                  <div class="notif-icon warning">
-                    <i class="fa-solid fa-clock"></i>
-                  </div>
-                  <div class="notif-content">
-                    <p class="notif-title">Pending Action</p>
-                    <p class="notif-desc">Please submit payment for your document request</p>
-                    <span class="notif-time">2 days ago</span>
-                  </div>
-                </div>
+                <div class="notif-empty">Loading notifications...</div>
               </div>
             </section>
           </aside>
@@ -276,10 +225,170 @@
         const displayName = user.name || `${firstName} ${lastName}`.trim() || 'User';
         
         document.getElementById('userName').textContent = displayName;
+        document.getElementById('welcomeHeader').textContent = `Welcome, ${displayName.split(' ')[0]}!`;
+        
+        // Populate Student Details from localStorage/userInfo
+        populateStudentDetails(userInfo, displayName);
+        
         loadNotifications();
+        loadRecentRequests();
+        loadTrackerStatus();
         generateCalendar();
       });
       
+      // Populate Student Details card
+      function populateStudentDetails(userInfo, displayName) {
+        const detailsCard = document.querySelector('.details-card dl');
+        if (detailsCard) {
+          const dds = detailsCard.querySelectorAll('dd');
+          
+          // Get the full name
+          const fullName = displayName || userInfo.firstName + ' ' + userInfo.lastName || 'N/A';
+          
+          // Populate the card
+          if (dds.length >= 3) {
+            dds[0].textContent = fullName;
+            dds[1].textContent = userInfo.studentNumber || 'N/A';
+            dds[2].textContent = userInfo.program || 'N/A';
+          }
+        }
+      }
+      
+      // Load recent requests from API
+      async function loadRecentRequests() {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            console.error('No authentication token found');
+            return;
+          }
+
+          const response = await fetch('/api/requests/', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to load requests');
+          }
+
+          const data = await response.json();
+          const requests = data.requests || [];
+          const tbody = document.getElementById('recentRequestsBody');
+
+          if (requests.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 15px;">No recent requests</td></tr>';
+            return;
+          }
+
+          // Get the 5 most recent requests
+          const recentRequests = requests.slice(0, 5);
+
+          tbody.innerHTML = recentRequests.map(request => {
+            const date = new Date(request.created_at).toLocaleDateString('en-PH', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            });
+
+            // Get document name from nested object
+            const documentName = request.document_templates?.document_name || request.document_name || 'N/A';
+            const referenceNumber = request.reference_number || 'N/A';
+            const statusClass = request.status?.toLowerCase().replace(/\s+/g, '-') || 'unknown';
+            const rowClass = statusClass === 'cancelled' ? 'cancelled-row' : '';
+
+            return `
+              <tr class="${rowClass}">
+                <td><strong>${referenceNumber}</strong></td>
+                <td>${documentName}</td>
+                <td><span class="status-badge ${statusClass}">${request.status}</span></td>
+                <td>${date}</td>
+              </tr>
+            `;
+          }).join('');
+
+        } catch (error) {
+          console.error('Error loading recent requests:', error);
+          const tbody = document.getElementById('recentRequestsBody');
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 15px; color: #d32f2f;">Failed to load requests</td></tr>';
+        }
+      }
+      
+      // Load tracker status for most recent request
+      async function loadTrackerStatus() {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            console.error('No authentication token found');
+            return;
+          }
+
+          const response = await fetch('/api/requests/', {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to load requests');
+          }
+
+          const data = await response.json();
+          const requests = data.requests || [];
+
+          if (requests.length === 0) {
+            // No requests - show default state
+            document.getElementById('trackerReferenceId').textContent = 'Reference ID #--';
+            return;
+          }
+
+          // Get the most recent request
+          const mostRecentRequest = requests[0];
+          const referenceId = mostRecentRequest.reference_number || '--';
+          const status = mostRecentRequest.status || 'Requested';
+
+          // Update reference ID
+          document.getElementById('trackerReferenceId').textContent = `Reference ID #${referenceId}`;
+
+          // Define status order
+          const statusOrder = ['Requested', 'Verifying', 'Processing', 'For Release', 'Completed'];
+          const currentStatusIndex = statusOrder.indexOf(status);
+
+          // Update tracker steps
+          const steps = document.querySelectorAll('.tracker-steps li');
+          const trackerContainer = document.querySelector('.tracker-steps');
+          
+          steps.forEach((step, index) => {
+            // Remove all classes
+            step.classList.remove('completed', 'active');
+            
+            if (index < currentStatusIndex) {
+              // Previous steps are completed
+              step.classList.add('completed');
+            } else if (index === currentStatusIndex) {
+              // Current step is active
+              step.classList.add('active');
+            }
+            // Future steps have no special class
+          });
+          
+          // Create a linear gradient background for the line based on progress
+          if (currentStatusIndex >= 0 && trackerContainer) {
+            // Calculate the percentage to reach the current step (no overshoot to the next dot)
+            const totalSteps = steps.length;
+            // Step 0 -> 0%, Step 1 -> 25%, Step 2 -> 50%, Step 3 -> 75%, Step 4 -> 100%
+            const progressPercent = Math.min(100, Math.max(0, (currentStatusIndex / (totalSteps - 1)) * 100));
+            
+            // Push progress percent into CSS variable used by ::before line
+            trackerContainer.style.setProperty('--progress-percent', `${progressPercent}%`);
+          }
+
+        } catch (error) {
+          console.error('Error loading tracker status:', error);
+          document.getElementById('trackerReferenceId').textContent = 'Reference ID #Error';
+        }
+      }
       // Calendar functions
       function generateCalendar() {
         const year = currentDate.getFullYear();
@@ -354,30 +463,8 @@
       }
       
       function loadNotifications() {
-        const notifications = [
-          { id: 1, message: 'Your document request #2025-REG-00001 is ready for pickup', time: '2 hours ago', read: false },
-          { id: 2, message: 'Payment verified for request #2025-REG-00002', time: '1 day ago', read: false }
-        ];
-        
-        const notifList = document.getElementById('notifList');
-        const badge = document.getElementById('notifBadge');
-        const unreadCount = notifications.filter(n => !n.read).length;
-        
-        if (unreadCount > 0) {
-          badge.textContent = unreadCount;
-          badge.style.display = 'block';
-        }
-        
-        if (notifications.length === 0) {
-          notifList.innerHTML = '<div class="notif-empty">No new notifications</div>';
-        } else {
-          notifList.innerHTML = notifications.map(n => `
-            <div class="notif-item ${n.read ? 'read' : ''}">
-              <p>${n.message}</p>
-              <span class="notif-time">${n.time}</span>
-            </div>
-          `).join('');
-        }
+        // Student notifications are now driven by public/js/student_notifications.js
+        // This placeholder remains to avoid breaking existing calls during page init.
       }
       
       function markAllAsRead() {
@@ -401,5 +488,6 @@
         window.location.href = 'login.html';
       }
     </script>
+      <script src="public/js/student_notifications.js"></script>
   </body>
 </html>

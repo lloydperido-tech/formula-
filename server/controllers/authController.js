@@ -67,9 +67,13 @@ const registerStudent = async (req, res) => {
       });
     }
 
-    // Send verification email
-    const verificationLink = `${process.env.FRONTEND_URL}/verify.html?token=${verificationToken}`;
-    await emailService.sendVerificationEmail(email, firstName, verificationLink);
+    // Send verification email (optional in development)
+    try {
+      const verificationLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify.html?token=${verificationToken}`;
+      await emailService.sendVerificationEmail(email, firstName, verificationLink);
+    } catch (emailError) {
+      console.warn('Email sending failed (non-critical):', emailError.message);
+    }
 
     res.json({
       success: true,
@@ -164,6 +168,8 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    console.log('Login attempt for:', email);
+
     // Get user
     const { data: user, error } = await db.supabase
       .from('users')
@@ -172,14 +178,18 @@ const login = async (req, res) => {
       .single();
 
     if (error || !user) {
+      console.log('User not found:', email, error);
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
 
+    console.log('User found:', user.email, 'Role:', user.role, 'Verified:', user.is_verified);
+
     // Check if student account is verified
     if (user.role === 'student' && !user.is_verified) {
+      console.log('Account not verified');
       return res.status(401).json({
         success: false,
         message: 'Please verify your email before logging in'
@@ -190,11 +200,14 @@ const login = async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
+      console.log('Invalid password for:', email);
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
+
+    console.log('Login successful for:', email);
 
     // Generate JWT token
     const token = jwt.sign(
@@ -207,16 +220,26 @@ const login = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
-    // Remove sensitive data
-    delete user.password;
-    delete user.verification_token;
-    delete user.verification_token_expiry;
+    // Format user object for frontend (convert snake_case to camelCase)
+    const formattedUser = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      middleName: user.middle_name,
+      studentNumber: user.student_number,
+      program: user.program,
+      contactNumber: user.contact_number,
+      address: user.address,
+      isVerified: user.is_verified
+    };
 
     res.json({
       success: true,
       message: 'Login successful',
       token,
-      user
+      user: formattedUser
     });
 
   } catch (error) {

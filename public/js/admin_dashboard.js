@@ -1,5 +1,5 @@
 // Admin Dashboard JavaScript
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = 'http://localhost:3000/api';
 let currentPage = 1;
 let pageSize = 10;
 let currentFilters = {
@@ -8,67 +8,104 @@ let currentFilters = {
     dateRange: ''
 };
 let allRequests = [];
+let dashboardRequests = [];
+let dashboardRequestsLoaded = false;
 let currentRequestId = null;
+let calendarDate = new Date();
+let selectedCalendarDate = null;
+let notificationPollInterval = null;
+let lastNotificationCount = 0;
+const calendarEvents = [
+    { date: '2025-12-15', title: 'Document Deadline' },
+    { date: '2025-12-20', title: 'Office Closed - Holiday' },
+    { date: '2025-12-25', title: 'Christmas Day' },
+    { date: '2026-01-01', title: 'New Year' }
+];
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     loadAdminInfo();
-    loadStatistics();
-    loadRequestQueue();
+    if (document.getElementById('statPending')) loadStatistics();
+    if (document.getElementById('queueTableBody')) loadRequestQueue();
+    loadDashboardSummary();
     setupEventListeners();
+    initCalendar();
+    initNotifications();
 });
 
 // Setup Event Listeners
 function setupEventListeners() {
     // Search & Filters
-    document.getElementById('searchInput').addEventListener('input', debounce(() => {
-        currentPage = 1;
-        currentFilters.search = document.getElementById('searchInput').value;
-        loadRequestQueue();
-    }, 500));
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(() => {
+            currentPage = 1;
+            currentFilters.search = searchInput.value;
+            loadRequestQueue();
+        }, 500));
+    }
 
-    document.getElementById('statusFilter').addEventListener('change', () => {
-        currentPage = 1;
-        currentFilters.status = document.getElementById('statusFilter').value;
-        loadRequestQueue();
-    });
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', () => {
+            currentPage = 1;
+            currentFilters.status = statusFilter.value;
+            loadRequestQueue();
+        });
+    }
 
-    document.getElementById('dateFilter').addEventListener('change', () => {
-        currentPage = 1;
-        currentFilters.dateRange = document.getElementById('dateFilter').value;
-        loadRequestQueue();
-    });
+    const dateFilter = document.getElementById('dateFilter');
+    if (dateFilter) {
+        dateFilter.addEventListener('change', () => {
+            currentPage = 1;
+            currentFilters.dateRange = dateFilter.value;
+            loadRequestQueue();
+        });
+    }
 
-    document.getElementById('resetFiltersBtn').addEventListener('click', () => {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('statusFilter').value = '';
-        document.getElementById('dateFilter').value = '';
-        currentFilters = { search: '', status: '', dateRange: '' };
-        currentPage = 1;
-        loadRequestQueue();
-    });
+    const resetBtn = document.getElementById('resetFiltersBtn');
+    if (resetBtn && searchInput && statusFilter && dateFilter) {
+        resetBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            statusFilter.value = '';
+            dateFilter.value = '';
+            currentFilters = { search: '', status: '', dateRange: '' };
+            currentPage = 1;
+            loadRequestQueue();
+        });
+    }
 
     // Pagination
-    document.getElementById('prevPageBtn').addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    if (prevPageBtn) {
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadRequestQueue();
+            }
+        });
+    }
+
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    if (nextPageBtn) {
+        nextPageBtn.addEventListener('click', () => {
+            currentPage++;
             loadRequestQueue();
-        }
-    });
+        });
+    }
 
-    document.getElementById('nextPageBtn').addEventListener('click', () => {
-        currentPage++;
-        loadRequestQueue();
-    });
-
-    document.getElementById('refreshBtn').addEventListener('click', () => {
-        loadStatistics();
-        loadRequestQueue();
-        showToast('Data refreshed', 'success');
-    });
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', () => {
+            loadStatistics();
+            loadRequestQueue();
+            showToast('Data refreshed', 'success');
+        });
+    }
 
     // Logout
-    document.getElementById('logoutBtn').addEventListener('click', logout);
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) logoutBtn.addEventListener('click', logout);
 
     // Modal Close Buttons
     document.querySelectorAll('.modal-close').forEach(btn => {
@@ -107,24 +144,284 @@ function setupEventListeners() {
 async function loadAdminInfo() {
     try {
         const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-        if (!token) {
+        const nameFallback = localStorage.getItem('adminName') || localStorage.getItem('userName');
+        const storedProfile = safeParse(localStorage.getItem('userInfo')) || safeParse(localStorage.getItem('user')) || {};
+        if (!token && !nameFallback) {
             window.location.href = 'login.html';
             return;
         }
 
-        const response = await fetch(`${API_BASE}/auth/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        if (token) {
+            const response = await fetch(`${API_BASE}/auth/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
 
-        if (!response.ok) throw new Error('Failed to load admin info');
-        
-        const data = await response.json();
-        const user = data.user || data.data;
-        document.getElementById('adminName').textContent = (user && user.name) || 'Admin';
+            if (!response.ok) throw new Error('Failed to load admin info');
+            
+            const data = await response.json();
+            const user = data.user || data.data || {};
+
+            const parts = mergeNameParts(user, storedProfile);
+            const composite = [parts.first, parts.last].filter(Boolean).join(' ').trim();
+            const storedComposite = buildCompositeFromName(nameFallback);
+            const apiComposite = buildCompositeFromName(user.name || user.fullName);
+
+            const displayName = composite
+                || (apiComposite || '').trim()
+                || (user.fullName && user.fullName.trim())
+                || (user.name && user.name.trim())
+                || storedComposite
+                || user.email
+                || nameFallback
+                || 'Admin';
+
+            document.getElementById('adminName').textContent = displayName;
+            // Only persist if we have at least two name tokens to avoid overwriting with a lone last name
+            if (displayName.split(' ').filter(Boolean).length >= 2) {
+                localStorage.setItem('adminName', displayName);
+            }
+            return;
+        }
+
+        // Fallback if no token but a cached name exists
+        if (nameFallback) {
+            document.getElementById('adminName').textContent = nameFallback;
+            return;
+        }
     } catch (error) {
         console.error('Error loading admin info:', error);
-        document.getElementById('adminName').textContent = 'Admin';
+        const cached = localStorage.getItem('adminName');
+        document.getElementById('adminName').textContent = cached || 'Admin';
     }
+}
+
+function mergeNameParts(primary, secondary) {
+    const a = extractNameParts(primary);
+    const b = extractNameParts(secondary);
+    return {
+        first: a.first || b.first || '',
+        last: a.last || b.last || ''
+    };
+}
+
+function extractNameParts(obj) {
+    if (!obj || typeof obj !== 'object') return { first: '', last: '' };
+    const first = obj.firstName || obj.first_name || obj.firstname || obj.fname || obj.given_name || obj.givenName || obj.givenname || obj.first || '';
+    const last = obj.lastName || obj.last_name || obj.lastname || obj.lname || obj.surname || obj.family_name || obj.familyName || obj.last || '';
+    return { first: (first || '').trim(), last: (last || '').trim() };
+}
+
+function buildCompositeFromName(name) {
+    if (!name || typeof name !== 'string') return '';
+    const tokens = name.trim().split(/\s+/);
+    if (tokens.length >= 2) return tokens.join(' ');
+    return '';
+}
+
+// Dashboard summary (stats, priority, trend, recent)
+async function loadDashboardSummary() {
+    const requests = await fetchDashboardRequests();
+    dashboardRequests = requests;
+    dashboardRequestsLoaded = true;
+    populateStatsFromRequests(requests);
+    populateDashboardData(requests);
+    setWelcomeLine();
+}
+
+function setWelcomeLine() {
+    const nameEl = document.getElementById('welcomeName');
+    const dateEl = document.getElementById('welcomeDate');
+    if (nameEl) {
+        const stored = localStorage.getItem('adminName') || localStorage.getItem('userName') || 'Admin';
+        nameEl.textContent = `Welcome, ${stored}!`;
+    }
+    if (dateEl) {
+        const now = new Date();
+        dateEl.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+}
+
+async function populateStatsFromRequests(requests) {
+    const totalEl = document.getElementById('statTotal');
+    const reqEl = document.getElementById('statRequested');
+    const procEl = document.getElementById('statProcessing');
+    const relEl = document.getElementById('statReleased');
+    if (!totalEl || !reqEl || !procEl || !relEl) return;
+
+    if (!requests || requests.length === 0) {
+        totalEl.textContent = 0;
+        reqEl.textContent = 0;
+        procEl.textContent = 0;
+        relEl.textContent = 0;
+        return;
+    }
+
+    let requested = 0;
+    let processing = 0;
+    let released = 0;
+
+    requests.forEach(r => {
+        const status = (r.status || '').toLowerCase();
+        if (status.includes('processing')) processing += 1;
+        else if (status.includes('for release') || status.includes('completed') || status.includes('released')) released += 1;
+        else if (status.includes('requested') || status.includes('pending')) requested += 1;
+    });
+
+    const total = requests.length;
+    totalEl.textContent = total;
+    reqEl.textContent = requested;
+    procEl.textContent = processing;
+    relEl.textContent = released;
+}
+
+async function populateDashboardData(requests) {
+    const priorityBody = document.getElementById('priorityTableBody');
+    const trendBars = document.getElementById('trendBars');
+    const recentBody = document.getElementById('recentRequestsBody');
+    if (!priorityBody && !trendBars && !recentBody) return;
+
+    try {
+        const data = requests || await fetchDashboardRequests();
+        renderPriority(priorityBody, data);
+        renderTrend(trendBars, data);
+        renderRecent(recentBody, data);
+    } catch (err) {
+        console.error('Dashboard data load error:', err);
+        if (priorityBody) priorityBody.innerHTML = '<tr><td colspan="2">Failed to load</td></tr>';
+        if (trendBars) trendBars.innerHTML = '<div class="bar" style="height: 12px"></div>';
+        if (recentBody) recentBody.innerHTML = '<tr><td colspan="3">Failed to load</td></tr>';
+    }
+}
+
+async function fetchDashboardRequests() {
+    try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch(`${API_BASE}/requests/admin/queue?page=1&limit=300`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to load requests');
+        const payload = await response.json();
+        const requests = normalizeRequests(extractRequestList(payload));
+        return requests;
+    } catch (err) {
+        console.error('Dashboard fetch error:', err);
+        return [];
+    }
+}
+
+function renderPriority(tbody, requests) {
+    if (!tbody) return;
+    if (!requests || requests.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2">No data</td></tr>';
+        return;
+    }
+
+    const counts = {};
+    requests.forEach(r => {
+        const name = r.template_name || r.document_name || r.document_templates?.document_name || 'Unknown';
+        counts[name] = (counts[name] || 0) + 1;
+    });
+
+    const rows = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([name, count]) => `<tr><td>${name}</td><td>${count} pending</td></tr>`)
+        .join('');
+
+    tbody.innerHTML = rows || '<tr><td colspan="2">No data</td></tr>';
+}
+
+function renderTrend(container, requests) {
+    if (!container) return;
+    if (!requests || requests.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+
+    const today = new Date();
+    const days = [];
+    for (let i = 7; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        days.push(key);
+    }
+
+    const counts = days.reduce((acc, key) => ({ ...acc, [key]: 0 }), {});
+    requests.forEach(r => {
+        if (!r.created_at) return;
+        const key = new Date(r.created_at).toISOString().slice(0, 10);
+        if (counts[key] !== undefined) counts[key] += 1;
+    });
+
+    const max = Math.max(1, ...Object.values(counts));
+    container.innerHTML = Object.values(counts)
+        .map(c => {
+            const h = Math.max(8, Math.round((c / max) * 120));
+            return `<div class="bar" style="height: ${h}px" title="${c} requests"></div>`;
+        })
+        .join('');
+}
+
+function renderRecent(tbody, requests) {
+    if (!tbody) return;
+    if (!requests || requests.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3">No recent requests</td></tr>';
+        return;
+    }
+
+    const sorted = [...requests].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const recent = sorted.slice(0, 8);
+    tbody.innerHTML = recent.map(r => {
+        const name = r.student_name || r.student_full_name || r.studentEmail || 'N/A';
+        const doc = r.template_name || r.document_name || r.document_templates?.document_name || 'N/A';
+        const program = r.program || r.course || r.student_program || r.student_course || 'N/A';
+        return `<tr><td>${name}</td><td>${doc}</td><td>${program}</td></tr>`;
+    }).join('');
+}
+
+function safeParse(value) {
+    if (!value) return null;
+    try { return JSON.parse(value); } catch (_e) { return null; }
+}
+
+function extractRequestList(payload) {
+    if (!payload || typeof payload !== 'object') return [];
+    const candidates = [
+        payload.requests,
+        payload.data?.requests,
+        payload.data?.data?.requests,
+        payload.data,
+        payload.queue
+    ];
+    return candidates.find(Array.isArray) || [];
+}
+
+function normalizeRequest(raw) {
+    if (!raw || typeof raw !== 'object') return null;
+    const user = raw.users || raw.user || {};
+    const doc = raw.document_templates || raw.documentTemplate || {};
+    const receipt = Array.isArray(raw.payment_receipts) ? raw.payment_receipts[0] : raw.payment_receipts || {};
+
+    const studentName = raw.student_name
+        || raw.student_full_name
+        || [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
+
+    return {
+        ...raw,
+        student_name: studentName || raw.studentEmail || 'N/A',
+        student_email: raw.student_email || user.email || 'N/A',
+        student_id: raw.student_id || user.student_number || user.id || 'N/A',
+        template_name: raw.template_name || raw.document_name || doc.document_name || doc.document_code || 'Unknown',
+        document_name: raw.document_name || doc.document_name || 'Unknown',
+        receipt_status: raw.receipt_status || receipt?.verification_status || 'Pending',
+        program: raw.program || raw.course || raw.student_program || raw.student_course || user.program || user.course || 'N/A'
+    };
+}
+
+function normalizeRequests(list) {
+    if (!Array.isArray(list)) return [];
+    return list.map(normalizeRequest).filter(Boolean);
 }
 
 // Load Statistics
@@ -163,12 +460,17 @@ async function loadRequestQueue() {
 
         if (!response.ok) throw new Error('Failed to load request queue');
         
-        const data = await response.json();
-        allRequests = data.data.requests || [];
-        const totalPages = Math.ceil((data.data.total || 0) / pageSize);
+        const payload = await response.json();
+        const rawRequests = extractRequestList(payload);
+        allRequests = normalizeRequests(rawRequests);
 
-        document.getElementById('totalCount').textContent = data.data.total || 0;
-        document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages || 1}`;
+        const totalItems = payload.pagination?.totalItems
+            || payload.data?.total
+            || (Array.isArray(rawRequests) ? rawRequests.length : 0);
+        const totalPages = Math.max(1, Math.ceil((totalItems || 0) / pageSize));
+
+        document.getElementById('totalCount').textContent = totalItems || 0;
+        document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
         
         document.getElementById('prevPageBtn').disabled = currentPage === 1;
         document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
@@ -239,8 +541,14 @@ async function openDetailsModal(requestId) {
 
         if (!response.ok) throw new Error('Failed to load request details');
         
-        const data = await response.json();
-        const request = data.data;
+        const payload = await response.json();
+        const request = normalizeRequest(
+            payload.request
+            || payload.data?.request
+            || (payload.data && !payload.data.requests ? payload.data : null)
+        );
+
+        if (!request) throw new Error('Missing request payload');
 
         document.getElementById('detailRefNum').textContent = request.reference_number;
         document.getElementById('detailStatus').textContent = request.status;
@@ -274,8 +582,11 @@ async function loadStatusHistory(requestId) {
 
         if (!response.ok) throw new Error('Failed to load status history');
         
-        const data = await response.json();
-        const history = data.data.status_history || [];
+        const payload = await response.json();
+        const history = payload.status_history
+            || payload.data?.status_history
+            || payload.request?.status_history
+            || [];
 
         const historyHtml = history.length > 0 ?
             history.map(item => `
@@ -455,6 +766,7 @@ async function rejectReceipt() {
 
 // Format Status Class
 function formatStatusClass(status) {
+    if (!status) return 'status-unknown';
     return status.toLowerCase().replace(/\s+/g, '-');
 }
 
@@ -469,6 +781,218 @@ function formatDate(dateString) {
         hour: '2-digit',
         minute: '2-digit'
     });
+}
+
+// Calendar Setup (mirrors student dashboard)
+function initCalendar() {
+    const prevBtn = document.getElementById('prevMonth');
+    const nextBtn = document.getElementById('nextMonth');
+    const daysContainer = document.getElementById('calendarDays');
+    const header = document.getElementById('currentMonthYear');
+
+    if (!prevBtn || !nextBtn || !daysContainer || !header) return;
+
+    prevBtn.addEventListener('click', () => changeMonth(-1));
+    nextBtn.addEventListener('click', () => changeMonth(1));
+    generateCalendar();
+
+    document.addEventListener('click', (e) => {
+        const infoEl = document.getElementById('calendarInfo');
+        const calendarCard = document.querySelector('.calendar-card');
+        if (!infoEl || !calendarCard) return;
+        const clickedInside = calendarCard.contains(e.target);
+        if (!clickedInside) hideCalendarInfo();
+    });
+}
+
+function generateCalendar() {
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+
+    const header = document.getElementById('currentMonthYear');
+    const daysContainer = document.getElementById('calendarDays');
+    if (!header || !daysContainer) return;
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    header.textContent = `${monthNames[month]} ${year}`;
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const today = new Date();
+    const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+    const todayDate = today.getDate();
+
+    daysContainer.innerHTML = '';
+
+    for (let i = 0; i < firstDay; i++) {
+        const emptyDay = document.createElement('div');
+        emptyDay.className = 'calendar-day empty';
+        daysContainer.appendChild(emptyDay);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayCell = document.createElement('div');
+        dayCell.className = 'calendar-day';
+        dayCell.textContent = day;
+
+        if (isCurrentMonth && day === todayDate) {
+            dayCell.classList.add('today');
+        }
+
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const event = calendarEvents.find(e => e.date === dateStr);
+        if (event) {
+            dayCell.classList.add('has-event');
+            dayCell.title = event.title;
+        }
+
+        if (selectedCalendarDate === dateStr) {
+            dayCell.classList.add('selected');
+        }
+
+        dayCell.addEventListener('click', () => handleCalendarDayClick(dateStr, dayCell));
+
+        daysContainer.appendChild(dayCell);
+    }
+}
+
+function changeMonth(direction) {
+    calendarDate.setMonth(calendarDate.getMonth() + direction);
+    selectedCalendarDate = null;
+    highlightSelectedDay(null);
+    hideCalendarInfo();
+    generateCalendar();
+}
+
+async function handleCalendarDayClick(dateStr, dayCell) {
+    highlightSelectedDay(dayCell);
+    selectedCalendarDate = dateStr;
+
+    if (!dashboardRequestsLoaded) {
+        renderCalendarInfo(dateStr, null, 'loading');
+        try {
+            dashboardRequests = await fetchDashboardRequests();
+            dashboardRequestsLoaded = true;
+        } catch (_e) {
+            renderCalendarInfo(dateStr, { count: 0, topDoc: null }, 'error');
+            return;
+        }
+    }
+
+    const summary = summarizeRequestsForDate(dateStr, dashboardRequests);
+    renderCalendarInfo(dateStr, summary, 'ready');
+}
+
+function highlightSelectedDay(dayCell) {
+    const container = document.getElementById('calendarDays');
+    if (!container) return;
+    container.querySelectorAll('.calendar-day.selected').forEach(el => el.classList.remove('selected'));
+    if (dayCell) dayCell.classList.add('selected');
+}
+
+function summarizeRequestsForDate(dateStr, requests) {
+    if (!Array.isArray(requests) || requests.length === 0) {
+        return { count: 0, topDoc: null };
+    }
+
+    const matches = requests.filter(r => getDateKey(r.created_at) === dateStr);
+    if (matches.length === 0) return { count: 0, topDoc: null };
+
+    const docCounts = matches.reduce((acc, r) => {
+        const name = r.template_name || r.document_name || 'Unknown';
+        acc[name] = (acc[name] || 0) + 1;
+        return acc;
+    }, {});
+
+    const topEntry = Object.entries(docCounts).sort((a, b) => b[1] - a[1])[0];
+    return {
+        count: matches.length,
+        topDoc: topEntry ? { name: topEntry[0], count: topEntry[1] } : null
+    };
+}
+
+function renderCalendarInfo(dateStr, summary, state = 'ready') {
+    const infoEl = document.getElementById('calendarInfo');
+    if (!infoEl) return;
+
+    infoEl.classList.add('active');
+
+    const parsed = new Date(`${dateStr}T00:00:00`);
+    const friendlyDate = isNaN(parsed)
+        ? dateStr
+        : parsed.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+    if (state === 'loading') {
+        infoEl.innerHTML = `
+            <div class="calendar-info__header">
+                <span class="calendar-info__label">Selected Day</span>
+                <span class="calendar-info__date">${friendlyDate}</span>
+            </div>
+            <div class="calendar-info__body">
+                <div class="calendar-info__pill">Loading requests...</div>
+            </div>
+        `;
+        return;
+    }
+
+    if (state === 'error') {
+        infoEl.innerHTML = `
+            <div class="calendar-info__header">
+                <span class="calendar-info__label">Selected Day</span>
+                <span class="calendar-info__date">${friendlyDate}</span>
+            </div>
+            <div class="calendar-info__body empty">
+                <div class="calendar-info__pill muted">Unable to load data</div>
+                <p class="calendar-info__note">Try again or refresh the page.</p>
+            </div>
+        `;
+        return;
+    }
+
+    if (!summary || summary.count === 0) {
+        infoEl.innerHTML = `
+            <div class="calendar-info__header">
+                <span class="calendar-info__label">Selected Day</span>
+                <span class="calendar-info__date">${friendlyDate}</span>
+            </div>
+            <div class="calendar-info__body empty">
+                <div class="calendar-info__pill muted">No requests</div>
+                <p class="calendar-info__note">No requests recorded for this day.</p>
+            </div>
+        `;
+        return;
+    }
+
+    const { count, topDoc } = summary;
+    const topDocMarkup = topDoc
+        ? `<div class="calendar-info__pill accent">Top: ${topDoc.name} (${topDoc.count})</div>`
+        : '';
+
+    infoEl.innerHTML = `
+        <div class="calendar-info__header">
+            <span class="calendar-info__label">Selected Day</span>
+            <span class="calendar-info__date">${friendlyDate}</span>
+        </div>
+        <div class="calendar-info__body">
+            <div class="calendar-info__pill">${count} request${count === 1 ? '' : 's'}</div>
+            ${topDocMarkup}
+        </div>
+    `;
+}
+
+function hideCalendarInfo() {
+    const infoEl = document.getElementById('calendarInfo');
+    if (!infoEl) return;
+    infoEl.classList.remove('active');
+    infoEl.innerHTML = '';
+}
+
+function getDateKey(dateValue) {
+    if (!dateValue) return null;
+    const parsed = new Date(dateValue);
+    if (isNaN(parsed)) return null;
+    return parsed.toISOString().slice(0, 10);
 }
 
 // Debounce Function
@@ -500,3 +1024,126 @@ function logout() {
     localStorage.removeItem('authToken');
     window.location.href = 'login.html';
 }
+
+// ===== NOTIFICATIONS SYSTEM =====
+
+// Initialize notifications polling
+function initNotifications() {
+    console.log('Initializing notifications system...');
+    loadNotifications();
+    
+    // Poll for new notifications every 5 seconds
+    notificationPollInterval = setInterval(() => {
+        loadNotifications();
+    }, 5000);
+}
+
+// Load notifications from API
+async function loadNotifications() {
+    try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+
+        const response = await fetch(`${API_BASE}/admin/notifications`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            console.error('Failed to load notifications:', response.status);
+            return;
+        }
+
+        const data = await response.json();
+        if (data.success && Array.isArray(data.notifications)) {
+            updateNotificationBadge(data.notifications);
+            
+            // Check if there are new notifications since last time
+            if (data.notifications.length > lastNotificationCount) {
+                const newCount = data.notifications.length - lastNotificationCount;
+                if (newCount > 0 && lastNotificationCount > 0) {
+                    // Only show toast if this isn't the initial load
+                    showNewRequestNotification(data.notifications[0]);
+                }
+                lastNotificationCount = data.notifications.length;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+    }
+}
+
+// Update the notification badge
+function updateNotificationBadge(notifications) {
+    const badge = document.getElementById('notifBadge');
+    const notifList = document.getElementById('notifList');
+    
+    if (!badge || !notifList) return;
+
+    const count = notifications.length;
+    
+    // Show/hide badge
+    if (count > 0) {
+        badge.style.display = 'block';
+        badge.textContent = count > 99 ? '99+' : count;
+    } else {
+        badge.style.display = 'none';
+    }
+
+    // Update notification list
+    if (count === 0) {
+        notifList.innerHTML = '<div class="notif-empty">No new requests</div>';
+    } else {
+        notifList.innerHTML = notifications.map(notif => {
+            const studentName = notif.users
+                ? `${notif.users.first_name || ''} ${notif.users.last_name || ''}`.trim()
+                : 'Unknown Student';
+            const docName = notif.document_templates?.document_name || 'Unknown Document';
+            const createdAt = new Date(notif.created_at).toLocaleTimeString();
+            
+            return `
+                <div class="notif-item">
+                    <div class="notif-content">
+                        <strong>${studentName}</strong>
+                        <p>${docName}</p>
+                        <small>Ref: ${notif.reference_number}</small>
+                        <small style="display: block; color: #999;">${createdAt}</small>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+}
+
+// Show toast notification for new request
+function showNewRequestNotification(notification) {
+    const studentName = notification.users
+        ? `${notification.users.first_name || ''} ${notification.users.last_name || ''}`.trim()
+        : 'A student';
+    const docName = notification.document_templates?.document_name || 'a document';
+    
+    const message = `📨 New request: ${studentName} requested ${docName}`;
+    showToast(message, 'success');
+    
+    console.log('New request notification:', notification.reference_number);
+}
+
+// Toggle notifications dropdown
+function toggleNotifications() {
+    const dropdown = document.getElementById('notificationsDropdown');
+    if (dropdown) {
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+// Mark all notifications as read (clear badge)
+function markAllAsRead() {
+    const badge = document.getElementById('notifBadge');
+    if (badge) {
+        badge.style.display = 'none';
+    }
+}
+

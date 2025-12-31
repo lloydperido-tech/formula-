@@ -1,8 +1,9 @@
+/* --- 1. Global & Font Styles --- */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 
 body {
@@ -10,112 +11,137 @@ body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background-color: #f3eedf;
+  background-color: #f9f4e3;
 }
 
-/* Sidebar Navigation */
+h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  color: #444;
+}
+
+/* --- Left Navigation Bar --- */
 .leftnav {
   width: 280px;
   height: 100vh;
-  background: #27512b;
+  background-color: #27512b;
+  padding: 1.5rem;
+  color: #f9f4e3;
   display: flex;
   flex-direction: column;
-  padding: 20px 0;
   flex-shrink: 0;
+  position: relative;
+  z-index: 1100; /* Ensure sidebar stays above dropdown overlays */
 }
 
-.logo {
+/* --- Logo Section in Sidebar --- */
+
+.leftnav .logo {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 0 24px 30px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 30px;
+  gap: 0;
+  margin-left: -8px;
+  margin-bottom: 2.5rem;
   text-decoration: none;
+  color: #f9f4e3;
 }
 
-.logo img {
-  width: 50px;
-  height: 50px;
+.leftnav .logo img {
+  max-width: 80px;
+  height: auto;
 }
 
-.logo-text {
+.leftnav .logo-text {
   display: flex;
   flex-direction: column;
-  color: white;
 }
 
-.logo-text strong {
-  font-size: 18px;
-  font-weight: 700;
+.leftnav .logo-text strong {
+  font-size: 1.1rem;
+  font-weight: bold;
 }
 
-.logo-text span {
-  font-size: 12px;
-  opacity: 0.8;
+.leftnav .logo-text span {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: #f9f4e3;
+  white-space: nowrap;
 }
 
-.nav-links {
-  list-style: none;
-  padding: 0 12px;
-  flex-grow: 1;
+.leftnav .nav-links {
+  list-style-type: none;
 }
 
-.nav-item {
-  margin-bottom: 6px;
-}
-
-.nav-link {
+.leftnav .nav-link {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px 18px;
-  color: rgba(255, 255, 255, 0.85);
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.5rem;
   text-decoration: none;
-  border-radius: 10px;
-  transition: all 0.2s ease;
-  font-size: 15px;
-  background: none;
-  border: none;
-  width: 100%;
-  cursor: pointer;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  color: #f9f4e3;
 }
 
-.nav-link:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-.nav-link.active {
-  background: #0f5d27;
-  color: white;
-  font-weight: 600;
-}
-
-.nav-link i {
+.leftnav .nav-link i {
   width: 20px;
-  text-align: center;
-  font-size: 18px;
+  margin-right: 1rem;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  color: #f9f4e3;
 }
+
+.leftnav .nav-link.active,
+.leftnav .nav-link:hover {
+  background-color: #9cb89dd3;
+}
+
+.leftnav .nav-link.active i,
+.leftnav .nav-link:hover i {
+  color: #ffca05;
+}
+/* --- END HOVER/ACTIVE EFFECT --- */
 
 .nav-logout {
+  margin-top: auto;
   padding: 0 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 20px;
-  margin-top: 20px;
 }
 
 .nav-logout button {
   width: 100%;
   text-align: left;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  pointer-events: auto; /* Explicitly allow clicks */
+  cursor: pointer;
 }
 
-/* Main Content Area */
+.nav-logout button:hover {
+  background-color: #9cb89dd3;
+  cursor: pointer;
+}
+
+/* --- 3. Main Page Content (Right Side) --- */
 .page-content {
-  flex-grow: 1;
+  flex: 1;
   height: 100vh;
   overflow-y: auto;
   padding: 30px 40px;
+  background-color: #f3eedf;
 }
 
 .topbar {
@@ -128,6 +154,7 @@ body {
 }
 
 .topbar h1 {
+  margin: 0;
   font-weight: 700;
   font-size: 1.75rem;
   color: #27231b;
@@ -140,21 +167,20 @@ body {
   gap: 1.5rem;
 }
 
-.user-profile button {
+.user-profile .notifs,
+.user-profile .user {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.2rem;
-  color: #555;
-  transition: color 0.2s;
-}
-
-.user-profile button:hover {
-  color: #0f5d27;
-}
-
-.user-profile .notifs {
+  font-size: 1.5rem;
+  color: #222;
   position: relative;
+}
+
+.user-profile .username {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #222;
 }
 
 .notif-badge {
@@ -172,12 +198,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.username {
-  font-weight: 600;
-  color: #27231b;
-  font-size: 15px;
 }
 
 /* Notification Dropdown */

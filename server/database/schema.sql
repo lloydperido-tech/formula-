@@ -130,3 +130,17 @@ CREATE TABLE IF NOT EXISTS deletion_log (
   deleted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   reason VARCHAR(255) DEFAULT '90-day retention policy'
 );
+
+-- Contact messages from visitors
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  full_name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  status ENUM('new', 'read', 'responded') DEFAULT 'new',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_email (email),
+  INDEX idx_status (status),
+  INDEX idx_created_at (created_at)
+);

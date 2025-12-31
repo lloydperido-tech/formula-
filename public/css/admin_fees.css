@@ -1,0 +1,452 @@
+/* Admin Document Fees (based on student fees layout) */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+body {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #f9f4e3;
+}
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+h3 {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  color: #444;
+}
+
+.leftnav {
+  width: 280px;
+  height: 100vh;
+  background-color: #27512b;
+  padding: 1.5rem;
+  color: #f9f4e3;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.leftnav .logo {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-left: -8px;
+  margin-bottom: 2.5rem;
+  text-decoration: none;
+  color: #fff;
+}
+
+.leftnav .logo img {
+  max-width: 80px;
+  height: auto;
+}
+
+.leftnav .logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.leftnav .logo-text strong {
+  font-size: 1.1rem;
+  font-weight: bold;
+  line-height: 1.1;
+  margin-bottom: 0.1rem;
+}
+
+.leftnav .logo-text span {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: #d1e2d3;
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+.leftnav .nav-links {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.leftnav .nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.45rem;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  color: #f9f4e3;
+}
+
+.leftnav .nav-link i {
+  width: 20px;
+  margin-right: 1rem;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  color: #fff;
+}
+
+.leftnav .nav-link.active,
+.leftnav .nav-link:hover {
+  background-color: #9cb89dd3;
+  color: #f9f4e3;
+}
+
+.leftnav .nav-link.active i,
+.leftnav .nav-link:hover i {
+  color: #f7d43f;
+}
+
+.nav-logout {
+  margin-top: auto;
+  padding: 0 12px;
+}
+
+.nav-logout button {
+  width: 100%;
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+
+.nav-logout button:hover {
+  background-color: #9cb89dd3;
+  cursor: pointer;
+}
+
+.page-content {
+  flex: 1;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 30px 40px;
+  background-color: #f3eedf;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid #e6e3d8;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1.75rem;
+  color: #27231b;
+  letter-spacing: -0.02em;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-profile .notifs,
+.user-profile .user {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #222;
+  position: relative;
+}
+
+.user-profile .username {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #222;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #dc2626;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notifications-dropdown {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  width: 360px;
+  max-height: 480px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notif-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e6e3d8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fafaf8;
+}
+
+.notif-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #27231b;
+}
+
+.mark-read-btn {
+  background: none;
+  border: none;
+  color: #0f5d27;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.mark-read-btn:hover {
+  background: #e8f5ec;
+}
+
+.notif-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notif-item {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f0eee9;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.notif-item:hover {
+  background: #f7f5ef;
+}
+
+.notif-item p {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  color: #2f281f;
+}
+
+.notif-time {
+  font-size: 12px;
+  color: #6b6558;
+}
+
+.notif-empty {
+  padding: 30px 20px;
+  text-align: center;
+  color: #6b6558;
+  font-size: 14px;
+}
+
+.fees-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+  border: 1px solid #ece6d5;
+}
+
+.fees-info h2 {
+  margin-bottom: 12px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6b6558;
+  margin-bottom: 8px;
+}
+
+.intro-text {
+  color: #5c5240;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.fees-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.request-now-btn {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #0f5d27, #178b3a);
+  color: white;
+  padding: 12px 18px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: 0;
+  border: 1px solid #0f5d27;
+  box-shadow: 0 10px 24px rgba(15, 93, 39, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  white-space: nowrap;
+}
+
+.request-now-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(15, 93, 39, 0.28);
+  filter: brightness(1.02);
+}
+
+.fee-table-wrapper {
+  overflow-x: auto;
+  margin-top: 10px;
+}
+
+.fees-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.fees-table thead {
+  background: #f5f0e4;
+}
+
+.fees-table th,
+.fees-table td {
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid #efe8d9;
+}
+
+.fees-table th {
+  font-weight: 700;
+  color: #2f281f;
+}
+
+.fees-table td {
+  color: #3b3428;
+}
+
+.fees-table tr:hover td {
+  background: #faf7f0;
+}
+
+.loading-row {
+  text-align: center;
+  padding: 20px;
+  color: #6b6558;
+}
+
+.fees-sidebar .card + .card {
+  margin-top: 16px;
+}
+
+.notes-list,
+.payment-methods {
+  list-style: disc inside;
+  color: #4a4236;
+  line-height: 1.6;
+}
+
+.contact-link {
+  color: #0f5d27;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.contact-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1024px) {
+  .fees-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-content {
+    padding: 24px;
+  }
+
+  .fees-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .request-now-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    flex-direction: column;
+  }
+
+  .leftnav {
+    width: 100%;
+    height: auto;
+  }
+}

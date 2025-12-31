@@ -51,7 +51,7 @@ CREATE TABLE requests (
   purpose TEXT,
   form_data JSONB,
   total_amount DECIMAL(10,2) NOT NULL,
-  status VARCHAR(50) DEFAULT 'Pending Payment' CHECK (status IN ('Pending Payment', 'Payment Submitted', 'Payment Verified', 'Processing', 'For Release', 'Completed', 'Cancelled')),
+  status VARCHAR(50) DEFAULT 'Requested' CHECK (status IN ('Requested', 'Verifying', 'Processing', 'For Release', 'Completed', 'Cancelled')),
   notes TEXT,
   payment_verified_at TIMESTAMP WITH TIME ZONE,
   document_generated_at TIMESTAMP WITH TIME ZONE,
@@ -163,3 +163,14 @@ CREATE POLICY "Students can view own requests" ON requests
 
 -- More policies can be added as needed for frontend direct access
 -- For now, backend with service role key will handle all operations
+
+-- Contact messages table
+CREATE TABLE contact_messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  full_name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  status VARCHAR(20) DEFAULT 'new' CHECK (status IN ('new', 'read', 'responded')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);

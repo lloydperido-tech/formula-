@@ -110,7 +110,7 @@
       const googleEmail = document.getElementById('googleEmail');
       const googleModalError = document.getElementById('googleModalError');
 
-      const API_BASE = 'http://localhost:3001/api';
+      const API_BASE = 'http://localhost:3000/api';
 
       accountChips.forEach((chip) => {
         chip.addEventListener('click', () => {
@@ -172,7 +172,7 @@
             program: data.user.program,
             yearLevel: data.user.yearLevel,
             contactNumber: '',
-            address: ''
+            completeAddress: data.user.address || ''
           };
           localStorage.setItem('userInfo', JSON.stringify(userInfo));
 
@@ -251,7 +251,7 @@
             program: data.user.program,
             yearLevel: data.user.yearLevel,
             contactNumber: '',
-            address: ''
+            completeAddress: data.user.address || ''
           };
           localStorage.setItem('userInfo', JSON.stringify(userInfo));
           

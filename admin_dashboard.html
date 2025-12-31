@@ -1,162 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - CvSU DRS</title>
-    <link rel="stylesheet" href="public/css/admin_dashboard.css">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin Dashboard - CvSU DRS</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+        <link rel="stylesheet" href="public/css/admin_dashboard.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <div class="logo-section">
-                    <img src="public/assets/logo/outlined-logo.svg" alt="CvSU DRS" class="header-logo" />
-                    <div class="title-group">
-                        <h1>CvSU DRS Admin</h1>
-                        <p class="subtitle">Document Request Management</p>
-                    </div>
+        <nav class="leftnav">
+            <a href="admin_dashboard.html" class="logo">
+                <img src="public/assets/logo/c_logoo.svg" alt="CvSU Logo" />
+                <div class="logo-text">
+                    <strong>CvSU - DRS</strong>
+                    <span>Admin Portal</span>
                 </div>
-                <div class="header-actions">
-                    <div class="user-info">
-                        <span id="adminName">Loading...</span>
-                        <button id="logoutBtn" class="logout-btn">
-                          <i class="fa-solid fa-sign-out"></i>
-                          Logout
-                        </button>
-                    </div>
-                </div>
+            </a>
+
+            <ul class="nav-links">
+                <li class="nav-item">
+                    <a href="admin_dashboard.html" class="nav-link active">
+                        <i class="fa-solid fa-star"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="admin_manage_requests.html" class="nav-link">
+                        <i class="fa-solid fa-star"></i>
+                        <span>Manage Requests</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="admin_fees.html" class="nav-link">
+                        <i class="fa-solid fa-star"></i>
+                        <span>Document Fees</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="nav-logout">
+                <button onclick="logout()" class="nav-link">
+                    <i class="fa-solid fa-sign-out"></i>
+                    <span>Logout</span>
+                </button>
             </div>
-        </header>
+        </nav>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Statistics Cards -->
-            <section class="stats-section">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon pending">PP</div>
-                        <div class="stat-info">
-                            <p class="stat-label">Pending Payment</p>
-                            <p class="stat-value" id="statPending">0</p>
+        <div class="page-content">
+            <header class="topbar">
+                <h1>Dashboard</h1>
+                <div class="user-profile">
+                    <button class="notifs" aria-label="View notifications" onclick="toggleNotifications()">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
+                    </button>
+                    <span class="username" id="adminName">Loading...</span>
+                </div>
+
+                <!-- Notifications Dropdown -->
+                <div class="notifications-dropdown" id="notificationsDropdown" style="display: none;">
+                    <div class="notif-header">
+                        <h4>Notifications</h4>
+                        <button onclick="markAllAsRead()" class="mark-read-btn">Mark all as read</button>
+                    </div>
+                    <div class="notif-list" id="notifList">
+                        <div class="notif-empty">No new notifications</div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <div class="dashboard-card">
+                    <div class="board-header">
+                        <div>
+                            <p class="welcome-text" id="welcomeName">Welcome, Admin!</p>
+                            <p class="date-text" id="welcomeDate">&nbsp;</p>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon submitted">PS</div>
-                        <div class="stat-info">
-                            <p class="stat-label">Payment Submitted</p>
-                            <p class="stat-value" id="statSubmitted">0</p>
+
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <div class="stat-label">Total Requests</div>
+                            <div class="stat-value" id="statTotal">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Requested</div>
+                            <div class="stat-value" id="statRequested">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Processing</div>
+                            <div class="stat-value" id="statProcessing">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Released</div>
+                            <div class="stat-value" id="statReleased">0</div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon verified">PV</div>
-                        <div class="stat-info">
-                            <p class="stat-label">Payment Verified</p>
-                            <p class="stat-value" id="statVerified">0</p>
+
+                    <div class="split-grid">
+                        <div class="panel">
+                            <div class="panel-title">Processing Priority Queue</div>
+                            <table class="priority-table">
+                                <thead>
+                                    <tr>
+                                        <th>Document Type</th>
+                                        <th>Task Load</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="priorityTableBody">
+                                    <tr><td colspan="2">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                            <div class="view-link">View All Requests</div>
+                        </div>
+
+                        <div class="panel">
+                            <div class="panel-title">Request Trend (Weekly)</div>
+                            <div class="bar-chart" id="trendBars"></div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon processing">PR</div>
-                        <div class="stat-info">
-                            <p class="stat-label">Processing</p>
-                            <p class="stat-value" id="statProcessing">0</p>
+
+                    <div class="panel-row">
+                        <div class="panel recent-panel">
+                            <div class="panel-title">Recent Requests</div>
+                            <div class="recent-table-wrapper">
+                                <table class="recent-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Document Type</th>
+                                            <th>Program</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentRequestsBody">
+                                        <tr><td colspan="3">Loading...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon ready">FR</div>
-                        <div class="stat-info">
-                            <p class="stat-label">For Release</p>
-                            <p class="stat-value" id="statReady">0</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon completed">CD</div>
-                        <div class="stat-info">
-                            <p class="stat-label">Completed</p>
-                            <p class="stat-value" id="statCompleted">0</p>
+
+                        <div class="panel calendar-card">
+                            <div class="calendar-header">
+                                <button class="calendar-nav" id="prevMonth" aria-label="Previous month">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <h3 id="currentMonthYear">December 2025</h3>
+                                <button class="calendar-nav" id="nextMonth" aria-label="Next month">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+
+                            <div class="calendar-container">
+                                <div class="calendar-headers">
+                                    <div class="calendar-day-header">Sun</div>
+                                    <div class="calendar-day-header">Mon</div>
+                                    <div class="calendar-day-header">Tue</div>
+                                    <div class="calendar-day-header">Wed</div>
+                                    <div class="calendar-day-header">Thu</div>
+                                    <div class="calendar-day-header">Fri</div>
+                                    <div class="calendar-day-header">Sat</div>
+                                </div>
+                                <div class="calendar-grid" id="calendarDays"></div>
+                            </div>
+
+                            <div class="calendar-legend">
+                                <div class="legend-item">
+                                    <span class="legend-dot today"></span>
+                                    <span>Today</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-dot event"></span>
+                                    <span>Event</span>
+                                </div>
+                            </div>
+
+                            <div class="calendar-info" id="calendarInfo" aria-live="polite"></div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </main>
+        </div>
 
-            <!-- Filters & Search -->
-            <section class="filters-section">
-                <div class="filter-group">
-                    <div class="search-box">
-                        <input 
-                            type="text" 
-                            id="searchInput" 
-                            placeholder="Search by reference number, student name, or email..."
-                            class="search-input"
-                        >
-                        <span class="search-icon">Search</span>
-                    </div>
-                    <select id="statusFilter" class="filter-select">
-                        <option value="">All Status</option>
-                        <option value="Pending Payment">Pending Payment</option>
-                        <option value="Payment Submitted">Payment Submitted</option>
-                        <option value="Payment Verified">Payment Verified</option>
-                        <option value="Processing">Processing</option>
-                        <option value="For Release">For Release</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
-                    </select>
-                    <select id="dateFilter" class="filter-select">
-                        <option value="">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                        <option value="custom">Custom Range</option>
-                    </select>
-                    <button id="resetFiltersBtn" class="btn-secondary">Reset Filters</button>
-                </div>
-            </section>
-
-            <!-- Request Queue Table -->
-            <section class="queue-section">
-                <div class="section-header">
-                    <h2>Request Queue</h2>
-                    <div class="header-actions">
-                        <span class="total-count">Total: <span id="totalCount">0</span></span>
-                        <button id="refreshBtn" class="btn-refresh">Refresh</button>
-                    </div>
-                </div>
-
-                <div class="table-wrapper">
-                    <table class="queue-table">
-                        <thead>
-                            <tr>
-                                <th>Reference #</th>
-                                <th>Student Name</th>
-                                <th>Document</th>
-                                <th>Quantity</th>
-                                <th>Total Amount</th>
-                                <th>Status</th>
-                                <th>Receipt</th>
-                                <th>Submitted</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="queueTableBody">
-                            <tr class="loading-row">
-                                <td colspan="9" class="loading-message">Loading requests...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div class="pagination">
-                    <button id="prevPageBtn" class="btn-pagination">← Previous</button>
-                    <span id="pageInfo" class="page-info">Page 1</span>
-                    <button id="nextPageBtn" class="btn-pagination">Next →</button>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- Status Update Modal -->
+        <!-- Status Update Modal -->
     <div id="statusModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -330,6 +355,29 @@
             </div>
         </div>
     </div>
+
+    <script>
+      function toggleNotifications() {
+        const dropdown = document.getElementById('notificationsDropdown');
+        if (!dropdown) return;
+        dropdown.style.display = dropdown.style.display === 'none' || dropdown.style.display === '' ? 'block' : 'none';
+      }
+
+      function markAllAsRead() {
+        const badge = document.getElementById('notifBadge');
+        if (badge) badge.style.display = 'none';
+        document.querySelectorAll('.notif-item').forEach(item => item.classList.add('read'));
+      }
+
+      document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('notificationsDropdown');
+        const notifBtn = document.querySelector('.notifs');
+        if (!dropdown || !notifBtn) return;
+        if (!dropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+          dropdown.style.display = 'none';
+        }
+      });
+    </script>
 
     <script src="public/js/admin_dashboard.js"></script>
 </body>

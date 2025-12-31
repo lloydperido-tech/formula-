@@ -1,53 +1,138 @@
 // Student Tracking Page JavaScript
+console.log('🚀 s_track.js loaded - Version 3.1 - ' + new Date().toISOString());
+
 const API_BASE = 'http://localhost:3000/api';
 let studentRequests = [];
 let currentSelectedRequest = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Page loaded, starting initialization');
+    
+    // Test API connection first
+    testAPIConnection();
+    
     loadStudentRequests();
     setupEventListeners();
     updateUsername();
 });
 
+// Test API Connection
+async function testAPIConnection() {
+    try {
+        const response = await fetch(`${API_BASE}/health`);
+        const data = await response.json();
+        console.log('✓ API Health Check:', data);
+    } catch (error) {
+        console.error('✗ API Health Check failed:', error);
+    }
+}
+
 // Setup Event Listeners
 function setupEventListeners() {
     // Search functionality
-    document.getElementById('track-input-card').addEventListener('input', debounce(filterRequests, 300));
+    const searchInput = document.getElementById('track-input-card');
+    const searchBtn = document.querySelector('.search-btn');
 
-    // Close details
-    document.querySelector('.close-details').addEventListener('click', closeDetails);
-    document.getElementById('closeDetailsBtn').addEventListener('click', closeDetails);
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(filterRequests, 300));
+    }
+    if (searchBtn) {
+        searchBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            filterRequests();
+        });
+    }
 
-    // Receipt file input
-    document.getElementById('receiptFile').addEventListener('change', handleFileSelection);
-    document.getElementById('submitReceiptBtn').addEventListener('click', submitReceipt);
-    document.getElementById('downloadReceiptBtn').addEventListener('click', downloadReceipt);
+    // Details/receipt controls (only if present)
+    const closeDetailBtn = document.querySelector('.close-details');
+    const closeDetailsFooterBtn = document.getElementById('closeDetailsBtn');
+    const receiptFile = document.getElementById('receiptFile');
+    const submitReceiptBtn = document.getElementById('submitReceiptBtn');
+    const downloadReceiptBtn = document.getElementById('downloadReceiptBtn');
+
+    if (closeDetailBtn) closeDetailBtn.addEventListener('click', closeDetails);
+    if (closeDetailsFooterBtn) closeDetailsFooterBtn.addEventListener('click', closeDetails);
+    if (receiptFile) receiptFile.addEventListener('change', handleFileSelection);
+    if (submitReceiptBtn) submitReceiptBtn.addEventListener('click', submitReceipt);
+    if (downloadReceiptBtn) downloadReceiptBtn.addEventListener('click', downloadReceipt);
+}
+
+// View Request Summary - Navigate to summary page
+function viewRequestSummary(requestId) {
+    window.location.href = `s_request_summary.html?id=${requestId}`;
 }
 
 // Load Student Requests
 async function loadStudentRequests() {
     try {
         const token = localStorage.getItem('authToken');
+        console.log('Token found:', !!token);
+        console.log('Token value:', token ? token.substring(0, 20) + '...' : 'none');
+        
         if (!token) {
+            console.log('No token found, redirecting to login');
             window.location.href = 'login.html';
             return;
         }
 
-        const response = await fetch(`${API_BASE}/requests`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const url = `${API_BASE}/requests`;
+        console.log('Fetching requests from:', url);
+        
+        // Create abort controller with 10 second timeout
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            signal: controller.signal
         });
 
-        if (!response.ok) throw new Error('Failed to load requests');
+        clearTimeout(timeoutId);
+
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        console.log('Response headers:', {
+            'Content-Type': response.headers.get('Content-Type'),
+            'Content-Length': response.headers.get('Content-Length')
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('API Error Response:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText
+            });
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
         
         const data = await response.json();
-        studentRequests = data.data || [];
+        console.log('Full API Response data:', data);
+        
+        if (!data.success) {
+            console.error('API returned success: false', data);
+            throw new Error(data.message || 'Failed to fetch requests');
+        }
+        
+        studentRequests = data.requests || [];
+        console.log('Student requests array:', studentRequests);
+        console.log('Number of requests:', studentRequests.length);
 
         renderRequestsTable();
     } catch (error) {
         console.error('Error loading requests:', error);
-        document.getElementById('requestsTableBody').innerHTML = 
-            '<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #d32f2f;">Failed to load requests. Please refresh the page.</td></tr>';
+        if (error.name === 'AbortError') {
+            document.getElementById('requestsTableBody').innerHTML = 
+                `<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #d32f2f;">Request timeout - Server may not be responding. Please refresh the page.</td></tr>`;
+        } else {
+            document.getElementById('requestsTableBody').innerHTML = 
+                `<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #d32f2f;">Error: ${error.message}</td></tr>`;
+        }
     }
 }
 
@@ -60,19 +145,25 @@ function renderRequestsTable() {
         return;
     }
 
-    tbody.innerHTML = studentRequests.map(request => `
-        <tr onclick="showRequestDetails('${request.id}')">
+    tbody.innerHTML = studentRequests.map(request => {
+        // Get document name from the nested object
+        const documentName = request.document_templates?.document_name || 'Unknown';
+        const statusClass = `status-${request.status.toLowerCase().replace(/\s+/g, '-')}`;
+        
+        return `
+        <tr class="${statusClass}" onclick="showRequestDetails('${request.id}')">
             <td>${request.reference_number}</td>
-            <td>${request.template_name || 'Unknown'}</td>
+            <td>${documentName}</td>
             <td>₱${(request.total_amount || 0).toFixed(2)}</td>
-            <td><span class="status-${request.status.toLowerCase().replace(/\s+/g, '-')}">${request.status}</span></td>
+            <td><span class="${statusClass}">${request.status}</span></td>
             <td>
-                <button class="action-btn" aria-label="View details" onclick="event.stopPropagation();">
+                <button class="action-btn" aria-label="View details" onclick="event.stopPropagation(); viewRequestSummary('${request.id}');">
                     <i class="fa-solid fa-eye"></i>
                 </button>
             </td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
 }
 
 // Filter Requests
@@ -82,7 +173,7 @@ function filterRequests() {
     
     const filtered = studentRequests.filter(request =>
         request.reference_number.toLowerCase().includes(searchTerm) ||
-        (request.template_name && request.template_name.toLowerCase().includes(searchTerm))
+        (request.document_templates?.document_name && request.document_templates.document_name.toLowerCase().includes(searchTerm))
     );
 
     if (filtered.length === 0) {
@@ -90,38 +181,59 @@ function filterRequests() {
         return;
     }
 
-    tbody.innerHTML = filtered.map(request => `
-        <tr onclick="showRequestDetails('${request.id}')">
+    tbody.innerHTML = filtered.map(request => {
+        const documentName = request.document_templates?.document_name || 'Unknown';
+        const statusClass = `status-${request.status.toLowerCase().replace(/\s+/g, '-')}`;
+        return `
+        <tr class="${statusClass}" onclick="showRequestDetails('${request.id}')">
             <td>${request.reference_number}</td>
-            <td>${request.template_name || 'Unknown'}</td>
+            <td>${documentName}</td>
             <td>₱${(request.total_amount || 0).toFixed(2)}</td>
-            <td><span class="status-${request.status.toLowerCase().replace(/\s+/g, '-')}">${request.status}</span></td>
+            <td><span class="${statusClass}">${request.status}</span></td>
             <td>
-                <button class="action-btn" aria-label="View details" onclick="event.stopPropagation();">
+                <button class="action-btn" aria-label="View details" onclick="event.stopPropagation(); viewRequestSummary('${request.id}');">
                     <i class="fa-solid fa-eye"></i>
                 </button>
             </td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
 }
 
 // Show Request Details
 async function showRequestDetails(requestId) {
+    console.log('🔵 showRequestDetails CALLED with requestId:', requestId);
+    console.log('Function is working!');
+    
     try {
         const token = localStorage.getItem('authToken');
+        console.log('Loading details for request:', requestId);
+        
         const response = await fetch(`${API_BASE}/requests/details/${requestId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (!response.ok) throw new Error('Failed to load request details');
+        console.log('Details response status:', response.status);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+            throw new Error(errorData.message || `Server error: ${response.status}`);
+        }
         
         const data = await response.json();
-        currentSelectedRequest = data.data;
+        console.log('Details loaded:', data);
+        currentSelectedRequest = data.request;
 
         // Populate basic details
+        const templateName = currentSelectedRequest.document_templates?.document_name || 
+                            currentSelectedRequest.template_name || 'Unknown';
+        const studentName = currentSelectedRequest.users ? 
+                           `${currentSelectedRequest.users.first_name} ${currentSelectedRequest.users.last_name}` :
+                           currentSelectedRequest.student_name || 'N/A';
+
         document.querySelector('.detail-ref').textContent = currentSelectedRequest.reference_number;
-        document.querySelector('.detail-student').textContent = currentSelectedRequest.student_name || 'N/A';
-        document.querySelector('.detail-type').textContent = currentSelectedRequest.template_name || 'Unknown';
+        document.querySelector('.detail-student').textContent = studentName;
+        document.querySelector('.detail-type').textContent = templateName;
         document.querySelector('.detail-amount').textContent = `₱${(currentSelectedRequest.total_amount || 0).toFixed(2)}`;
         document.querySelector('.detail-date').textContent = formatDate(currentSelectedRequest.created_at);
         document.querySelector('.detail-notes').textContent = currentSelectedRequest.purpose || 'No notes';
@@ -139,16 +251,15 @@ async function showRequestDetails(requestId) {
         document.querySelector('.details-card').removeAttribute('aria-hidden');
     } catch (error) {
         console.error('Error loading request details:', error);
-        alert('Failed to load request details');
+        alert(`Failed to load request details: ${error.message}`);
     }
 }
 
 // Render Status Progress
 function renderStatusProgress(currentStatus) {
     const statuses = [
-        'Pending Payment',
-        'Payment Submitted',
-        'Payment Verified',
+        'Requested',
+        'Verifying',
         'Processing',
         'For Release',
         'Completed'
@@ -183,6 +294,8 @@ function renderStatusHistory(history) {
 
 // Handle Payment Section
 function handlePaymentSection(request, requestId) {
+    console.log('📋 handlePaymentSection called:', { status: request.status, requestId });
+    
     const paymentSection = document.getElementById('paymentSection');
     const receiptStatusText = document.getElementById('receiptStatus');
     const receiptPreview = document.getElementById('receiptPreview');
@@ -190,7 +303,17 @@ function handlePaymentSection(request, requestId) {
     const submitBtn = document.getElementById('submitReceiptBtn');
     const downloadBtn = document.getElementById('downloadReceiptBtn');
 
-    const needsPayment = ['Pending Payment', 'Payment Submitted'].includes(request.status);
+    console.log('Elements found:', {
+        paymentSection: !!paymentSection,
+        receiptStatusText: !!receiptStatusText,
+        receiptPreview: !!receiptPreview,
+        uploadWidget: !!uploadWidget,
+        submitBtn: !!submitBtn,
+        downloadBtn: !!downloadBtn
+    });
+
+    const needsPayment = ['Requested', 'Verifying'].includes(request.status);
+    console.log('Needs payment?', needsPayment);
 
     if (!needsPayment) {
         paymentSection.style.display = 'none';
@@ -200,14 +323,16 @@ function handlePaymentSection(request, requestId) {
 
     paymentSection.style.display = 'block';
 
-    if (request.status === 'Pending Payment') {
+    if (request.status === 'Requested') {
+        console.log('Status: Requested - showing upload widget');
         receiptStatusText.textContent = 'Waiting for payment submission...';
         receiptStatusText.className = 'receipt-status-text pending';
         receiptPreview.style.display = 'none';
         uploadWidget.style.display = 'block';
         submitBtn.style.display = 'block';
         downloadBtn.style.display = 'none';
-    } else if (request.status === 'Payment Submitted') {
+    } else if (request.status === 'Verifying') {
+        console.log('Status: Verifying - loading receipt image');
         receiptStatusText.textContent = 'Receipt submitted - pending admin verification...';
         receiptStatusText.className = 'receipt-status-text submitted';
         uploadWidget.style.display = 'none';
@@ -215,6 +340,7 @@ function handlePaymentSection(request, requestId) {
         downloadBtn.style.display = 'inline-block';
 
         // Try to load receipt image
+        console.log('🔄 Calling loadReceiptImage for:', requestId);
         loadReceiptImage(requestId);
     }
 }
@@ -222,38 +348,60 @@ function handlePaymentSection(request, requestId) {
 // Load Receipt Image
 async function loadReceiptImage(requestId) {
     try {
+        console.log('Loading receipt image for request:', requestId);
         const token = localStorage.getItem('authToken');
+        
+        // First get receipt metadata
         const response = await fetch(`${API_BASE}/receipts/${requestId}/receipt`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (!response.ok) return;
+        if (!response.ok) {
+            console.log('No receipt found for this request');
+            return;
+        }
 
         const data = await response.json();
-        const receipt = data.data;
+        const receipt = data.receipt;
+        console.log('Receipt data:', receipt);
 
         if (receipt && receipt.file_path) {
-            const fileResponse = await fetch(`${API_BASE}/receipts/${requestId}/receipt?download=false`, {
+            // Now get the actual image file with authentication
+            const imageUrl = `${API_BASE}/receipts/${requestId}/receipt/file`;
+            console.log('Loading image from:', imageUrl);
+            
+            // Fetch the image with authorization and convert to blob
+            const imageResponse = await fetch(imageUrl, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+            
+            if (imageResponse.ok) {
+                const blob = await imageResponse.blob();
+                const objectUrl = URL.createObjectURL(blob);
+                
+                const imgElement = document.getElementById('receiptImage');
+                imgElement.src = objectUrl;
+                imgElement.onload = () => {
+                    console.log('✅ Image loaded successfully');
+                    document.getElementById('receiptPreview').style.display = 'block';
+                };
+                imgElement.onerror = () => {
+                    console.error('❌ Failed to load image');
+                };
+            } else {
+                console.error('Failed to fetch image, status:', imageResponse.status);
+            }
 
-            if (fileResponse.ok) {
-                const blob = await fileResponse.blob();
-                const url = URL.createObjectURL(blob);
-                document.getElementById('receiptImage').src = url;
-                document.getElementById('receiptPreview').style.display = 'block';
-
-                const statusElement = document.getElementById('receiptVerificationStatus');
-                if (receipt.verification_status === 'Verified') {
-                    statusElement.textContent = '✓ Receipt verified by admin';
-                    statusElement.className = 'verification-status verified';
-                } else if (receipt.verification_status === 'Rejected') {
-                    statusElement.textContent = `✗ Rejected: ${receipt.verification_notes || 'Invalid receipt'}`;
-                    statusElement.className = 'verification-status rejected';
-                } else {
-                    statusElement.textContent = '⏳ Awaiting verification';
-                    statusElement.className = 'verification-status pending';
-                }
+            const statusElement = document.getElementById('receiptVerificationStatus');
+            if (receipt.verification_status === 'Verified') {
+                statusElement.textContent = '✓ Receipt verified by admin';
+                statusElement.className = 'verification-status verified';
+            } else if (receipt.verification_status === 'Rejected') {
+                statusElement.textContent = `✗ Rejected: ${receipt.verification_notes || 'Invalid receipt'}`;
+                statusElement.className = 'verification-status rejected';
+            } else {
+                statusElement.textContent = '⏳ Awaiting verification';
+                statusElement.className = 'verification-status pending';
             }
         }
     } catch (error) {
@@ -298,20 +446,43 @@ async function submitReceipt() {
             return;
         }
 
+        console.log('📤 Uploading receipt for request:', currentSelectedRequest.id);
+        console.log('File:', file.name, file.type, file.size);
+
         const formData = new FormData();
         formData.append('receipt', file);
 
         const token = localStorage.getItem('authToken');
-        const response = await fetch(
-            `${API_BASE}/receipts/${currentSelectedRequest.id}/receipt`,
-            {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData
-            }
-        );
+        const url = `${API_BASE}/receipts/${currentSelectedRequest.id}/receipt`;
+        console.log('Upload URL:', url);
 
-        if (!response.ok) throw new Error('Failed to upload receipt');
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` },
+            body: formData
+        });
+
+        console.log('Response status:', response.status);
+        console.log('Response headers:', {
+            'Content-Type': response.headers.get('Content-Type'),
+            'Content-Length': response.headers.get('Content-Length')
+        });
+
+        const contentType = response.headers.get('Content-Type');
+        let result;
+        
+        if (contentType && contentType.includes('application/json')) {
+            result = await response.json();
+            console.log('Response data:', result);
+        } else {
+            const text = await response.text();
+            console.log('Response text:', text);
+            result = { message: text || 'Unknown error' };
+        }
+
+        if (!response.ok) {
+            throw new Error(result.message || `Server error: ${response.status}`);
+        }
 
         alert('Receipt uploaded successfully! Waiting for admin verification...');
         fileInput.value = '';
@@ -321,7 +492,7 @@ async function submitReceipt() {
         await showRequestDetails(currentSelectedRequest.id);
     } catch (error) {
         console.error('Error submitting receipt:', error);
-        alert('Failed to upload receipt. Please try again.');
+        alert(`Failed to upload receipt: ${error.message}`);
     }
 }
 
@@ -365,17 +536,7 @@ function updateUsername() {
         window.location.href = 'login.html';
         return;
     }
-
-    fetch(`${API_BASE}/auth/me`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.data && data.data.name) {
-            document.querySelector('.username').textContent = data.data.name;
-        }
-    })
-    .catch(err => console.error('Error loading user info:', err));
+    // User info can be loaded from token if needed in the future
 }
 
 // Format Date
@@ -404,210 +565,168 @@ function debounce(func, wait) {
     };
 }
 
-// Status badge styling
-document.addEventListener('DOMContentLoaded', () => {
-    const style = document.createElement('style');
-    style.textContent = `
-        .status-pending-payment { background-color: #fff3cd; color: #856404; padding: 0.35rem 0.75rem; border-radius: 4px; }
-        .status-payment-submitted { background-color: #cfe2ff; color: #084298; padding: 0.35rem 0.75rem; border-radius: 4px; }
-        .status-payment-verified { background-color: #d1e7dd; color: #0f5132; padding: 0.35rem 0.75rem; border-radius: 4px; }
-        .status-processing { background-color: #e2e3e5; color: #383d41; padding: 0.35rem 0.75rem; border-radius: 4px; }
-        .status-for-release { background-color: #ffeaa7; color: #8b4513; padding: 0.35rem 0.75rem; border-radius: 4px; }
-        .status-completed { background-color: #d1e7dd; color: #0f5132; padding: 0.35rem 0.75rem; border-radius: 4px; }
-        .status-cancelled { background-color: #f8d7da; color: #842029; padding: 0.35rem 0.75rem; border-radius: 4px; }
 
-        .progress-container {
-            display: flex;
-            justify-content: space-between;
-            margin: 1.5rem 0;
-            position: relative;
-        }
+// Add status badge styling
+const style = document.createElement('style');
+style.textContent = `
+    .status-pending-payment { background-color: #fff3cd; color: #856404; padding: 0.35rem 0.75rem; border-radius: 4px; }
+    .status-payment-submitted { background-color: #cfe2ff; color: #084298; padding: 0.35rem 0.75rem; border-radius: 4px; }
+    .status-payment-verified { background-color: #d1e7dd; color: #0f5132; padding: 0.35rem 0.75rem; border-radius: 4px; }
+    .status-processing { background-color: #e2e3e5; color: #383d41; padding: 0.35rem 0.75rem; border-radius: 4px; }
+    .status-for-release { background-color: #ffeaa7; color: #8b4513; padding: 0.35rem 0.75rem; border-radius: 4px; }
+    .status-completed { background-color: #d1e7dd; color: #0f5132; padding: 0.35rem 0.75rem; border-radius: 4px; }
+    .status-cancelled { background-color: #f8d7da; color: #842029; padding: 0.35rem 0.75rem; border-radius: 4px; }
 
-        .progress-container::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background-color: #ddd;
-            z-index: -1;
-        }
-
-        .progress-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
-        }
-
-        .step-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #ddd;
-            color: #999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            z-index: 1;
-        }
-
-        .progress-step.active .step-circle {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .progress-step.current .step-circle {
-            background-color: #2196F3;
-            color: white;
-            box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1);
-        }
-
-        .step-label {
-            font-size: 0.85rem;
-            text-align: center;
-            color: #666;
-            max-width: 100%;
-        }
-
-        .progress-step.active .step-label {
-            color: #333;
-            font-weight: 500;
-        }
-
-        .receipt-status-text {
-            padding: 0.75rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            font-weight: 500;
-        }
-
-        .receipt-status-text.pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .receipt-status-text.submitted {
-            background-color: #cfe2ff;
-            color: #084298;
-        }
-
-        .receipt-preview-img {
-            max-width: 100%;
-            max-height: 400px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .verification-status {
-            font-weight: 600;
-            padding: 0.5rem;
-            border-radius: 4px;
-            display: inline-block;
-            margin-top: 0.5rem;
-        }
-
-        .verification-status.verified {
-            background-color: #d1e7dd;
-            color: #0f5132;
-        }
-
-        .verification-status.rejected {
-            background-color: #f8d7da;
-            color: #842029;
-        }
-
-        .verification-status.pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .upload-label {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background-color: #2196F3;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-
-        .upload-label:hover {
-            background-color: #1976D2;
-        }
-
-        .upload-hint {
-            font-size: 0.85rem;
-            color: #999;
-            margin-top: 0.5rem;
-        }
-
-        .history-item {
-            margin-bottom: 1rem;
-            padding: 0.75rem;
-            background-color: #f5f5f5;
-            border-left: 3px solid #2196F3;
-            border-radius: 4px;
-        }
-
-        .history-date {
-            display: block;
-            font-size: 0.85rem;
-            color: #999;
-            margin-top: 0.25rem;
-        }
-
-        .history-notes {
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 0.5rem;
-            font-style: italic;
-        }
-    `;
-    document.head.appendChild(style);
-});
-
-
-  // search by reference (exact or partial)
-  function performSearch() {
-    const q = (searchInput.value || '').trim().toLowerCase();
-    if (!q) return;
-    const rows = Array.from(table.querySelectorAll('tr'));
-    const found = rows.find(r => (r.dataset.ref || '').toLowerCase().includes(q));
-    if (found) {
-      // optionally highlight
-      rows.forEach(r => r.classList.remove('highlight'));
-      found.classList.add('highlight');
-      // scroll into view
-      found.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      showDetailsFromRow(found);
-    } else {
-      // no results - optionally show a message
-      alert('No request found for: ' + searchInput.value);
+    .progress-container {
+        display: flex;
+        justify-content: space-between;
+        margin: 1.5rem 0;
+        position: relative;
     }
-  }
 
-  searchBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-    performSearch();
-  });
-
-  searchInput.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      performSearch();
+    .progress-container::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: #ddd;
+        z-index: -1;
     }
-  });
 
-  // close details
-  closeBtn.addEventListener('click', function () {
-    detailsCard.setAttribute('aria-hidden', 'true');
-    detailsCard.classList.remove('visible');
-    const rows = Array.from(table.querySelectorAll('tr'));
-    rows.forEach(r => r.classList.remove('highlight'));
-  });
-});
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+    }
+
+    .step-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #ddd;
+        color: #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        z-index: 1;
+    }
+
+    .progress-step.active .step-circle {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .progress-step.current .step-circle {
+        background-color: #2196F3;
+        color: white;
+        box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1);
+    }
+
+    .step-label {
+        font-size: 0.85rem;
+        text-align: center;
+        color: #666;
+        max-width: 100%;
+    }
+
+    .progress-step.active .step-label {
+        color: #333;
+        font-weight: 500;
+    }
+
+    .receipt-status-text {
+        padding: 0.75rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+
+    .receipt-status-text.pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .receipt-status-text.submitted {
+        background-color: #cfe2ff;
+        color: #084298;
+    }
+
+    .receipt-preview-img {
+        max-width: 100%;
+        max-height: 400px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .verification-status {
+        font-weight: 600;
+        padding: 0.5rem;
+        border-radius: 4px;
+        display: inline-block;
+        margin-top: 0.5rem;
+    }
+
+    .verification-status.verified {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+
+    .verification-status.rejected {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+    .verification-status.pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .upload-label {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background-color: #2196F3;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background-color 0.3s;
+    }
+
+    .upload-label:hover {
+        background-color: #1976D2;
+    }
+
+    .upload-hint {
+        font-size: 0.85rem;
+        color: #999;
+        margin-top: 0.5rem;
+    }
+
+    .history-item {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background-color: #f5f5f5;
+        border-left: 3px solid #2196F3;
+        border-radius: 4px;
+    }
+
+    .history-date {
+        display: block;
+        font-size: 0.85rem;
+        color: #999;
+        margin-top: 0.25rem;
+    }
+
+    .history-notes {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 0.5rem;
+        font-style: italic;
+    }
+`;
+document.head.appendChild(style);

@@ -42,12 +42,6 @@
             <span>Document Fees</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a href="s_profile.html" class="nav-link">
-            <i class="fa-solid fa-star"></i>
-            <span>My Profile</span>
-          </a>
-        </li>
       </ul>
 
       <div class="nav-logout">
@@ -66,9 +60,6 @@
             <i class="fa-solid fa-bell"></i>
             <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
           </button>
-          <button class="user" aria-label="User menu" onclick="toggleProfileMenu()">
-            <i class="fa-regular fa-user"></i>
-          </button>
           <span class="username" id="userName">User</span>
         </div>
         
@@ -85,10 +76,6 @@
         
         <!-- Profile Menu Dropdown -->
         <div class="profile-menu-dropdown" id="profileMenuDropdown" style="display: none;">
-          <a href="s_profile.html" class="profile-menu-item">
-            <i class="fa-solid fa-user"></i>
-            <span>My Profile</span>
-          </a>
           <a href="#" onclick="logout(); return false;" class="profile-menu-item">
             <i class="fa-solid fa-sign-out"></i>
             <span>Logout</span>
@@ -139,60 +126,42 @@
             </div>
           </div>
 
+          <div class="grid contact-grid">
+            <div>
+              <label for="completeAddress">Complete Address</label>
+              <input type="text" id="completeAddress" name="completeAddress" readonly />
+            </div>
+            <div>
+              <label for="contactNumber">Contact Number</label>
+              <input type="tel" id="contactNumber" name="contactNumber" placeholder="Enter your contact number" />
+            </div>
+          </div>
+
           <!-- Document Request Section -->
           <div class="request-section">
             <h4>Select Document</h4>
             
-            <div class="form-group">
-              <label for="templateSelect">Document Type <span class="required">*</span></label>
-              <select id="templateSelect" required>
-                <option value="">-- Select Document Type --</option>
-              </select>
-            </div>
+            <div id="documentsContainer"></div>
 
-            <!-- Template Details -->
-            <div id="templateDetails" style="display: none; background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0;"></div>
+            <p id="addDocBtn">[ + Add Document ]</p>
 
-            <!-- Dynamic Form Fields -->
-            <div id="formFieldsContainer"></div>
-
-            <!-- Quantity & Purpose -->
-            <div class="grid">
-              <div class="form-group">
-                <label for="quantity">Quantity <span class="required">*</span></label>
-                <div class="qty-box">
-                  <button type="button" class="quantity-btn minus-btn" onclick="decreaseQuantity()">-</button>
-                  <input type="number" id="quantity" name="quantity" value="1" min="1" required />
-                  <button type="button" class="quantity-btn plus-btn" onclick="increaseQuantity()">+</button>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="purpose">Purpose (Optional)</label>
-                <input type="text" id="purpose" name="purpose" placeholder="e.g., Employment, Transfer, etc." />
-              </div>
-            </div>
-
-            <!-- Cost Summary -->
-            <div class="cost-summary">
-              <div class="cost-line">
-                <span>Cost for Copies:</span>
-                <span id="cost">₱0.00</span>
-              </div>
-              <div class="cost-line total">
-                <span>Total Amount:</span>
-                <span id="total">₱0.00</span>
-              </div>
-            </div>
-
-            <!-- Submit Button -->
-            <button id="submitBtn" class="confirm-button" type="submit">Submit Request</button>
+            <button id="confirmBtn" class="confirm-button" type="button">Confirm</button>
           </div>
         </div>
       </main>
     </div>
 
-    <script src="public/js/s_request.js"></script>
+    <div id="confirmModal">
+      <div id="modalContent">
+        <p class="review-text">Please review your information carefully before submitting. Ensure that all details are accurate.</p>
+        <p class="warning-text"><i>If you find any incorrect information, do not proceed and contact the Registrar's Office for assistance.</i></p>
+        <div class="modal-actions">
+          <button id="goBack" class="modal-btn">Go Back</button>
+          <button id="understand" class="modal-btn">I understand</button>
+        </div>
+      </div>
+    </div>
+
     <script>
       // Load user info on page load
       document.addEventListener('DOMContentLoaded', () => {
@@ -210,10 +179,13 @@
         document.getElementById('program').value = userInfo.program || '';
         document.getElementById('cvsuEmail').value = userInfo.email || user.email || '';
         document.getElementById('studentNumber').value = userInfo.studentNumber || user.studentNumber || '';
+        document.getElementById('completeAddress').value = userInfo.completeAddress || '';
+        document.getElementById('contactNumber').value = userInfo.contactNumber || '';
         document.getElementById('userName').textContent = displayName;
         
-        // Load mock notifications
-        loadNotifications();
+        
+        // Create default first document row
+        createDocRow();
       });
       
       // Notification functions
@@ -232,31 +204,7 @@
       }
       
       function loadNotifications() {
-        // Mock notifications - in production, fetch from API
-        const notifications = [
-          { id: 1, message: 'Your document request #2025-REG-00001 is ready for pickup', time: '2 hours ago', read: false },
-          { id: 2, message: 'Payment verified for request #2025-REG-00002', time: '1 day ago', read: false }
-        ];
-        
-        const notifList = document.getElementById('notifList');
-        const badge = document.getElementById('notifBadge');
-        const unreadCount = notifications.filter(n => !n.read).length;
-        
-        if (unreadCount > 0) {
-          badge.textContent = unreadCount;
-          badge.style.display = 'block';
-        }
-        
-        if (notifications.length === 0) {
-          notifList.innerHTML = '<div class="notif-empty">No new notifications</div>';
-        } else {
-          notifList.innerHTML = notifications.map(n => `
-            <div class="notif-item ${n.read ? 'read' : ''}">
-              <p>${n.message}</p>
-              <span class="notif-time">${n.time}</span>
-            </div>
-          `).join('');
-        }
+          // Student notifications now handled by public/js/student_notifications.js
       }
       
       function markAllAsRead() {
@@ -275,68 +223,109 @@
         }
       });
 
-      // Quantity adjustment functions
-      function decreaseQuantity() {
-        const input = document.getElementById('quantity');
-        if (parseInt(input.value) > 1) {
-          input.value = parseInt(input.value) - 1;
-          calculateCost();
-        }
-      }
-
-      function increaseQuantity() {
-        const input = document.getElementById('quantity');
-        input.value = parseInt(input.value) + 1;
-        calculateCost();
-      }
-
       // Logout function
       function logout() {
         localStorage.clear();
         window.location.href = 'login.html';
       }
+
+      // Document Request Management
+      const container = document.getElementById("documentsContainer");
+      const addBtn = document.getElementById("addDocBtn");
+      const modal = document.getElementById("confirmModal");
+      const confirmBtn = document.getElementById("confirmBtn");
+      const goBackBtn = document.getElementById("goBack");
+      const understandBtn = document.getElementById("understand");
+
+      function createDocRow() {
+        const row = document.createElement("div");
+        row.className = "doc-row";
+
+        row.innerHTML = `
+          <div class="doc-field">
+            <label>Document Type:</label>
+            <select>
+              <option value="">-- Select Document Type --</option>
+              <option value="Certificate of Enrollment">Certificate of Enrollment</option>
+              <option value="Certificate of Grades">Certificate of Grades</option>
+              <option value="Transcript of Records">Transcript of Records</option>
+              <option value="Certificate of Registration">Certificate of Registration</option>
+              <option value="Diploma/Degree Certificate">Diploma/Degree Certificate</option>
+              <option value="Good Moral Certificate">Good Moral Certificate</option>
+              <option value="Honorable Dismissal">Honorable Dismissal</option>
+              <option value="Course Description">Course Description</option>
+              <option value="Certification of Units Earned">Certification of Units Earned</option>
+            </select>
+          </div>
+
+          <div class="doc-field">
+            <label>Purpose:</label>
+            <input type='text' placeholder='Purpose'>
+          </div>
+
+          <div class="qty-controls">
+            <button class='qty-btn minus-btn' type='button'>-</button>
+            <div class="qty-display">
+              <span class="qty-label">Qty:</span>
+              <input type='number' class='qty-input' value='1' min='1'>
+            </div>
+            <button class='qty-btn plus-btn' type='button'>+</button>
+          </div>
+
+          <button class='remove-btn' type='button'><i class='fa-solid fa-trash'></i></button>
+        `;
+
+        const qtyInput = row.querySelector('.qty-input');
+        row.querySelector('.minus-btn').onclick = () => {
+          if (parseInt(qtyInput.value) > 1) {
+            qtyInput.value = parseInt(qtyInput.value) - 1;
+          }
+        };
+        
+        row.querySelector('.plus-btn').onclick = () => {
+          qtyInput.value = parseInt(qtyInput.value) + 1;
+        };
+        
+        row.querySelector('.remove-btn').onclick = () => row.remove();
+
+        container.appendChild(row);
+      }
+
+      addBtn.onclick = createDocRow;
+      
+      confirmBtn.onclick = () => {
+        modal.style.display = "flex";
+      };
+      
+      goBackBtn.onclick = () => {
+        modal.style.display = "none";
+      };
+
+      understandBtn.onclick = () => {
+        // Persist contact number into userInfo
+        const contactNumber = document.getElementById('contactNumber')?.value || '';
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        userInfo.contactNumber = contactNumber;
+        localStorage.setItem('userInfo', JSON.stringify(userInfo));
+
+        // Collect document request details from the form
+        const documents = [];
+        document.querySelectorAll('.doc-row').forEach(row => {
+          const type = row.querySelector('select')?.value || '';
+          const purpose = row.querySelector("input[type='text']")?.value || '';
+          const quantity = parseInt(row.querySelector('.qty-input')?.value || '1', 10) || 1;
+          if (type) {
+            documents.push({ type, purpose, quantity });
+          }
+        });
+
+        // Save to localStorage for s_request2 consumption
+        localStorage.setItem('currentRequest', JSON.stringify({ documents }));
+
+        // Redirect to the request summary page
+        window.location.href = 's_request2.html';
+      };
     </script>
-    <!-- Confirmation Modal -->
-    <div id="confirmModal">
-      <div id="modalContent">
-        <p class="review-text">
-          Please review your information carefully before submitting. Ensure
-          that all details are accurate.
-        </p>
-        <p class="warning-text">
-          **If you find any incorrect information, do not proceed and contact
-          the Registrar's Office for assistance.**
-        </p>
-        <div class="modal-actions">
-          <button id="goBack" class="modal-btn">Go Back</button>
-          <button id="understand" class="modal-btn">I understand</button>
-        </div>
-      </div>
-    </div>
-
-    <script src="public/js/s_request.js"></script>
-  </body>
-</html>
-        </div>
-      </main>
-    </div>
-
-    <div id="confirmModal">
-      <div id="modalContent">
-        <p class="review-text">
-          Please review your information carefully before submitting. Ensure
-          that all details are accurate.
-        </p>
-        <p class="warning-text">
-          **If you find any incorrect information, do not proceed and contact
-          the Registrar's Office for assistance.**
-        </p>
-        <div class="modal-actions">
-          <button id="goBack" class="modal-btn">Go Back</button>
-          <button id="understand" class="modal-btn">I understand</button>
-        </div>
-      </div>
-    </div>
-    <script src="public/js/s_request.js"></script>
+    <script src="public/js/student_notifications.js"></script>
   </body>
 </html>

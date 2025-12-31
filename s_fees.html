@@ -48,12 +48,6 @@
             <span>Document Fees</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a href="s_profile.html" class="nav-link">
-            <i class="fa-solid fa-star"></i>
-            <span>My Profile</span>
-          </a>
-        </li>
       </ul>
 
       <div class="nav-logout">
@@ -71,9 +65,6 @@
             <i class="fa-solid fa-bell"></i>
             <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
           </button>
-          <button class="user" aria-label="User menu" onclick="toggleProfileMenu()">
-            <i class="fa-regular fa-user"></i>
-          </button>
           <span class="username" id="userName">User</span>
         </div>
         
@@ -90,10 +81,6 @@
         
         <!-- Profile Menu Dropdown -->
         <div class="profile-menu-dropdown" id="profileMenuDropdown" style="display: none;">
-          <a href="s_profile.html" class="profile-menu-item">
-            <i class="fa-solid fa-user"></i>
-            <span>My Profile</span>
-          </a>
           <a href="#" onclick="logout(); return false;" class="profile-menu-item">
             <i class="fa-solid fa-sign-out"></i>
             <span>Logout</span>
@@ -121,54 +108,61 @@
                     <th>Processing Time</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td>Transcript of Records</td>
-                    <td>₱50.00</td>
-                    <td>₱25.00 each</td>
-                    <td>3-5 days</td>
-                  </tr>
+                <tbody id="feesTableBody">
+                  <!-- Dynamically loaded from database -->
                   <tr>
                     <td>Certificate of Enrollment</td>
+                    <td>₱30.00</td>
+                    <td>₱0.00 each</td>
+                    <td>1-2 days</td>
+                  </tr>
+                  <tr>
+                    <td>Certificate of Good Moral</td>
                     <td>₱50.00</td>
-                    <td>₱25.00 each</td>
-                    <td>2-3 days</td>
+                    <td>₱0.00 each</td>
+                    <td>2-4 days</td>
+                  </tr>
+                  <tr>
+                    <td>Certificate of Grades</td>
+                    <td>₱50.00</td>
+                    <td>₱10.00 each</td>
+                    <td>2-4 days</td>
                   </tr>
                   <tr>
                     <td>Certificate of Registration</td>
-                    <td>₱50.00</td>
-                    <td>₱25.00 each</td>
-                    <td>2-3 days</td>
-                  </tr>
-                  <tr>
-                    <td>Diploma/Degree Certificate</td>
-                    <td>₱100.00</td>
-                    <td>₱50.00 each</td>
-                    <td>5-7 days</td>
-                  </tr>
-                  <tr>
-                    <td>Good Moral Certificate</td>
-                    <td>₱25.00</td>
-                    <td>₱15.00 each</td>
-                    <td>2-3 days</td>
-                  </tr>
-                  <tr>
-                    <td>Honorable Dismissal</td>
-                    <td>₱50.00</td>
-                    <td>₱25.00 each</td>
-                    <td>3-5 days</td>
-                  </tr>
-                  <tr>
-                    <td>Course Description</td>
-                    <td>₱50.00</td>
-                    <td>₱25.00 each</td>
-                    <td>3-5 days</td>
+                    <td>₱30.00</td>
+                    <td>₱0.00 each</td>
+                    <td>1-2 days</td>
                   </tr>
                   <tr>
                     <td>Certification of Units Earned</td>
                     <td>₱50.00</td>
-                    <td>₱25.00 each</td>
-                    <td>3-5 days</td>
+                    <td>₱0.00 each</td>
+                    <td>2-4 days</td>
+                  </tr>
+                  <tr>
+                    <td>Course Description</td>
+                    <td>₱50.00</td>
+                    <td>₱30.00 each</td>
+                    <td>4-6 days</td>
+                  </tr>
+                  <tr>
+                    <td>Diploma/Degree Certificate</td>
+                    <td>₱200.00</td>
+                    <td>₱0.00 each</td>
+                    <td>13-15 days</td>
+                  </tr>
+                  <tr>
+                    <td>Honorable Dismissal</td>
+                    <td>₱100.00</td>
+                    <td>₱0.00 each</td>
+                    <td>4-6 days</td>
+                  </tr>
+                  <tr>
+                    <td>Transcript of Records</td>
+                    <td>₱150.00</td>
+                    <td>₱50.00 each</td>
+                    <td>6-8 days</td>
                   </tr>
                 </tbody>
               </table>
@@ -232,6 +226,9 @@
     </div>
     
     <script>
+      // DOM Elements
+      const feesTableBody = document.getElementById('feesTableBody');
+
       // Load user info on page load
       document.addEventListener('DOMContentLoaded', () => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -243,7 +240,73 @@
         
         document.getElementById('userName').textContent = displayName;
         loadNotifications();
+        loadDocumentFees();
       });
+
+      // Load document fees from API
+      async function loadDocumentFees() {
+        try {
+          const response = await fetch('/api/templates/active', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to load document fees');
+          }
+
+          const data = await response.json();
+          const templates = data.templates || [];
+
+          if (templates.length === 0) {
+            feesTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No documents available</td></tr>';
+            return;
+          }
+
+          // Sort templates alphabetically by document name
+          templates.sort((a, b) => a.document_name.localeCompare(b.document_name));
+
+          // Build table rows
+          feesTableBody.innerHTML = templates.map(template => {
+            const basePrice = parseFloat(template.base_price || 0).toFixed(2);
+            const additionalPrice = parseFloat(template.price_per_copy || 0).toFixed(2);
+            const processingDays = formatProcessingDays(template.processing_days);
+
+            return `
+              <tr>
+                <td>${template.document_name}</td>
+                <td>₱${basePrice}</td>
+                <td>₱${additionalPrice} each</td>
+                <td>${processingDays}</td>
+              </tr>
+            `;
+          }).join('');
+
+        } catch (error) {
+          console.error('Error loading document fees:', error);
+          feesTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #d32f2f;">Failed to load document fees. Please refresh the page.</td></tr>';
+        }
+      }
+
+      // Format processing days
+      function formatProcessingDays(days) {
+        if (!days) return 'N/A';
+        
+        // If it's already formatted like "3-5 days", return as is
+        if (typeof days === 'string' && days.includes('-')) {
+          return days;
+        }
+
+        // If it's a number, format it
+        const daysNum = parseInt(days);
+        if (isNaN(daysNum)) return 'N/A';
+
+        // Return range based on number (e.g., 3 days = "2-3 days")
+        const minDays = Math.max(1, daysNum - 1);
+        const maxDays = daysNum + 1;
+        return `${minDays}-${maxDays} days`;
+      }
       
       // Notification functions
       function toggleNotifications() {
@@ -261,30 +324,7 @@
       }
       
       function loadNotifications() {
-        const notifications = [
-          { id: 1, message: 'Your document request #2025-REG-00001 is ready for pickup', time: '2 hours ago', read: false },
-          { id: 2, message: 'Payment verified for request #2025-REG-00002', time: '1 day ago', read: false }
-        ];
-        
-        const notifList = document.getElementById('notifList');
-        const badge = document.getElementById('notifBadge');
-        const unreadCount = notifications.filter(n => !n.read).length;
-        
-        if (unreadCount > 0) {
-          badge.textContent = unreadCount;
-          badge.style.display = 'block';
-        }
-        
-        if (notifications.length === 0) {
-          notifList.innerHTML = '<div class="notif-empty">No new notifications</div>';
-        } else {
-          notifList.innerHTML = notifications.map(n => `
-            <div class="notif-item ${n.read ? 'read' : ''}">
-              <p>${n.message}</p>
-              <span class="notif-time">${n.time}</span>
-            </div>
-          `).join('');
-        }
+        // Student notifications now handled by public/js/student_notifications.js
       }
       
       function markAllAsRead() {
@@ -308,5 +348,6 @@
         window.location.href = 'login.html';
       }
     </script>
+    <script src="public/js/student_notifications.js"></script>
   </body>
 </html>

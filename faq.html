@@ -34,7 +34,7 @@
           Lorem ipsum dolor sit amet, consectetur adipiscing elit?
           <i class="fa-solid fa-chevron-down"></i>
         </button>
-        <div class="answer">
+        <div class="answer" style="display: block;">
           Cras enim ante, accumsan sit amet lorem sit amet, vehicula semper
           lacus. Nullam tincidunt elit id sem porta, quis rutrum orci tincidunt.
           Quisque commodo, justo id fermentum imperdiet, enim sapien sodales
@@ -47,7 +47,7 @@
           Lorem ipsum dolor sit amet, consectetur adipiscing elit?
           <i class="fa-solid fa-chevron-down"></i>
         </button>
-        <div class="answer">
+        <div class="answer" style="display: block;">
           Cras enim ante, accumsan sit amet lorem sit amet, vehicula semper
           lacus. Nullam tincidunt elit id sem porta, quis rutrum orci tincidunt.
           Quisque commodo, justo id fermentum imperdiet, enim sapien sodales
@@ -60,7 +60,7 @@
           Lorem ipsum dolor sit amet, consectetur adipiscing elit?
           <i class="fa-solid fa-chevron-down"></i>
         </button>
-        <div class="answer">
+        <div class="answer" style="display: block;">
           Cras enim ante, accumsan sit amet lorem sit amet, vehicula semper
           lacus. Nullam tincidunt elit id sem porta, quis rutrum orci tincidunt.
           Quisque commodo, justo id fermentum imperdiet, enim sapien sodales
@@ -73,7 +73,7 @@
           Lorem ipsum dolor sit amet, consectetur adipiscing elit?
           <i class="fa-solid fa-chevron-down"></i>
         </button>
-        <div class="answer">
+        <div class="answer" style="display: block;">
           Cras enim ante, accumsan sit amet lorem sit amet, vehicula semper
           lacus. Nullam tincidunt elit id sem porta, quis rutrum orci tincidunt.
           Quisque commodo, justo id fermentum imperdiet, enim sapien sodales
@@ -105,15 +105,18 @@
 
       for (i = 0; i < acc.length; i++) {
         acc[i].addEventListener("click", function () {
-          this.classList.toggle("active");
-          this.parentElement.classList.toggle("active");
-
-          var answer = this.nextElementSibling;
-
-          if (answer.style.display == "block") {
-            answer.style.display = "none";
-          } else {
-            answer.style.display = "block";
+          var isActive = this.classList.contains("active");
+          
+          // Close all FAQs first
+          for (var j = 0; j < acc.length; j++) {
+            acc[j].classList.remove("active");
+            acc[j].parentElement.classList.remove("active");
+          }
+          
+          // If the clicked FAQ was not active, open it
+          if (!isActive) {
+            this.classList.add("active");
+            this.parentElement.classList.add("active");
           }
         });
       }

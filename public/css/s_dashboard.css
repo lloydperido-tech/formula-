@@ -116,14 +116,19 @@ h3 {
 .nav-logout {
   margin-top: auto; /* Pushes logout to the bottom */
   padding: 0 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 20px;
-  margin-top: 20px;
 }
 
 .nav-logout button {
   width: 100%;
   text-align: left;
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+
+.nav-logout button:hover {
+  background-color: #9cb89dd3;
+  cursor: pointer;
 }
 
 /* --- 3. Main Page Content (Right Side) --- */
@@ -360,62 +365,65 @@ main {
 .tracker-steps {
   list-style-type: none;
   display: flex;
-  padding-top: 0.5rem;
+  justify-content: space-between;
   position: relative;
-  margin: 0 auto;
+  margin: 2rem auto 0;
   width: 98%;
+  padding: 0;
+  --progress-percent: 0%;
+}
+
+/* Base background line */
+.tracker-steps::before {
+  content: "";
+  position: absolute;
+  width: 80%;
+  height: 2px;
+  background: linear-gradient(to right, #36593a var(--progress-percent, 0%), #d1d5db var(--progress-percent, 0%));
+  top: 6px;
+  left: 10%;
+  z-index: 1;
 }
 
 .tracker-steps li {
   position: relative;
-  flex: 1; /* Each step takes equal width */
+  flex: 1;
   text-align: center;
-  font-size: 0.7rem; /* Very small labels */
+  font-size: 0.7rem;
   color: #999;
   font-weight: 500;
-  line-height: 1.3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .tracker-steps li span {
   display: block;
-  margin-top: 0.75rem; /* Space below the dot */
+  margin-top: 0.75rem;
 }
 
 /* The dot (default) */
 .tracker-steps li::before {
   content: "";
   display: block;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background-color: #d1d5db; /* Gray fill */
-  border: 3px solid #d1d5db; /* Gray border */
-  margin: 0 auto;
+  background-color: #d1d5db;
+  border: 2px solid #d1d5db;
   position: relative;
   z-index: 2;
+  flex-shrink: 0;
 }
 
-/* The line (default) */
+/* Remove individual li::after since we're using parent background */
 .tracker-steps li::after {
-  content: "";
-  position: absolute;
-  display: block;
-  width: 100%;
-  height: 3px;
-  background-color: #d1d5db; /* Gray line */
-  top: 3.5px; /* Aligns with middle of 10px dot */
-  left: 50%; /* Starts from center of this li */
-  z-index: 1;
-}
-
-/* Hide line after the last step */
-.tracker-steps li:last-child::after {
   display: none;
 }
 
 /* --- Tracker States --- */
 
-/* COMPLETED state (solid green dot, green line) */
+/* COMPLETED state (solid green dot) */
 .tracker-steps li.completed {
   color: #36593a;
   font-weight: bold;
@@ -424,27 +432,33 @@ main {
   background-color: #36593a;
   border-color: #36593a;
 }
-.tracker-steps li.completed::after {
-  background-color: #36593a; /* Green line */
-}
 
-/* ACTIVE state (green outline dot, gray line) */
+/* ACTIVE state (green outline dot) */
 .tracker-steps li.active {
   color: #36593a;
   font-weight: bold;
 }
 .tracker-steps li.active::before {
-  background-color: #f9f4e3; /* White fill */
+  background-color: white; /* White fill */
   border-color: #36593a; /* Green border */
+  border-width: 3px;
 }
-/* The line after an active step is still gray */
-.tracker-steps li.active::after {
-  background-color: #d1d5db;
+
+/* Create a dynamic green line effect for completed and active items */
+.tracker-steps li.completed ~ li::before,
+.tracker-steps li.active::before {
+  /* These will be styled individually */
+}
+
+/* Override the base line with green for completed sections */
+.tracker-steps li.completed:not(:last-child) ~ li:not(.completed):not(.active)::before {
+  /* This targets pending items after completed ones */
 }
 
 /* --- 6b. Recent Requests (Original styles) --- */
 .recent-requests h2 {
   font-size: 1.5rem;
+  margin-bottom: 0.8rem; /* Add breathing room before the table */
 }
 
 .recent-requests table {
@@ -471,6 +485,56 @@ main {
   font-size: 0.9rem; /* was 1rem */
   color: #333;
   height: 2.5rem;
+}
+
+/* Status Badge Styling */
+.status-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-badge.requested {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.status-badge.verifying {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.status-badge.processing {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.status-badge.for-release {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.status-badge.completed {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.status-badge.rejected {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.status-badge.cancelled {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* Cancelled request row styling */
+.recent-requests tbody tr.cancelled-row {
+  border-left: 4px solid #d32f2f;
 }
 
 /* --- 7. Calendar Styling --- */

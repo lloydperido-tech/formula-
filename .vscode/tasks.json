@@ -1,0 +1,20 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "npm start (server)",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"start",
+				"--prefix",
+				"server"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$npm-stylish"
+			],
+			"group": "build"
+		}
+	]
+}

@@ -1,0 +1,6 @@
+{
+    "workbench.settings.editor": "ui",
+    "workbench.settings.useSplitJSON": true,
+    "github.copilot.chat.terminalChatLocation": "terminal",
+    "github.copilot.chat.agent.autoFix": true
+}

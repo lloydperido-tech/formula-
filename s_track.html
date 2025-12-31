@@ -48,12 +48,6 @@
             <span>Document Fees</span>
           </a>
         </li>
-        <li class="nav-item">
-          <a href="s_profile.html" class="nav-link">
-            <i class="fa-solid fa-star"></i>
-            <span>My Profile</span>
-          </a>
-        </li>
       </ul>
 
       <div class="nav-logout">
@@ -66,16 +60,10 @@
     <div class="page-content">
       <header class="topbar">
         <h1>Track Request</h1>
-
-        <!-- search moved into the table card header (top-right) -->
-
         <div class="user-profile">
           <button class="notifs" aria-label="View notifications" onclick="toggleNotifications()">
             <i class="fa-solid fa-bell"></i>
             <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
-          </button>
-          <button class="user" aria-label="User menu" onclick="toggleProfileMenu()">
-            <i class="fa-regular fa-user"></i>
           </button>
           <span class="username" id="userName">User</span>
         </div>
@@ -93,10 +81,6 @@
         
         <!-- Profile Menu Dropdown -->
         <div class="profile-menu-dropdown" id="profileMenuDropdown" style="display: none;">
-          <a href="s_profile.html" class="profile-menu-item">
-            <i class="fa-solid fa-user"></i>
-            <span>My Profile</span>
-          </a>
           <a href="#" onclick="logout(); return false;" class="profile-menu-item">
             <i class="fa-solid fa-sign-out"></i>
             <span>Logout</span>
@@ -144,77 +128,27 @@
             </div>
           </div>
 
-          <aside class="right-column">
-            <div class="card details-card" aria-hidden="true">
-              <div class="details-header">
-                <h3>Request Details</h3>
-                <button class="close-details" aria-label="Close details">
-                  ✕
-                </button>
-              </div>
-
-              <div class="details-body">
-                <p>
-                  <strong>Reference ID:</strong>
-                  <span class="detail-ref">—</span>
-                </p>
-                <p>
-                  <strong>Student:</strong>
-                  <span class="detail-student">—</span>
-                </p>
-                <p>
-                  <strong>Document:</strong> <span class="detail-type">—</span>
-                </p>
-                <p>
-                  <strong>Amount:</strong> <span class="detail-amount">—</span>
-                </p>
-                <p>
-                  <strong>Date Requested:</strong>
-                  <span class="detail-date">—</span>
-                </p>
-                <p>
-                  <strong>Notes:</strong> <span class="detail-notes">—</span>
-                </p>
-
-                <h4>Status Progress</h4>
-                <div id="statusProgress" class="status-progress">
-                  <!-- Status progress will be injected here -->
-                </div>
-
-                <h4>Status History</h4>
-                <ol class="details-tracker" id="statusHistory">
-                  <!-- Status history will be injected here -->
-                </ol>
-
-                <div id="paymentSection" style="display: none;">
-                  <h4>Payment Receipt</h4>
-                  <div class="receipt-upload-area">
-                    <p id="receiptStatus" class="receipt-status-text">Waiting for payment...</p>
-                    <div id="receiptPreview" style="display: none; margin: 1rem 0;">
-                      <img id="receiptImage" src="" alt="Payment Receipt" class="receipt-preview-img">
-                      <p id="receiptVerificationStatus" class="verification-status"></p>
-                    </div>
-                    <div id="uploadWidget" style="display: none;">
-                      <label class="upload-label">
-                        <input type="file" id="receiptFile" accept="image/jpg,image/jpeg,image/png,application/pdf" style="display: none;">
-                        <span class="upload-btn">Choose Receipt Image</span>
-                      </label>
-                      <p class="upload-hint">JPG, PNG, or PDF • Max 5MB</p>
-                      <button id="submitReceiptBtn" class="btn-primary" style="margin-top: 1rem; width: 100%; display: none;">Submit Receipt</button>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="details-actions">
-                  <button id="downloadReceiptBtn" class="btn-secondary" style="display: none;">Download Receipt</button>
-                  <button id="closeDetailsBtn" class="btn-secondary">Close</button>
-                </div>
-              </div>
-            </div>
-          </aside>
+        </section>
         </section>
       </main>
-      <script src="public/js/s_track.js"></script>
+      
+      <script>
+        console.log('🔴 INLINE SCRIPT RUNNING - HTML loaded correctly');
+        console.log('Current URL:', window.location.href);
+        
+        // Test if showRequestDetails function exists
+        setTimeout(() => {
+          console.log('Testing function availability...');
+          console.log('showRequestDetails exists?', typeof showRequestDetails);
+          if (typeof showRequestDetails === 'function') {
+            console.log('✅ Function is available!');
+          } else {
+            console.error('❌ Function NOT available!');
+          }
+        }, 1000);
+      </script>
+      
+      <script src="public/js/s_track.js?v=3.1"></script>
     </div>
     
     <script>
@@ -247,30 +181,7 @@
       }
       
       function loadNotifications() {
-        const notifications = [
-          { id: 1, message: 'Your document request #2025-REG-00001 is ready for pickup', time: '2 hours ago', read: false },
-          { id: 2, message: 'Payment verified for request #2025-REG-00002', time: '1 day ago', read: false }
-        ];
-        
-        const notifList = document.getElementById('notifList');
-        const badge = document.getElementById('notifBadge');
-        const unreadCount = notifications.filter(n => !n.read).length;
-        
-        if (unreadCount > 0) {
-          badge.textContent = unreadCount;
-          badge.style.display = 'block';
-        }
-        
-        if (notifications.length === 0) {
-          notifList.innerHTML = '<div class="notif-empty">No new notifications</div>';
-        } else {
-          notifList.innerHTML = notifications.map(n => `
-            <div class="notif-item ${n.read ? 'read' : ''}">
-              <p>${n.message}</p>
-              <span class="notif-time">${n.time}</span>
-            </div>
-          `).join('');
-        }
+        // Student notifications now handled by public/js/student_notifications.js
       }
       
       function markAllAsRead() {
@@ -294,5 +205,6 @@
         window.location.href = 'login.html';
       }
     </script>
+    <script src="public/js/student_notifications.js"></script>
   </body>
 </html>
