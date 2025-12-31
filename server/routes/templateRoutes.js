@@ -11,7 +11,7 @@ router.get('/active', templateController.getActiveTemplates);
 router.post('/', 
   verifyToken, 
   isAdmin, 
-  uploadTemplate.single('templateFile'), 
+  uploadTemplate, 
   templateController.createTemplate
 );
 
@@ -30,7 +30,7 @@ router.get('/:id',
 router.put('/:id', 
   verifyToken, 
   isAdmin, 
-  uploadTemplate.single('templateFile'), 
+  uploadTemplate, 
   templateController.updateTemplate
 );
 
@@ -47,3 +47,4 @@ router.delete('/:id',
 );
 
 module.exports = router;
+

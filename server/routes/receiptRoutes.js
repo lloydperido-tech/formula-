@@ -49,6 +49,7 @@ const handleMulterError = (err, req, res, next) => {
 };
 
 // Student routes
+<<<<<<< HEAD
 router.post('/:requestId/upload', 
   (req, res, next) => {
     uploadReceipt.single('receipt')(req, res, (err) => {
@@ -65,6 +66,9 @@ router.post('/:requestId/upload',
   receiptController.uploadReceipt
 );
 router.post('/:requestId/receipt', uploadReceipt.single('receipt'), handleMulterError, receiptController.uploadReceipt);
+=======
+router.post('/:requestId/receipt', uploadReceipt, receiptController.uploadReceipt);
+>>>>>>> formula/master
 router.get('/:requestId/receipt', receiptController.getReceipt);
 router.get('/:requestId/receipt/file', receiptController.viewReceipt);
 
@@ -73,3 +77,4 @@ router.patch('/:requestId/receipt/verify', authMiddleware.isAdmin, receiptContro
 router.get('/:requestId/receipt/download', authMiddleware.isAdmin, receiptController.downloadReceipt);
 
 module.exports = router;
+

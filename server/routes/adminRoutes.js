@@ -24,3 +24,4 @@ router.patch('/receipts/:id/verify', receiptController.verifyReceipt);
 router.get('/receipts/:id/download', receiptController.downloadReceipt);
 
 module.exports = router;
+
