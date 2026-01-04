@@ -348,19 +348,80 @@ function renderTrend(container, requests) {
     }
 
     const counts = days.reduce((acc, key) => ({ ...acc, [key]: 0 }), {});
+    const dailyData = days.reduce((acc, key) => ({ ...acc, [key]: [] }), {});
+    
     requests.forEach(r => {
         if (!r.created_at) return;
         const key = new Date(r.created_at).toISOString().slice(0, 10);
-        if (counts[key] !== undefined) counts[key] += 1;
+        if (counts[key] !== undefined) {
+            counts[key] += 1;
+            dailyData[key].push(r);
+        }
     });
 
     const max = Math.max(1, ...Object.values(counts));
     container.innerHTML = Object.values(counts)
-        .map(c => {
+        .map((c, idx) => {
             const h = Math.max(8, Math.round((c / max) * 120));
-            return `<div class="bar" style="height: ${h}px" title="${c} requests"></div>`;
+            const dayKey = days[idx];
+            return `<div class="bar" style="height: ${h}px" data-day="${dayKey}" data-count="${c}" title="${c} requests"></div>`;
         })
         .join('');
+    
+    // Store daily data globally for click handlers
+    window.trendDailyData = dailyData;
+    
+    // Add click handlers to bars
+    container.querySelectorAll('.bar').forEach(bar => {
+        bar.addEventListener('click', function() {
+            const dayKey = this.getAttribute('data-day');
+            showTrendDetails(dayKey, window.trendDailyData[dayKey]);
+            
+            // Update active state
+            container.querySelectorAll('.bar').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    
+    // Show first day details by default
+    const firstDay = days[0];
+    showTrendDetails(firstDay, dailyData[firstDay]);
+}
+
+function showTrendDetails(dayKey, dayRequests) {
+    let detailsContainer = document.getElementById('trendDetails');
+    
+    if (!detailsContainer) {
+        detailsContainer = document.createElement('div');
+        detailsContainer.id = 'trendDetails';
+        detailsContainer.className = 'trend-details';
+        document.getElementById('trendBars').parentElement.appendChild(detailsContainer);
+    }
+    
+    const date = new Date(dayKey);
+    const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    const total = dayRequests.length;
+    
+    let mostRequested = 'N/A';
+    if (dayRequests.length > 0) {
+        const docCounts = {};
+        dayRequests.forEach(r => {
+            const doc = r.template_name || r.document_name || r.document_templates?.document_name || 'Unknown';
+            docCounts[doc] = (docCounts[doc] || 0) + 1;
+        });
+        const sorted = Object.entries(docCounts).sort((a, b) => b[1] - a[1]);
+        if (sorted.length > 0) {
+            mostRequested = sorted[0][0];
+        }
+    }
+    
+    detailsContainer.innerHTML = `
+        <div class="trend-details-content">
+            <div class="trend-details-label">Date: ${dateStr}</div>
+            <div>Total Requests: ${total}</div>
+            <div>Most Requested: ${mostRequested}</div>
+        </div>
+    `;
 }
 
 function renderRecent(tbody, requests) {

@@ -424,10 +424,16 @@ h3 {
 }
 
 .view-link {
-    margin-top: 6px;
+    display: block;
+    margin-top: 12px;
+    margin-left: auto;
+    margin-right: auto;
     font-size: 0.75rem;
     text-align: center;
     color: #5a513f;
+    width: fit-content;
+    text-decoration: underline;
+    cursor: pointer;
 }
 
 .bar-chart {
@@ -445,6 +451,43 @@ h3 {
 .bar-chart .bar {
     background: #75af75;
     border-radius: 2px 2px 0 0;
+    cursor: pointer;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+}
+
+.bar-chart .bar:hover {
+    opacity: 0.8;
+    filter: brightness(1.1);
+}
+
+.bar-chart .bar.active {
+    opacity: 1;
+    filter: brightness(1.2);
+    box-shadow: 0 0 4px rgba(117, 175, 117, 0.6);
+}
+
+.trend-details {
+    margin-top: 12px;
+    padding: 10px;
+    background: #f5f1e8;
+    border: 1px solid #d5cfc1;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: #333;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.trend-details-content {
+    line-height: 1.6;
+}
+
+.trend-details-label {
+    font-weight: bold;
+    color: #5a513f;
+    margin-bottom: 4px;
 }
 
 /* Calendar (matches student dashboard styling) */
