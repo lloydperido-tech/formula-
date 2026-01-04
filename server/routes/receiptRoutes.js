@@ -49,26 +49,8 @@ const handleMulterError = (err, req, res, next) => {
 };
 
 // Student routes
-<<<<<<< HEAD
-router.post('/:requestId/upload', 
-  (req, res, next) => {
-    uploadReceipt.single('receipt')(req, res, (err) => {
-      if (err) {
-        console.error('Upload middleware error:', err);
-        return res.status(400).json({
-          success: false,
-          message: err.message || 'Failed to upload file'
-        });
-      }
-      next();
-    });
-  },
-  receiptController.uploadReceipt
-);
+router.post('/:requestId/upload', uploadReceipt.single('receipt'), handleMulterError, receiptController.uploadReceipt);
 router.post('/:requestId/receipt', uploadReceipt.single('receipt'), handleMulterError, receiptController.uploadReceipt);
-=======
-router.post('/:requestId/receipt', uploadReceipt, receiptController.uploadReceipt);
->>>>>>> formula/master
 router.get('/:requestId/receipt', receiptController.getReceipt);
 router.get('/:requestId/receipt/file', receiptController.viewReceipt);
 

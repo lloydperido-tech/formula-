@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Request Summary</title>
+    <link rel="icon" type="image/png" href="public/assets/pictures/cvsudrs.png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="public/css/s_request.css" />
 </head>
@@ -96,12 +97,12 @@
           <!-- ---------- STUDENT INFO ---------- -->
           <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
               <tr><td colspan="2" style="background: #f0f0f0; padding: 10px; font-weight: bold; border: 1px solid #ddd;">Student Information</td></tr>
-              <tr><td style="padding: 8px; border: 1px solid #ddd;">Full Name:</td><td style="padding: 8px; border: 1px solid #ddd;" id="fullName">—</td></tr>
-              <tr><td style="padding: 8px; border: 1px solid #ddd;">Student Number:</td><td style="padding: 8px; border: 1px solid #ddd;" id="studentNum">—</td></tr>
-              <tr><td style="padding: 8px; border: 1px solid #ddd;">CvSU Email:</td><td style="padding: 8px; border: 1px solid #ddd;" id="email">—</td></tr>
-              <tr><td style="padding: 8px; border: 1px solid #ddd;">Program:</td><td style="padding: 8px; border: 1px solid #ddd;" id="program">—</td></tr>
-              <tr><td style="padding: 8px; border: 1px solid #ddd;">Contact Number:</td><td style="padding: 8px; border: 1px solid #ddd;" id="contact">—</td></tr>
-              <tr><td style="padding: 8px; border: 1px solid #ddd;">Complete Address:</td><td style="padding: 8px; border: 1px solid #ddd;" id="address">—</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">Full Name:</td><td style="padding: 8px; border: 1px solid #ddd;" id="fullName">-</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">Student Number:</td><td style="padding: 8px; border: 1px solid #ddd;" id="studentNum">-</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">CvSU Email:</td><td style="padding: 8px; border: 1px solid #ddd;" id="email">-</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">Program:</td><td style="padding: 8px; border: 1px solid #ddd;" id="program">-</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">Contact Number:</td><td style="padding: 8px; border: 1px solid #ddd;" id="contact">-</td></tr>
+              <tr><td style="padding: 8px; border: 1px solid #ddd;">Complete Address:</td><td style="padding: 8px; border: 1px solid #ddd;" id="address">-</td></tr>
           </table>
 
           <!-- ---------- REFERENCE INFO ---------- -->
@@ -176,11 +177,11 @@
     // Populate user info
     document.getElementById('userName').textContent = displayName;
     document.getElementById('fullName').textContent = displayName;
-    document.getElementById('studentNum').textContent = userInfo.studentNumber || user.studentNumber || '—';
-    document.getElementById('email').textContent = userInfo.email || user.email || '—';
-    document.getElementById('program').textContent = userInfo.program || '—';
-    document.getElementById('contact').textContent = userInfo.contactNumber || '—';
-    document.getElementById('address').textContent = userInfo.completeAddress || '—';
+    document.getElementById('studentNum').textContent = userInfo.studentNumber || user.studentNumber || '-';
+    document.getElementById('email').textContent = userInfo.email || user.email || '-';
+    document.getElementById('program').textContent = userInfo.program || '-';
+    document.getElementById('contact').textContent = userInfo.contactNumber || '-';
+    document.getElementById('address').textContent = userInfo.completeAddress || '-';
     
     // Generate reference ID in format YYYY-MMDD-XXXXX
     const now = new Date();
@@ -226,8 +227,8 @@
         
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td style="padding: 8px; border: 1px solid #ddd;">${doc.type || '—'}</td>
-          <td style="padding: 8px; border: 1px solid #ddd;">${doc.purpose || '—'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${doc.type || '-'}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${doc.purpose || '-'}</td>
           <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${doc.quantity || 1}</td>
           <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${price.toFixed(2)}</td>
           <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${rowTotal.toFixed(2)}</td>
@@ -460,3 +461,9 @@
 
 </body>
 </html>
+
+
+
+
+
+

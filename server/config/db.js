@@ -1,35 +1,29 @@
+const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
 
-// Temporary in-memory mock database
-const mockUsers = [
-  { id: 1, email: 'admin@cvsu.edu.ph', role: 'admin', first_name: 'Admin', last_name: 'User' },
-  { id: 2, email: 'student@cvsu.edu.ph', role: 'student', first_name: 'Student', last_name: 'User' }
-];
+// Create Supabase client using environment variables
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
-const supabase = {
-  from: (table) => ({
-    select: () => ({
-      limit: () => ({
-        data: mockUsers,
-        error: null
-      })
-    }),
-    eq: (field, value) => ({
-      single: () => ({
-        data: mockUsers.find(u => u[field] === value),
-        error: null
-      })
-    })
-  })
-};
-
+// Test connection helper
 const testConnection = async () => {
-  console.log('✅ Mock Supabase connected successfully');
-  return true;
+  try {
+    const { error } = await supabase.from('users').select('id').limit(1);
+    if (error && error.code !== 'PGRST116') {
+      // PGRST116: table not found yet
+      throw error;
+    }
+    console.log('✅ Supabase connected successfully');
+    return true;
+  } catch (error) {
+    console.error('❌ Supabase connection failed:', error.message);
+    return false;
+  }
 };
 
-const db = {
+module.exports = {
   supabase,
   testConnection
 };
-
-module.exports = db;
