@@ -566,6 +566,31 @@ main {
   color: #999;
 }
 
+#actionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#actionButtons .btn-secondary {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#actionButtons .btn-secondary:hover {
+  background-color: #e0e0e0;
+  border-color: #999;
+}
+
 /* Status History */
 .history-timeline {
   display: flex;

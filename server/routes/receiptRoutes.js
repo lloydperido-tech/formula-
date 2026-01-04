@@ -56,6 +56,7 @@ router.get('/:requestId/receipt/file', receiptController.viewReceipt);
 
 // Admin routes
 router.patch('/:requestId/receipt/verify', authMiddleware.isAdmin, receiptController.verifyReceipt);
+router.delete('/:requestId/receipt', authMiddleware.isAdmin, receiptController.deleteReceipt);
 router.get('/:requestId/receipt/download', authMiddleware.isAdmin, receiptController.downloadReceipt);
 
 module.exports = router;

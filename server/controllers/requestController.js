@@ -30,10 +30,8 @@ async function generateReferenceNumber() {
     const sequentialNumber = (count || 0) + 1;
     const referenceNumber = `${datePrefix}-${String(sequentialNumber).padStart(5, '0')}`;
     
-    console.log(`Generated reference number: ${referenceNumber} (daily sequence: ${sequentialNumber})`);
     return referenceNumber;
   } catch (err) {
-    console.error('Error generating reference number:', err);
     // Final fallback
     const random = Math.floor(Math.random() * 90000) + 10000;
     return `${datePrefix}-${String(random).padStart(5, '0')}`;
@@ -52,8 +50,6 @@ exports.createRequest = async (req, res) => {
   try {
     const { templateId, quantity, purpose, formData } = req.body;
     const studentId = req.user.id;
-
-    console.log('Creating request:', { studentId, templateId, quantity, purpose });
 
     // Validate inputs
     if (!templateId || !quantity || quantity < 1) {
@@ -94,8 +90,6 @@ exports.createRequest = async (req, res) => {
       template.price_per_copy,
       quantity
     );
-
-    console.log('Template found:', { name: template.document_name, totalAmount });
 
     // Try to create request with retry on duplicate reference number
     let request = null;
@@ -246,8 +240,6 @@ exports.getStudentRequests = async (req, res) => {
     const { data: requests, error, count } = await query
       .order('created_at', { ascending: false });
 
-    console.log('Requests query result:', { count, error, requestCount: requests?.length });
-
     if (error) {
       console.error('Get requests error:', error);
       return res.status(500).json({
@@ -309,6 +301,19 @@ exports.getRequestDetails = async (req, res) => {
         });
       }
 
+      // Fetch status history for this request
+      const { data: history, error: historyError } = await db.supabase
+        .from('request_status_history')
+        .select('id, old_status, new_status, notes, changed_at, changed_by')
+        .eq('request_id', id)
+        .order('changed_at', { ascending: true });
+
+      if (historyError) {
+        console.error('Error fetching status history:', historyError);
+      }
+
+      request.status_history = history || [];
+
       return res.json({
         success: true,
         request
@@ -350,6 +355,19 @@ exports.getRequestDetails = async (req, res) => {
         message: 'Request not found'
       });
     }
+
+    // Fetch status history for this request
+    const { data: history, error: historyError } = await db.supabase
+      .from('request_status_history')
+      .select('id, old_status, new_status, notes, changed_at, changed_by')
+      .eq('request_id', id)
+      .order('changed_at', { ascending: true });
+
+    if (historyError) {
+      console.error('Error fetching status history:', historyError);
+    }
+
+    request.status_history = history || [];
 
     res.json({
       success: true,

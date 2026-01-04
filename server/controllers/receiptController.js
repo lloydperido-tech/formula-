@@ -4,24 +4,16 @@ const path = require('path');
 
 // Upload payment receipt
 exports.uploadReceipt = async (req, res) => {
-  console.log('📤 Upload receipt request received');
-  console.log('Request ID:', req.params.requestId);
-  console.log('User:', req.user);
-  console.log('File:', req.file);
-  
   try {
     const { requestId } = req.params;
     const studentId = req.user.id;
 
     if (!req.file) {
-      console.error('❌ No file uploaded');
       return res.status(400).json({
         success: false,
         message: 'Receipt file is required'
       });
     }
-
-    console.log('✅ File received:', req.file.filename);
 
     // Get request to verify ownership
     const { data: request, error: fetchError } = await db.supabase
@@ -283,13 +275,123 @@ exports.verifyReceipt = async (req, res) => {
   }
 };
 
+// Delete receipt (admin only)
+exports.deleteReceipt = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Admin access required'
+      });
+    }
+
+    const { requestId } = req.params;
+    const { reason } = req.body;
+
+    // Get receipt and request details
+    const { data: receipt, error: receiptError } = await db.supabase
+      .from('payment_receipts')
+      .select('file_path')
+      .eq('request_id', requestId)
+      .single();
+
+    if (receiptError || !receipt) {
+      return res.status(404).json({
+        success: false,
+        message: 'Receipt not found'
+      });
+    }
+
+    // Get request and student info
+    const { data: request, error: requestError } = await db.supabase
+      .from('requests')
+      .select('student_id, reference_number, status')
+      .eq('id', requestId)
+      .single();
+
+    if (requestError || !request) {
+      return res.status(404).json({
+        success: false,
+        message: 'Request not found'
+      });
+    }
+
+    // Delete file from disk
+    try {
+      await fs.unlink(receipt.file_path);
+    } catch (error) {
+      console.error('Error deleting receipt file:', error);
+      // Continue even if file deletion fails
+    }
+
+    // Delete receipt record from database
+    const { error: deleteError } = await db.supabase
+      .from('payment_receipts')
+      .delete()
+      .eq('request_id', requestId);
+
+    if (deleteError) {
+      console.error('Delete receipt error:', deleteError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to delete receipt'
+      });
+    }
+
+    // Update request status back to Requested
+    await db.supabase
+      .from('requests')
+      .update({ status: 'Requested' })
+      .eq('id', requestId);
+
+    // Log status change
+    await db.supabase
+      .from('request_status_history')
+      .insert([{
+        request_id: requestId,
+        old_status: request.status,
+        new_status: 'Requested',
+        changed_by: req.user.id,
+        notes: `Receipt removed by admin. Reason: ${reason || 'No reason provided'}`
+      }])
+      .catch(err => console.error('Error logging status:', err));
+
+    // Create notification for student
+    const notificationMessage = reason 
+      ? `Your payment receipt for request ${request.reference_number} has been removed. Reason: ${reason}. Please upload a new receipt.`
+      : `Your payment receipt for request ${request.reference_number} has been removed. Please upload a new receipt.`;
+
+    await db.supabase
+      .from('notifications')
+      .insert([{
+        user_id: request.student_id,
+        type: 'receipt_removed',
+        title: 'Receipt Removed',
+        message: notificationMessage,
+        reference_id: requestId,
+        is_read: false
+      }])
+      .catch(err => console.error('Error creating notification:', err));
+
+    res.json({
+      success: true,
+      message: 'Receipt deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Delete receipt error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete receipt'
+    });
+  }
+};
+
 // View receipt file (student can view their own, admin can view any)
 exports.viewReceipt = async (req, res) => {
   try {
     const { requestId } = req.params;
     const studentId = req.user.id;
-
-    console.log('🔵 viewReceipt called for requestId:', requestId);
 
     // Get receipt with request ownership check
     const { data: receipt, error: receiptError } = await db.supabase
@@ -298,10 +400,7 @@ exports.viewReceipt = async (req, res) => {
       .eq('request_id', requestId)
       .single();
 
-    console.log('🔵 Receipt query result:', { receipt, error: receiptError });
-
     if (receiptError || !receipt) {
-      console.log('❌ Receipt not found in database');
       return res.status(404).json({
         success: false,
         message: 'Receipt not found'
@@ -317,7 +416,6 @@ exports.viewReceipt = async (req, res) => {
         .single();
 
       if (requestError || !request || request.student_id !== studentId) {
-        console.log('❌ Unauthorized access');
         return res.status(403).json({
           success: false,
           message: 'Unauthorized'
@@ -329,28 +427,19 @@ exports.viewReceipt = async (req, res) => {
     let filePath = receipt.file_path;
     
     if (!filePath) {
-      console.log('❌ No file_path stored for receipt');
       return res.status(404).json({
         success: false,
         message: 'Receipt file path not found'
       });
     }
     
-    console.log('🔵 File path from DB:', filePath);
-    
     // Normalize the path
     const normalizedPath = path.normalize(filePath);
-    console.log('🔵 Normalized path:', normalizedPath);
     
     // Check if file exists
     try {
       const stats = await fs.access(normalizedPath);
-      console.log('✅ File exists at:', normalizedPath);
     } catch (err) {
-      console.log('❌ File not found or not accessible');
-      console.log('Attempted path:', normalizedPath);
-      console.log('Error:', err.code, err.message);
-      
       // Try to provide more helpful error
       return res.status(404).json({
         success: false,
@@ -362,8 +451,6 @@ exports.viewReceipt = async (req, res) => {
     // Verify path is within uploads directory (security check)
     const uploadsDir = path.normalize(path.join(__dirname, '..', 'uploads'));
     if (!normalizedPath.startsWith(uploadsDir) && !normalizedPath.toLowerCase().startsWith(uploadsDir.toLowerCase())) {
-      console.log('❌ Access denied - path outside uploads directory');
-      console.log('Path:', normalizedPath, 'Allowed dir:', uploadsDir);
       return res.status(403).json({
         success: false,
         message: 'Access denied'
@@ -371,11 +458,9 @@ exports.viewReceipt = async (req, res) => {
     }
 
     // Send the file
-    console.log('✅ Sending file:', normalizedPath);
     res.sendFile(normalizedPath);
 
   } catch (error) {
-    console.error('View receipt error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to load receipt',
@@ -425,7 +510,6 @@ exports.downloadReceipt = async (req, res) => {
     res.download(filePath, `receipt-${requestId}${path.extname(filePath)}`);
 
   } catch (error) {
-    console.error('Download receipt error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to download receipt'

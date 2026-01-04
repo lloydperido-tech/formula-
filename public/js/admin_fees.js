@@ -124,7 +124,6 @@ function markAllAsRead() {
 
 // Initialize notifications polling
 function initNotifications() {
-  console.log('Initializing notifications system...');
   loadNotifications();
   
   // Poll for new notifications every 5 seconds
@@ -236,12 +235,7 @@ function showNewRequestNotification(notification) {
   
   // Show alert
   alert(message);
-  
-  console.log('New request notification:', notification.reference_number);
-}
 
-// View request details from notification
-function viewRequestDetails(requestId) {
   window.location.href = `admin_manage_requests.html?id=${requestId}`;
 }
 

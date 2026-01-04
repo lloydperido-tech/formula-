@@ -39,7 +39,6 @@ app.get('/api/health', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error('Error:', err.message);
   res.status(err.status || 500).json({
     success: false,
     message: err.message || 'Internal server error'
@@ -50,15 +49,9 @@ app.use((err, req, res, next) => {
 const startServer = async () => {
   // Test database connection
   const dbConnected = await testConnection();
-  
-  if (!dbConnected) {
-    console.error('⚠️  Server starting without database connection');
-  }
 
   app.listen(PORT, () => {
-    console.log(`\n🚀 SmartQ Server running on http://localhost:${PORT}`);
-    console.log(`📁 Admin panel: http://localhost:${PORT}/admin/dashboard.html`);
-    console.log(`📄 Student portal: http://localhost:${PORT}/landing.html\n`);
+    // Server started
   });
 };
 

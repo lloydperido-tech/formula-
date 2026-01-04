@@ -186,7 +186,7 @@
         
         
         // Create default first document row
-        createDocRow();
+        createDocRow(true);
       });
       
       // Notification functions
@@ -238,7 +238,7 @@
       const goBackBtn = document.getElementById("goBack");
       const understandBtn = document.getElementById("understand");
 
-      function createDocRow() {
+      function createDocRow(isInitial = false) {
         const row = document.createElement("div");
         row.className = "doc-row";
 
@@ -272,8 +272,7 @@
             </div>
             <button class='qty-btn plus-btn' type='button'>+</button>
           </div>
-
-          <button class='remove-btn' type='button'><i class='fa-solid fa-trash'></i></button>
+          ${isInitial ? "<div class='remove-placeholder' aria-hidden='true'></div>" : "<button class='remove-btn' type='button'><i class='fa-solid fa-trash'></i></button>"}
         `;
 
         const qtyInput = row.querySelector('.qty-input');
@@ -287,12 +286,15 @@
           qtyInput.value = parseInt(qtyInput.value) + 1;
         };
         
-        row.querySelector('.remove-btn').onclick = () => row.remove();
+        const removeBtn = row.querySelector('.remove-btn');
+        if (removeBtn) {
+          removeBtn.onclick = () => row.remove();
+        }
 
         container.appendChild(row);
       }
 
-      addBtn.onclick = createDocRow;
+      addBtn.onclick = () => createDocRow(false);
       
       confirmBtn.onclick = () => {
         // Validate all required fields

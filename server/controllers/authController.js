@@ -168,8 +168,6 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    console.log('Login attempt for:', email);
-
     // Get user
     const { data: user, error } = await db.supabase
       .from('users')
@@ -178,18 +176,14 @@ const login = async (req, res) => {
       .single();
 
     if (error || !user) {
-      console.log('User not found:', email, error);
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
 
-    console.log('User found:', user.email, 'Role:', user.role, 'Verified:', user.is_verified);
-
     // Check if student account is verified
     if (user.role === 'student' && !user.is_verified) {
-      console.log('Account not verified');
       return res.status(401).json({
         success: false,
         message: 'Please verify your email before logging in'
@@ -200,14 +194,11 @@ const login = async (req, res) => {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
-      console.log('Invalid password for:', email);
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password'
       });
     }
-
-    console.log('Login successful for:', email);
 
     // Generate JWT token
     const token = jwt.sign(

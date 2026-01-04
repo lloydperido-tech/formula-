@@ -1091,8 +1091,7 @@ function logout() {
 
 // Initialize notifications polling
 function initNotifications() {
-    console.log('Initializing notifications system...');
-    loadNotifications();
+
     
     // Poll for new notifications every 5 seconds
     notificationPollInterval = setInterval(() => {

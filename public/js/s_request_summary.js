@@ -19,7 +19,7 @@ async function loadRequestSummary() {
             return;
         }
 
-        const token = localStorage.getItem('authToken');
+        const token = localStorage.getItem('authToken') || localStorage.getItem('token');
         if (!token) {
             window.location.href = 'login.html';
             return;
@@ -146,9 +146,28 @@ function renderPaymentInfo(request) {
                     </span>
                 </label>
                 <p class="upload-hint">JPG, PNG, or PDF • Max 5MB</p>
-                <button id="submitReceiptBtn" class="btn-primary" style="margin-top: 15px; display: none;">
-                    <i class="fa-solid fa-check"></i> Submit Receipt
-                </button>
+                <div id="fileInfoSection" style="display: none; margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f5f5f5; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <i class="fa-solid fa-file" style="color: #666; margin-right: 8px;"></i>
+                            <span id="fileName" style="font-size: 14px; color: #333;"></span>
+                        </div>
+                        <button id="clearFileBtn" class="btn-secondary" style="padding: 6px 12px; font-size: 13px;">
+                            <i class="fa-solid fa-times"></i> Clear
+                        </button>
+                    </div>
+                    <div id="receiptPreviewArea" style="margin-top: 15px; border: 2px solid #e0e0e0; border-radius: 8px; padding: 15px; background: white; text-align: center; max-height: 500px; overflow: auto;">
+                        <!-- Preview will be inserted here -->
+                    </div>
+                </div>
+                <div id="actionButtons" style="display: none; margin-top: 15px; gap: 10px;">
+                    <button id="submitReceiptBtn" class="btn-primary">
+                        <i class="fa-solid fa-check"></i> Submit Receipt
+                    </button>
+                    <button id="changeFileBtn" class="btn-secondary">
+                        <i class="fa-solid fa-rotate"></i> Choose Different File
+                    </button>
+                </div>
             </div>
         `;
     } else if (request.status === 'Verifying') {
@@ -170,11 +189,37 @@ function renderPaymentInfo(request) {
     if (request.status === 'Requested') {
         const fileInput = document.getElementById('receiptFile');
         const submitBtn = document.getElementById('submitReceiptBtn');
+        const clearBtn = document.getElementById('clearFileBtn');
+        const changeBtn = document.getElementById('changeFileBtn');
+        const fileInfoSection = document.getElementById('fileInfoSection');
+        const fileName = document.getElementById('fileName');
+        const actionButtons = document.getElementById('actionButtons');
+        const previewArea = document.getElementById('receiptPreviewArea');
         
         fileInput.addEventListener('change', function() {
             if (this.files.length > 0) {
-                submitBtn.style.display = 'inline-flex';
+                const file = this.files[0];
+                // Show file info and action buttons
+                fileName.textContent = file.name;
+                fileInfoSection.style.display = 'block';
+                actionButtons.style.display = 'flex';
+                
+                // Generate preview
+                generateReceiptPreview(file, previewArea);
             }
+        });
+
+        // Clear file button
+        clearBtn.addEventListener('click', () => {
+            fileInput.value = '';
+            fileInfoSection.style.display = 'none';
+            actionButtons.style.display = 'none';
+            previewArea.innerHTML = '';
+        });
+
+        // Change file button
+        changeBtn.addEventListener('click', () => {
+            fileInput.click();
         });
 
         submitBtn.addEventListener('click', () => submitReceipt(request.id));
@@ -186,11 +231,8 @@ function renderPaymentInfo(request) {
 
 // Submit Receipt
 async function submitReceipt(requestId) {
-    console.log('🔵 submitReceipt called with requestId:', requestId);
     try {
         const fileInput = document.getElementById('receiptFile');
-        console.log('🔵 File input element:', fileInput);
-        console.log('🔵 Files selected:', fileInput?.files);
         
         if (!fileInput.files[0]) {
             alert('Please select a receipt file');
@@ -199,13 +241,10 @@ async function submitReceipt(requestId) {
 
         const formData = new FormData();
         formData.append('receipt', fileInput.files[0]);
-        console.log('🔵 FormData created, file:', fileInput.files[0].name);
 
         const token = localStorage.getItem('authToken');
-        console.log('🔵 Token exists:', !!token);
         
         const url = `${API_BASE}/receipts/${requestId}/upload`;
-        console.log('🔵 Upload URL:', url);
         
         const response = await fetch(url, {
             method: 'POST',
@@ -214,12 +253,8 @@ async function submitReceipt(requestId) {
             },
             body: formData
         });
-
-        console.log('🔵 Response status:', response.status);
-        console.log('🔵 Response ok:', response.ok);
         
         const responseData = await response.json();
-        console.log('🔵 Response data:', responseData);
 
         if (!response.ok) {
             throw new Error(responseData.message || 'Failed to upload receipt');
@@ -228,7 +263,6 @@ async function submitReceipt(requestId) {
         alert('Receipt uploaded successfully!');
         window.location.reload();
     } catch (error) {
-        console.error('🔴 Error uploading receipt:', error);
         alert('Failed to upload receipt: ' + error.message);
     }
 }
@@ -238,13 +272,10 @@ async function loadReceiptImage(requestId) {
     try {
         const token = localStorage.getItem('authToken');
         const url = `${API_BASE}/receipts/${requestId}/receipt/file`;
-        console.log('Loading receipt from:', url);
         
         const response = await fetch(url, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-
-        console.log('Receipt fetch response status:', response.status);
 
         if (response.ok) {
             const blob = await response.blob();
@@ -280,6 +311,65 @@ async function loadReceiptImage(requestId) {
     }
 }
 
+// Generate Receipt Preview
+function generateReceiptPreview(file, previewArea) {
+    const fileType = file.type;
+    const fileSize = file.size;
+    
+    // Check file size (5MB limit)
+    if (fileSize > 5 * 1024 * 1024) {
+        previewArea.innerHTML = `
+            <div style="padding: 20px; color: #d32f2f;">
+                <i class="fa-solid fa-exclamation-triangle" style="font-size: 24px;"></i>
+                <p style="margin-top: 10px;">File size exceeds 5MB limit</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Show loading state
+    previewArea.innerHTML = `
+        <div style="padding: 20px; color: #666;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px;"></i>
+            <p style="margin-top: 10px;">Loading preview...</p>
+        </div>
+    `;
+    
+    if (fileType.startsWith('image/')) {
+        // Image preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewArea.innerHTML = `
+                <img src="${e.target.result}" alt="Receipt Preview" style="max-width: 100%; max-height: 450px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            `;
+        };
+        reader.readAsDataURL(file);
+    } else if (fileType === 'application/pdf') {
+        // PDF preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const blob = new Blob([e.target.result], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            previewArea.innerHTML = `
+                <iframe src="${url}" style="width: 100%; height: 450px; border: none; border-radius: 6px;"></iframe>
+                <p style="margin-top: 10px; font-size: 13px; color: #666;">
+                    <i class="fa-solid fa-file-pdf"></i> PDF Document Preview
+                </p>
+            `;
+        };
+        reader.readAsArrayBuffer(file);
+    } else {
+        // Unsupported file type
+        previewArea.innerHTML = `
+            <div style="padding: 20px; color: #666;">
+                <i class="fa-solid fa-file" style="font-size: 24px;"></i>
+                <p style="margin-top: 10px;">Preview not available for this file type</p>
+                <p style="font-size: 13px; color: #999;">${file.name}</p>
+            </div>
+        `;
+    }
+}
+
 // Render Status History
 function renderStatusHistory(history) {
     const historyContainer = document.getElementById('statusHistory');
@@ -294,34 +384,35 @@ function renderStatusHistory(history) {
         return;
     }
 
-    const historyHtml = history.map(item => `
-        <div class="history-item">
-            <div class="history-icon">
-                <i class="fa-solid fa-clock"></i>
+    const historyHtml = history.map(item => {
+        const changeLabel = item.old_status
+            ? `${item.old_status} -> ${item.new_status}`
+            : item.new_status;
+        const changeDate = formatDate(item.changed_at, true);
+
+        return `
+            <div class="history-item">
+                <div class="history-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="history-content">
+                    <div class="history-status">${changeLabel}</div>
+                    <div class="history-date">Changed: ${changeDate}</div>
+                    ${item.notes ? `<p class="history-notes">${item.notes}</p>` : ''}
+                </div>
             </div>
-            <div class="history-content">
-                <div class="history-status">${item.new_status}</div>
-                <div class="history-date">${formatDate(item.changed_at)}</div>
-                ${item.notes ? `<p class="history-notes">${item.notes}</p>` : ''}
-            </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 
     historyContainer.innerHTML = historyHtml;
 }
 
 // Format Date
-function formatDate(dateString) {
+function formatDate(dateString, includeTime = false) {
     if (!dateString) return 'N/A';
-    
     const date = new Date(dateString);
-    const options = { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    };
-    
-    return date.toLocaleDateString('en-US', options);
+    const options = includeTime
+        ? { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+        : { year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('en-PH', options);
 }

@@ -14,7 +14,6 @@ const verifyToken = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Token decoded:', decoded);
     
     // Get user from database
     const { data: user, error } = await db.supabase
@@ -22,8 +21,6 @@ const verifyToken = async (req, res, next) => {
       .select('id, email, role, first_name, last_name')
       .eq('id', decoded.id)
       .single();
-
-    console.log('User fetched from DB:', user, 'Error:', error);
 
     if (error || !user) {
       return res.status(401).json({ 
@@ -33,10 +30,8 @@ const verifyToken = async (req, res, next) => {
     }
 
     req.user = user;
-    console.log('req.user set to:', req.user);
     next();
   } catch (error) {
-    console.error('Auth error:', error);
     return res.status(401).json({ 
       success: false, 
       message: 'Invalid token' 

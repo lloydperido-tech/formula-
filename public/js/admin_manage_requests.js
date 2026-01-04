@@ -272,6 +272,16 @@ function setupModalListeners() {
       }
     });
   }
+
+  const removeReceiptBtn = document.getElementById('removeReceiptBtn');
+  if (removeReceiptBtn) {
+    removeReceiptBtn.addEventListener('click', openRemoveReceiptModal);
+  }
+
+  const confirmRemoveBtn = document.getElementById('confirmRemoveReceiptBtn');
+  if (confirmRemoveBtn) {
+    confirmRemoveBtn.addEventListener('click', confirmRemoveReceipt);
+  }
 }
 
 async function openDetailsModal(requestId, event) {
@@ -465,10 +475,17 @@ async function loadReceiptPreview(requestId, options = {}) {
     receiptObjectUrl = URL.createObjectURL(blob);
 
     const viewLink = document.getElementById('viewReceiptLink');
+    const removeBtn = document.getElementById('removeReceiptBtn');
+    
     if (viewLink) {
       viewLink.href = receiptObjectUrl;
       viewLink.style.display = 'inline-block';
       viewLink.textContent = blob.type && blob.type.includes('pdf') ? 'Download receipt' : 'Open receipt';
+    }
+    
+    // Show remove button when receipt is available
+    if (removeBtn) {
+      removeBtn.style.display = 'inline-block';
     }
 
     const image = document.getElementById('receiptImage');
@@ -494,6 +511,73 @@ function closeDetailsModal() {
   if (modal) modal.style.display = 'none';
   resetReceiptSection();
   currentRequestId = null;
+}
+
+function openRemoveReceiptModal() {
+  if (!currentRequestId) {
+    alert('No request selected');
+    return;
+  }
+  
+  const modal = document.getElementById('removeReceiptModal');
+  const reasonField = document.getElementById('removeReason');
+  
+  if (reasonField) reasonField.value = '';
+  if (modal) modal.style.display = 'block';
+}
+
+function closeRemoveReceiptModal() {
+  const modal = document.getElementById('removeReceiptModal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function confirmRemoveReceipt() {
+  if (!currentRequestId) {
+    alert('No request selected');
+    return;
+  }
+
+  const reason = document.getElementById('removeReason').value.trim();
+  
+  if (!reason) {
+    alert('Please provide a reason for removing the receipt');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch(`${API_BASE}/receipts/${currentRequestId}/receipt`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ reason })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || 'Failed to remove receipt');
+    }
+
+    alert('Receipt removed successfully. Student has been notified.');
+    closeRemoveReceiptModal();
+    
+    // Reload receipt section to show updated state
+    resetReceiptSection('No receipt uploaded. Receipt was removed.');
+    
+    // Hide the remove button
+    const removeBtn = document.getElementById('removeReceiptBtn');
+    if (removeBtn) removeBtn.style.display = 'none';
+    
+    // Reload requests to update the table
+    await loadRequests();
+    
+  } catch (error) {
+    console.error('Remove receipt error:', error);
+    alert('Failed to remove receipt: ' + error.message);
+  }
 }
 
 async function updateRequestStatus() {
@@ -550,7 +634,6 @@ async function updateRequestStatus() {
 
 // Initialize notifications polling
 function initNotifications() {
-  console.log('Initializing notifications system...');
   loadNotifications();
   
   // Poll for new notifications every 5 seconds
@@ -667,8 +750,6 @@ function showNewRequestNotification(notification) {
   
   // Show alert
   alert(message);
-  
-  console.log('New request notification:', notification.reference_number);
 }
 
 // Toggle notifications dropdown

@@ -62,9 +62,6 @@
             <i class="fa-solid fa-bell"></i>
             <span class="notif-badge" id="notifBadge" style="display: none;">0</span>
           </button>
-          <button class="user" aria-label="User menu" onclick="toggleProfileMenu()">
-            <i class="fa-regular fa-user"></i>
-          </button>
           <span class="username" id="userName">User</span>
         </div>
         
@@ -77,14 +74,6 @@
           <div class="notif-list" id="notifList">
             <div class="notif-empty">No new notifications</div>
           </div>
-        </div>
-        
-        <!-- Profile Menu Dropdown -->
-        <div class="profile-menu-dropdown" id="profileMenuDropdown" style="display: none;">
-          <a href="#" onclick="logout(); return false;" class="profile-menu-item">
-            <i class="fa-solid fa-sign-out"></i>
-            <span>Logout</span>
-          </a>
         </div>
       </header>
 
@@ -112,7 +101,7 @@
           </table>
 
           <!-- ---------- REQUEST DETAILS ---------- -->
-          <div style="font-weight: bold; margin: 20px 0 10px 0;">>>> Request Details <<<</div>
+          <div style="font-weight: bold; margin: 20px 0 10px 0;"> Request Details</div>
 
           <table border="1" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
               <tr style="background: #f0f0f0;">
@@ -269,14 +258,9 @@
   function toggleNotifications() {
     const dropdown = document.getElementById('notificationsDropdown');
     const profileMenu = document.getElementById('profileMenuDropdown');
-    profileMenu.style.display = 'none';
-    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-  }
-  
-  function toggleProfileMenu() {
-    const dropdown = document.getElementById('profileMenuDropdown');
-    const notifDropdown = document.getElementById('notificationsDropdown');
-    notifDropdown.style.display = 'none';
+    if (profileMenu) {
+      profileMenu.style.display = 'none';
+    }
     dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
   }
   

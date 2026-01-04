@@ -470,6 +470,7 @@
   gap: 12px;
   align-items: center;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .status-pill.receipt-status-pill {

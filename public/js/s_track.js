@@ -1,5 +1,4 @@
 // Student Tracking Page JavaScript
-console.log('🚀 s_track.js loaded - Version 3.1 - ' + new Date().toISOString());
 
 const API_BASE = 'http://localhost:3000/api';
 let studentRequests = [];
@@ -9,8 +8,6 @@ let currentSortOrder = 'asc';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Page loaded, starting initialization');
-    
     // Test API connection first
     testAPIConnection();
     
@@ -88,9 +85,8 @@ async function testAPIConnection() {
     try {
         const response = await fetch(`${API_BASE}/health`);
         const data = await response.json();
-        console.log('✓ API Health Check:', data);
     } catch (error) {
-        console.error('✗ API Health Check failed:', error);
+        // Silently fail
     }
 }
 
@@ -133,17 +129,13 @@ function viewRequestSummary(requestId) {
 async function loadStudentRequests() {
     try {
         const token = localStorage.getItem('authToken');
-        console.log('Token found:', !!token);
-        console.log('Token value:', token ? token.substring(0, 20) + '...' : 'none');
         
         if (!token) {
-            console.log('No token found, redirecting to login');
             window.location.href = 'login.html';
             return;
         }
 
         const url = `${API_BASE}/requests`;
-        console.log('Fetching requests from:', url);
         
         // Create abort controller with 10 second timeout
         const controller = new AbortController();
@@ -159,39 +151,22 @@ async function loadStudentRequests() {
         });
 
         clearTimeout(timeoutId);
-
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        console.log('Response headers:', {
-            'Content-Type': response.headers.get('Content-Type'),
-            'Content-Length': response.headers.get('Content-Length')
-        });
         
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('API Error Response:', {
-                status: response.status,
-                statusText: response.statusText,
-                body: errorText
-            });
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
         const data = await response.json();
-        console.log('Full API Response data:', data);
         
         if (!data.success) {
-            console.error('API returned success: false', data);
             throw new Error(data.message || 'Failed to fetch requests');
         }
         
         studentRequests = data.requests || [];
-        console.log('Student requests array:', studentRequests);
-        console.log('Number of requests:', studentRequests.length);
 
         renderRequestsTable();
     } catch (error) {
-        console.error('Error loading requests:', error);
         if (error.name === 'AbortError') {
             document.getElementById('requestsTableBody').innerHTML = 
                 `<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #d32f2f;">Request timeout - Server may not be responding. Please refresh the page.</td></tr>`;
@@ -268,18 +243,12 @@ function filterRequests() {
 
 // Show Request Details
 async function showRequestDetails(requestId) {
-    console.log('🔵 showRequestDetails CALLED with requestId:', requestId);
-    console.log('Function is working!');
-    
     try {
         const token = localStorage.getItem('authToken');
-        console.log('Loading details for request:', requestId);
         
         const response = await fetch(`${API_BASE}/requests/details/${requestId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-
-        console.log('Details response status:', response.status);
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
@@ -287,7 +256,6 @@ async function showRequestDetails(requestId) {
         }
         
         const data = await response.json();
-        console.log('Details loaded:', data);
         currentSelectedRequest = data.request;
 
         // Populate basic details
@@ -316,7 +284,6 @@ async function showRequestDetails(requestId) {
         // Show details card
         document.querySelector('.details-card').removeAttribute('aria-hidden');
     } catch (error) {
-        console.error('Error loading request details:', error);
         alert(`Failed to load request details: ${error.message}`);
     }
 }
@@ -360,8 +327,6 @@ function renderStatusHistory(history) {
 
 // Handle Payment Section
 function handlePaymentSection(request, requestId) {
-    console.log('📋 handlePaymentSection called:', { status: request.status, requestId });
-    
     const paymentSection = document.getElementById('paymentSection');
     const receiptStatusText = document.getElementById('receiptStatus');
     const receiptPreview = document.getElementById('receiptPreview');
@@ -369,17 +334,7 @@ function handlePaymentSection(request, requestId) {
     const submitBtn = document.getElementById('submitReceiptBtn');
     const downloadBtn = document.getElementById('downloadReceiptBtn');
 
-    console.log('Elements found:', {
-        paymentSection: !!paymentSection,
-        receiptStatusText: !!receiptStatusText,
-        receiptPreview: !!receiptPreview,
-        uploadWidget: !!uploadWidget,
-        submitBtn: !!submitBtn,
-        downloadBtn: !!downloadBtn
-    });
-
     const needsPayment = ['Requested', 'Verifying'].includes(request.status);
-    console.log('Needs payment?', needsPayment);
 
     if (!needsPayment) {
         paymentSection.style.display = 'none';
@@ -390,7 +345,6 @@ function handlePaymentSection(request, requestId) {
     paymentSection.style.display = 'block';
 
     if (request.status === 'Requested') {
-        console.log('Status: Requested - showing upload widget');
         receiptStatusText.textContent = 'Waiting for payment submission...';
         receiptStatusText.className = 'receipt-status-text pending';
         receiptPreview.style.display = 'none';
@@ -398,7 +352,6 @@ function handlePaymentSection(request, requestId) {
         submitBtn.style.display = 'block';
         downloadBtn.style.display = 'none';
     } else if (request.status === 'Verifying') {
-        console.log('Status: Verifying - loading receipt image');
         receiptStatusText.textContent = 'Receipt submitted - pending admin verification...';
         receiptStatusText.className = 'receipt-status-text submitted';
         uploadWidget.style.display = 'none';
@@ -406,7 +359,6 @@ function handlePaymentSection(request, requestId) {
         downloadBtn.style.display = 'inline-block';
 
         // Try to load receipt image
-        console.log('🔄 Calling loadReceiptImage for:', requestId);
         loadReceiptImage(requestId);
     }
 }
@@ -414,7 +366,6 @@ function handlePaymentSection(request, requestId) {
 // Load Receipt Image
 async function loadReceiptImage(requestId) {
     try {
-        console.log('Loading receipt image for request:', requestId);
         const token = localStorage.getItem('authToken');
         
         // First get receipt metadata
@@ -423,18 +374,15 @@ async function loadReceiptImage(requestId) {
         });
 
         if (!response.ok) {
-            console.log('No receipt found for this request');
             return;
         }
 
         const data = await response.json();
         const receipt = data.receipt;
-        console.log('Receipt data:', receipt);
 
         if (receipt && receipt.file_path) {
             // Now get the actual image file with authentication
             const imageUrl = `${API_BASE}/receipts/${requestId}/receipt/file`;
-            console.log('Loading image from:', imageUrl);
             
             // Fetch the image with authorization and convert to blob
             const imageResponse = await fetch(imageUrl, {
@@ -448,14 +396,11 @@ async function loadReceiptImage(requestId) {
                 const imgElement = document.getElementById('receiptImage');
                 imgElement.src = objectUrl;
                 imgElement.onload = () => {
-                    console.log('✅ Image loaded successfully');
                     document.getElementById('receiptPreview').style.display = 'block';
                 };
                 imgElement.onerror = () => {
-                    console.error('❌ Failed to load image');
+                    // Silently fail
                 };
-            } else {
-                console.error('Failed to fetch image, status:', imageResponse.status);
             }
 
             const statusElement = document.getElementById('receiptVerificationStatus');
@@ -471,7 +416,7 @@ async function loadReceiptImage(requestId) {
             }
         }
     } catch (error) {
-        console.error('Error loading receipt image:', error);
+        // Silently fail
     }
 }
 
@@ -512,15 +457,11 @@ async function submitReceipt() {
             return;
         }
 
-        console.log('📤 Uploading receipt for request:', currentSelectedRequest.id);
-        console.log('File:', file.name, file.type, file.size);
-
         const formData = new FormData();
         formData.append('receipt', file);
 
         const token = localStorage.getItem('authToken');
         const url = `${API_BASE}/receipts/${currentSelectedRequest.id}/receipt`;
-        console.log('Upload URL:', url);
 
         const response = await fetch(url, {
             method: 'POST',
@@ -528,21 +469,13 @@ async function submitReceipt() {
             body: formData
         });
 
-        console.log('Response status:', response.status);
-        console.log('Response headers:', {
-            'Content-Type': response.headers.get('Content-Type'),
-            'Content-Length': response.headers.get('Content-Length')
-        });
-
         const contentType = response.headers.get('Content-Type');
         let result;
         
         if (contentType && contentType.includes('application/json')) {
             result = await response.json();
-            console.log('Response data:', result);
         } else {
             const text = await response.text();
-            console.log('Response text:', text);
             result = { message: text || 'Unknown error' };
         }
 
@@ -557,7 +490,6 @@ async function submitReceipt() {
         loadStudentRequests();
         await showRequestDetails(currentSelectedRequest.id);
     } catch (error) {
-        console.error('Error submitting receipt:', error);
         alert(`Failed to upload receipt: ${error.message}`);
     }
 }
@@ -583,7 +515,6 @@ async function downloadReceipt() {
         link.click();
         URL.revokeObjectURL(url);
     } catch (error) {
-        console.error('Error downloading receipt:', error);
         alert('Failed to download receipt');
     }
 }

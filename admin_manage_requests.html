@@ -186,7 +186,7 @@
                             </div>
                             <div class="receipt-actions">
                                 <a id="viewReceiptLink" class="action-link" href="#" target="_blank" rel="noopener" style="display: none;">Open receipt</a>
-                                <button id="reloadReceiptBtn" class="ghost-btn" type="button">Reload receipt</button>
+                                <button id="removeReceiptBtn" class="btn-danger" type="button" style="display: none;">Remove Receipt</button>
                             </div>
                         </div>
                     </div>
@@ -215,6 +215,27 @@
             <div class="modal-footer">
                 <button id="closeDetailsBtn" class="btn-secondary" onclick="closeDetailsModal()">Close</button>
                 <button id="updateStatusBtn" class="btn-primary">Update Status</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remove Receipt Modal -->
+    <div id="removeReceiptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Remove Receipt</h3>
+                <button class="modal-close" onclick="closeRemoveReceiptModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px;">Are you sure you want to remove this receipt? The student will be notified and will need to upload a new one.</p>
+                <div class="form-group">
+                    <label for="removeReason">Reason for Removal:</label>
+                    <textarea id="removeReason" class="form-textarea" placeholder="Explain why the receipt is being removed (e.g., unclear image, wrong receipt, etc.)" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeRemoveReceiptModal()">Cancel</button>
+                <button id="confirmRemoveReceiptBtn" class="btn-danger">Remove Receipt</button>
             </div>
         </div>
     </div>
