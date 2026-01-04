@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Requests - Admin | CvSU DRS</title>
+    <title>Manage Requests - CvSU DRS</title>
     <link rel="icon" type="image/png" href="public/assets/pictures/cvsudrs.png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="public/css/admin_dashboard.css">
@@ -73,8 +73,8 @@
         <main class="manage-requests">
             <div class="card controls-card">
                 <div class="search-group">
-                    <label for="searchRef" class="visually-hidden">Search by Reference ID</label>
-                    <input type="text" id="searchRef" placeholder="Search reference ID..." autocomplete="off" />
+                    <label for="searchRef" class="visually-hidden">Search requests</label>
+                    <input type="text" id="searchRef" placeholder="Search information..." autocomplete="off" />
                     <button id="clearSearch" class="ghost-btn" type="button">Clear</button>
                 </div>
                 <div class="summary" id="summaryText">Showing 0 requests</div>
@@ -85,13 +85,13 @@
                     <table class="requests-table">
                         <thead>
                             <tr>
-                                <th>Reference #</th>
-                                <th>Student Name</th>
-                                <th>Student Number</th>
-                                <th>Program</th>
-                                <th>Document</th>
-                                <th>Date</th>
-                                <th>Status</th>
+                                    <th class="sortable" data-column="reference_number">Reference #</th>
+                                    <th class="sortable" data-column="student_name">Student Name</th>
+                                    <th class="sortable" data-column="student_number">Student Number</th>
+                                    <th class="sortable" data-column="program">Program</th>
+                                    <th class="sortable" data-column="document_name">Document</th>
+                                    <th class="sortable" data-column="created_at">Date</th>
+                                    <th class="sortable" data-column="status">Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>

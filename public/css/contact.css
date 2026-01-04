@@ -254,6 +254,11 @@ main::after {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
+.navbar .logo {
+  display: flex;
+  align-items: center;
+}
+
 .navbar .logo img {
   height: 110px;
   margin-top: 10px;

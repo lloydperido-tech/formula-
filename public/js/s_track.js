@@ -4,6 +4,8 @@ console.log('🚀 s_track.js loaded - Version 3.1 - ' + new Date().toISOString()
 const API_BASE = 'http://localhost:3000/api';
 let studentRequests = [];
 let currentSelectedRequest = null;
+let currentSortColumn = null;
+let currentSortOrder = 'asc';
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,10 +14,74 @@ document.addEventListener('DOMContentLoaded', () => {
     // Test API connection first
     testAPIConnection();
     
+    setupColumnSorting();
     loadStudentRequests();
     setupEventListeners();
     updateUsername();
 });
+
+function setupColumnSorting() {
+    const headers = document.querySelectorAll('.requests-table th.sortable');
+    headers.forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.getAttribute('data-column');
+
+            if (currentSortColumn === column) {
+                currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                currentSortOrder = 'asc';
+            }
+
+            document.querySelectorAll('.requests-table th.sortable').forEach(h => {
+                h.classList.remove('sort-asc', 'sort-desc');
+            });
+            header.classList.add(currentSortOrder === 'asc' ? 'sort-asc' : 'sort-desc');
+
+            sortRequests(studentRequests, column, currentSortOrder);
+            const searchTerm = document.getElementById('track-input-card')?.value?.trim();
+            if (searchTerm) {
+                filterRequests();
+            } else {
+                renderRequestsTable();
+            }
+        });
+    });
+}
+
+function sortRequests(list, column, order) {
+    const direction = order === 'asc' ? 1 : -1;
+
+    list.sort((a, b) => {
+        const aVal = getColumnValue(a, column);
+        const bVal = getColumnValue(b, column);
+
+        // Numeric comparison for total amount
+        if (column === 'total_amount') {
+            return (Number(aVal) - Number(bVal)) * direction;
+        }
+
+        const aStr = String(aVal || '').toLowerCase();
+        const bStr = String(bVal || '').toLowerCase();
+        if (aStr === bStr) return 0;
+        return aStr > bStr ? 1 * direction : -1 * direction;
+    });
+}
+
+function getColumnValue(item, column) {
+    switch (column) {
+        case 'reference_number':
+            return item.reference_number || '';
+        case 'document_name':
+            return item.document_templates?.document_name || '';
+        case 'total_amount':
+            return Number(item.total_amount) || 0;
+        case 'status':
+            return item.status || '';
+        default:
+            return '';
+    }
+}
 
 // Test API Connection
 async function testAPIConnection() {

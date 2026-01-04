@@ -6,14 +6,79 @@ let lastReceiptStatus = null;
 let lastRequestStatus = null;
 let notificationPollInterval = null;
 let lastNotificationCount = 0;
+let currentNotificationCount = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
   hydrateAdminName();
   setupSearch();
+  setupColumnSorting();
   loadRequests();
   setupModalListeners();
   initNotifications();
+  
+  // Check if there's a request ID in the URL to open
+  const urlParams = new URLSearchParams(window.location.search);
+  const requestId = urlParams.get('id');
+  if (requestId) {
+    // Open the modal after a short delay to ensure page is fully loaded
+    setTimeout(() => openDetailsModal(requestId), 500);
+    // Remove the id parameter from the URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
 });
+
+let currentSortColumn = null;
+let currentSortOrder = 'asc';
+
+function setupColumnSorting() {
+  const headers = document.querySelectorAll('th.sortable');
+  headers.forEach(header => {
+    header.addEventListener('click', function() {
+      const columnName = this.getAttribute('data-column');
+      
+      // Toggle sort order if clicking the same column
+      if (currentSortColumn === columnName) {
+        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSortColumn = columnName;
+        currentSortOrder = 'asc';
+      }
+      
+      // Update visual indicator
+      document.querySelectorAll('th.sortable').forEach(h => {
+        h.classList.remove('sort-asc', 'sort-desc');
+      });
+      this.classList.add(currentSortOrder === 'asc' ? 'sort-asc' : 'sort-desc');
+      
+      // Sort and render
+      sortRequests(allRequests, columnName, currentSortOrder);
+      renderRequests(allRequests);
+    });
+  });
+}
+
+function sortRequests(list, column, order) {
+  list.sort((a, b) => {
+    let aVal = a[column] || '';
+    let bVal = b[column] || '';
+    
+    // Handle dates
+    if (column === 'created_at') {
+      aVal = new Date(aVal).getTime() || 0;
+      bVal = new Date(bVal).getTime() || 0;
+    } else {
+      // Case-insensitive string comparison
+      aVal = String(aVal).toLowerCase();
+      bVal = String(bVal).toLowerCase();
+    }
+    
+    if (order === 'asc') {
+      return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+    } else {
+      return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+    }
+  });
+}
 
 async function loadRequests(searchTerm = '') {
   const tbody = document.getElementById('requestsBody');
@@ -80,15 +145,41 @@ function setupSearch() {
   const clearBtn = document.getElementById('clearSearch');
   if (!searchInput || !clearBtn) return;
 
+  // First load all requests
+  loadRequests('');
+
   const runSearch = debounce(() => {
-    const term = searchInput.value.trim();
-    loadRequests(term);
+    const term = searchInput.value.trim().toLowerCase();
+    if (!term) {
+      renderRequests(allRequests);
+      updateSummary(allRequests.length, allRequests.length);
+      return;
+    }
+
+    // Filter across all fields
+    const filtered = allRequests.filter(req => {
+      const searchableFields = [
+        req.reference_number,
+        req.student_name,
+        req.student_number,
+        req.program,
+        req.document_name,
+        req.status,
+        formatDate(req.created_at)
+      ].map(field => String(field || '').toLowerCase());
+
+      return searchableFields.some(field => field.includes(term));
+    });
+
+    renderRequests(filtered);
+    updateSummary(filtered.length, allRequests.length);
   }, 300);
 
   searchInput.addEventListener('input', runSearch);
   clearBtn.addEventListener('click', () => {
     searchInput.value = '';
-    loadRequests('');
+    renderRequests(allRequests);
+    updateSummary(allRequests.length, allRequests.length);
     searchInput.focus();
   });
 }
@@ -159,16 +250,6 @@ function hydrateAdminName() {
 }
 
 // Notification helpers (match other admin pages)
-function toggleNotifications() {
-  const dropdown = document.getElementById('notificationsDropdown');
-  if (!dropdown) return;
-  dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-}
-
-function markAllAsRead() {
-  const badge = document.getElementById('notifBadge');
-  if (badge) badge.style.display = 'none';
-}
 
 function logout() {
   localStorage.removeItem('authToken');
@@ -525,20 +606,31 @@ function updateNotificationBadge(notifications) {
   if (!badge || !notifList) return;
 
   const count = notifications.length;
+  currentNotificationCount = count; // Store current count
+  
+  // Get the count of notifications that were marked as read
+  const readNotificationCount = parseInt(localStorage.getItem('readNotificationCount') || '0');
+  
+  // Only show badge if there are MORE notifications than when marked as read
+  const hasNewNotifications = count > readNotificationCount;
   
   // Show/hide badge
-  if (count > 0) {
+  if (hasNewNotifications) {
     badge.style.display = 'block';
-    badge.textContent = count > 99 ? '99+' : count;
+    const newCount = count - readNotificationCount;
+    badge.textContent = newCount > 99 ? '99+' : newCount;
   } else {
     badge.style.display = 'none';
   }
 
-  // Update notification list
+  // Update notification list - limit to 8 notifications
+  const MAX_NOTIFICATIONS = 8;
+  const displayedNotifications = notifications.slice(0, MAX_NOTIFICATIONS);
+  
   if (count === 0) {
     notifList.innerHTML = '<div class="notif-empty">No new requests</div>';
   } else {
-    notifList.innerHTML = notifications.map(notif => {
+    notifList.innerHTML = displayedNotifications.map(notif => {
       const studentName = notif.users
         ? `${notif.users.first_name || ''} ${notif.users.last_name || ''}`.trim()
         : 'Unknown Student';
@@ -546,7 +638,7 @@ function updateNotificationBadge(notifications) {
       const createdAt = new Date(notif.created_at).toLocaleTimeString();
       
       return `
-        <div class="notif-item">
+        <div class="notif-item" onclick="openDetailsModal('${notif.id}'); toggleNotifications();" style="cursor: pointer;">
           <div class="notif-content">
             <strong>${studentName}</strong>
             <p>${docName}</p>
@@ -556,6 +648,11 @@ function updateNotificationBadge(notifications) {
         </div>
       `;
     }).join('');
+    
+    // Show message if there are more notifications
+    if (count > MAX_NOTIFICATIONS) {
+      notifList.innerHTML += `<div class="notif-more"><small>... and ${count - MAX_NOTIFICATIONS} more</small></div>`;
+    }
   }
 }
 
@@ -577,16 +674,47 @@ function showNewRequestNotification(notification) {
 // Toggle notifications dropdown
 function toggleNotifications() {
   const dropdown = document.getElementById('notificationsDropdown');
-  if (dropdown) {
-    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+  const notifBtn = document.querySelector('.notifs');
+  
+  if (!dropdown) return;
+  
+  if (dropdown.style.display === 'none' || !dropdown.style.display) {
+    dropdown.style.display = 'block';
+    
+    // Position dropdown relative to button
+    if (notifBtn) {
+      const rect = notifBtn.getBoundingClientRect();
+      dropdown.style.position = 'fixed';
+      dropdown.style.top = (rect.bottom + 10) + 'px';
+      dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+      dropdown.style.left = 'auto';
+    }
+  } else {
+    dropdown.style.display = 'none';
   }
 }
+
+// Keep dropdown positioned when scrolling
+document.addEventListener('scroll', function() {
+  const dropdown = document.getElementById('notificationsDropdown');
+  const notifBtn = document.querySelector('.notifs');
+  
+  if (dropdown && dropdown.style.display === 'block' && notifBtn) {
+    const rect = notifBtn.getBoundingClientRect();
+    dropdown.style.top = (rect.bottom + 10) + 'px';
+    dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+  }
+}, true);
 
 // Mark all notifications as read (clear badge)
 function markAllAsRead() {
   const badge = document.getElementById('notifBadge');
   if (badge) {
+    badge.textContent = '0';
     badge.style.display = 'none';
   }
+  
+  // Store the ACTUAL current notification count so we only show badge for NEW notifications
+  localStorage.setItem('readNotificationCount', currentNotificationCount.toString());
 }
 

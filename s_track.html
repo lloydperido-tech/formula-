@@ -113,10 +113,10 @@
               <table class="requests-table">
                 <thead>
                   <tr>
-                    <th>Reference ID</th>
-                    <th>Document Type</th>
-                    <th>Total Amount</th>
-                    <th>Status</th>
+                    <th class="sortable" data-column="reference_number">Reference ID</th>
+                    <th class="sortable" data-column="document_name">Document Type</th>
+                    <th class="sortable" data-column="total_amount">Total Amount</th>
+                    <th class="sortable" data-column="status">Status</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -128,10 +128,74 @@
               </table>
             </div>
           </div>
+            <aside class="right-column">
+              <div class="card details-card" aria-hidden="true">
+                <div class="details-header">
+                  <h3>Request Details</h3>
+                  <button class="close-details" aria-label="Close details">
+                    ✕
+                  </button>
+                </div>
 
-        </section>
-        </section>
-      </main>
+                <div class="details-body">
+                  <p>
+                    <strong>Reference ID:</strong>
+                    <span class="detail-ref">—</span>
+                  </p>
+                  <p>
+                    <strong>Student:</strong>
+                    <span class="detail-student">—</span>
+                  </p>
+                  <p>
+                    <strong>Document:</strong> <span class="detail-type">—</span>
+                  </p>
+                  <p>
+                    <strong>Amount:</strong> <span class="detail-amount">—</span>
+                  </p>
+                  <p>
+                    <strong>Date Requested:</strong>
+                    <span class="detail-date">—</span>
+                  </p>
+                  <p>
+                    <strong>Notes:</strong> <span class="detail-notes">—</span>
+                  </p>
+
+                  <h4>Status Progress</h4>
+                  <div id="statusProgress" class="status-progress">
+                  </div>
+
+                  <h4>Status History</h4>
+                  <ol class="details-tracker" id="statusHistory">
+                  </ol>
+
+                  <div id="paymentSection" style="display: none;">
+                    <h4>Payment Receipt</h4>
+                    <div class="receipt-upload-area">
+                      <p id="receiptStatus" class="receipt-status-text">Waiting for payment...</p>
+                      <div id="receiptPreview" style="display: none; margin: 1rem 0;">
+                        <img id="receiptImage" src="" alt="Payment Receipt" class="receipt-preview-img">
+                        <p id="receiptVerificationStatus" class="verification-status"></p>
+                      </div>
+                      <div id="uploadWidget" style="display: none;">
+                        <label class="upload-label">
+                          <input type="file" id="receiptFile" accept="image/jpg,image/jpeg,image/png,application/pdf" style="display: none;">
+                          <span class="upload-btn">Choose Receipt Image</span>
+                        </label>
+                        <p class="upload-hint">JPG, PNG, or PDF • Max 5MB</p>
+                        <button id="submitReceiptBtn" class="btn-primary" style="margin-top: 1rem; width: 100%; display: none;">Submit Receipt</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="details-actions">
+                    <button id="downloadReceiptBtn" class="btn-secondary" style="display: none;">Download Receipt</button>
+                    <button id="closeDetailsBtn" class="btn-secondary">Close</button>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </section>
+        </main>
       
       <script>
         console.log('INLINE SCRIPT RUNNING - HTML loaded correctly');

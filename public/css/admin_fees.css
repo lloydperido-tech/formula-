@@ -200,7 +200,7 @@ h3 {
 }
 
 .notifications-dropdown {
-  position: absolute;
+  position: fixed;
   top: 60px;
   right: 20px;
   width: 360px;
@@ -208,7 +208,7 @@ h3 {
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  z-index: 1000;
+  z-index: 10001;
   overflow: hidden;
   animation: slideDown 0.2s ease-out;
 }

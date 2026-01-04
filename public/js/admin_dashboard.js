@@ -15,6 +15,7 @@ let calendarDate = new Date();
 let selectedCalendarDate = null;
 let notificationPollInterval = null;
 let lastNotificationCount = 0;
+let currentNotificationCount = 0;
 const calendarEvents = [
     { date: '2025-12-15', title: 'Document Deadline' },
     { date: '2025-12-20', title: 'Office Closed - Holiday' },
@@ -1145,20 +1146,31 @@ function updateNotificationBadge(notifications) {
     if (!badge || !notifList) return;
 
     const count = notifications.length;
+    currentNotificationCount = count; // Store current count
+    
+    // Get the count of notifications that were marked as read
+    const readNotificationCount = parseInt(localStorage.getItem('readNotificationCount') || '0');
+    
+    // Only show badge if there are MORE notifications than when marked as read
+    const hasNewNotifications = count > readNotificationCount;
     
     // Show/hide badge
-    if (count > 0) {
+    if (hasNewNotifications) {
         badge.style.display = 'block';
-        badge.textContent = count > 99 ? '99+' : count;
+        const newCount = count - readNotificationCount;
+        badge.textContent = newCount > 99 ? '99+' : newCount;
     } else {
         badge.style.display = 'none';
     }
 
-    // Update notification list
+    // Update notification list - limit to 8 notifications
+    const MAX_NOTIFICATIONS = 8;
+    const displayedNotifications = notifications.slice(0, MAX_NOTIFICATIONS);
+    
     if (count === 0) {
         notifList.innerHTML = '<div class="notif-empty">No new requests</div>';
     } else {
-        notifList.innerHTML = notifications.map(notif => {
+        notifList.innerHTML = displayedNotifications.map(notif => {
             const studentName = notif.users
                 ? `${notif.users.first_name || ''} ${notif.users.last_name || ''}`.trim()
                 : 'Unknown Student';
@@ -1166,7 +1178,7 @@ function updateNotificationBadge(notifications) {
             const createdAt = new Date(notif.created_at).toLocaleTimeString();
             
             return `
-                <div class="notif-item">
+                <div class="notif-item" onclick="viewRequestDetails('${notif.id}'); toggleNotifications();" style="cursor: pointer;">
                     <div class="notif-content">
                         <strong>${studentName}</strong>
                         <p>${docName}</p>
@@ -1176,6 +1188,11 @@ function updateNotificationBadge(notifications) {
                 </div>
             `;
         }).join('');
+        
+        // Show message if there are more notifications
+        if (count > MAX_NOTIFICATIONS) {
+            notifList.innerHTML += `<div class="notif-more"><small>... and ${count - MAX_NOTIFICATIONS} more</small></div>`;
+        }
     }
 }
 
@@ -1195,16 +1212,52 @@ function showNewRequestNotification(notification) {
 // Toggle notifications dropdown
 function toggleNotifications() {
     const dropdown = document.getElementById('notificationsDropdown');
-    if (dropdown) {
-        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    const notifBtn = document.querySelector('.notifs');
+    
+    if (!dropdown) return;
+    
+    if (dropdown.style.display === 'none' || !dropdown.style.display) {
+        dropdown.style.display = 'block';
+        
+        // Position dropdown relative to button
+        if (notifBtn) {
+            const rect = notifBtn.getBoundingClientRect();
+            dropdown.style.position = 'fixed';
+            dropdown.style.top = (rect.bottom + 10) + 'px';
+            dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+            dropdown.style.left = 'auto';
+        }
+    } else {
+        dropdown.style.display = 'none';
     }
 }
+
+// Keep dropdown positioned when scrolling
+document.addEventListener('scroll', function() {
+    const dropdown = document.getElementById('notificationsDropdown');
+    const notifBtn = document.querySelector('.notifs');
+    
+    if (dropdown && dropdown.style.display === 'block' && notifBtn) {
+        const rect = notifBtn.getBoundingClientRect();
+        dropdown.style.top = (rect.bottom + 10) + 'px';
+        dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+    }
+}, true);
 
 // Mark all notifications as read (clear badge)
 function markAllAsRead() {
     const badge = document.getElementById('notifBadge');
     if (badge) {
+        badge.textContent = '0';
         badge.style.display = 'none';
     }
+    
+    // Store the ACTUAL current notification count so we only show badge for NEW notifications
+    localStorage.setItem('readNotificationCount', currentNotificationCount.toString());
+}
+
+// View request details from notification
+function viewRequestDetails(requestId) {
+    window.location.href = `admin_manage_requests.html?id=${requestId}`;
 }
 

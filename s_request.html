@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Request a Document</title>
+    <title>Request Document - CvSU DRS</title>
     <link rel="icon" type="image/png" href="public/assets/pictures/cvsudrs.png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="public/css/s_request.css" />
@@ -295,6 +295,45 @@
       addBtn.onclick = createDocRow;
       
       confirmBtn.onclick = () => {
+        // Validate all required fields
+        const errorDiv = document.getElementById('errorMessage');
+        
+        // Check contact number
+        const contactNumber = document.getElementById('contactNumber').value.trim();
+        if (!contactNumber) {
+          errorDiv.textContent = 'Please enter your contact number.';
+          errorDiv.style.display = 'block';
+          return;
+        }
+        
+        // Check if at least one document row exists
+        const docRows = document.querySelectorAll('.doc-row');
+        if (docRows.length === 0) {
+          errorDiv.textContent = 'Please add at least one document.';
+          errorDiv.style.display = 'block';
+          return;
+        }
+        
+        // Check each document row
+        for (let row of docRows) {
+          const docType = row.querySelector('select').value.trim();
+          const purpose = row.querySelector("input[type='text']").value.trim();
+          
+          if (!docType) {
+            errorDiv.textContent = 'Please choose a document to request.';
+            errorDiv.style.display = 'block';
+            return;
+          }
+          
+          if (!purpose) {
+            errorDiv.textContent = 'Please enter a purpose for all documents.';
+            errorDiv.style.display = 'block';
+            return;
+          }
+        }
+        
+        // All validations passed, hide error message and show modal
+        errorDiv.style.display = 'none';
         modal.style.display = "flex";
       };
       

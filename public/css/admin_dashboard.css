@@ -236,14 +236,14 @@ h3 {
 }
 
 .notifications-dropdown {
-    position: absolute;
+    position: fixed;
     top: 70px;
-    right: 30px;
+    right: 40px;
     width: 350px;
     background: white;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 1000;
+    z-index: 1001;
 }
 
 .notif-header {
@@ -305,6 +305,15 @@ h3 {
     text-align: center;
     color: #999;
     font-size: 14px;
+}
+
+.notif-more {
+    padding: 10px 20px;
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    border-top: 1px solid #f0f0f0;
+    background-color: #fafafa;
 }
 
 /* --- New Admin Dashboard Layout (matches provided mock) --- */
