@@ -154,7 +154,7 @@
 
 <script>
   // Load user info and request details on page load
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
     const requestData = JSON.parse(localStorage.getItem('currentRequest') || '{}');
@@ -209,25 +209,97 @@
     let totalStamps = 0;
     
     if (requestData.documents && Array.isArray(requestData.documents)) {
-      requestData.documents.forEach(doc => {
-        const price = 100; // Default price per document
-        const rowTotal = price * doc.quantity;
-        const dstFee = 30 * doc.quantity;
-        const totalWithDSTFee = rowTotal + dstFee;
+      // Fetch templates from API to get actual prices
+      const token = localStorage.getItem('token');
+      try {
+        const templatesResponse = await fetch('http://localhost:3000/api/templates/active?t=' + new Date().getTime(), {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache, no-store, must-revalidate'
+          }
+        });
         
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td style="padding: 8px; border: 1px solid #ddd;">${doc.type || '-'}</td>
-          <td style="padding: 8px; border: 1px solid #ddd;">${doc.purpose || '-'}</td>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${doc.quantity || 1}</td>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${price.toFixed(2)}</td>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${rowTotal.toFixed(2)}</td>
-        `;
-        detailsBody.appendChild(row);
-        totalAmount += rowTotal;
-        totalWithDST += totalWithDSTFee;
-        totalStamps += doc.quantity;
-      });
+        if (templatesResponse.ok) {
+          const templatesData = await templatesResponse.json();
+          const templates = templatesData.templates || [];
+          const templateMap = {};
+          
+          // Build a map of template names to their prices
+          templates.forEach(template => {
+            templateMap[template.document_name] = {
+              basePrice: parseFloat(template.base_price),
+              pricePerCopy: parseFloat(template.price_per_copy)
+            };
+          });
+          
+          requestData.documents.forEach(doc => {
+            // Get actual price from database, fallback to 100 if not found
+            const templatePrice = templateMap[doc.type] || { basePrice: 100, pricePerCopy: 0 };
+            const basePrice = templatePrice.basePrice;
+            const pricePerCopy = templatePrice.pricePerCopy;
+            const price = basePrice + (pricePerCopy * doc.quantity);
+            const rowTotal = price;
+            const dstFee = 30 * doc.quantity;
+            const totalWithDSTFee = rowTotal + dstFee;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td style="padding: 8px; border: 1px solid #ddd;">${doc.type || '-'}</td>
+              <td style="padding: 8px; border: 1px solid #ddd;">${doc.purpose || '-'}</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${doc.quantity || 1}</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${price.toFixed(2)}</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${rowTotal.toFixed(2)}</td>
+            `;
+            detailsBody.appendChild(row);
+            totalAmount += rowTotal;
+            totalWithDST += totalWithDSTFee;
+            totalStamps += doc.quantity;
+          });
+        } else {
+          // Fallback to original hardcoded logic if API fails
+          requestData.documents.forEach(doc => {
+            const price = 100;
+            const rowTotal = price * doc.quantity;
+            const dstFee = 30 * doc.quantity;
+            const totalWithDSTFee = rowTotal + dstFee;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td style="padding: 8px; border: 1px solid #ddd;">${doc.type || '-'}</td>
+              <td style="padding: 8px; border: 1px solid #ddd;">${doc.purpose || '-'}</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${doc.quantity || 1}</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${price.toFixed(2)}</td>
+              <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${rowTotal.toFixed(2)}</td>
+            `;
+            detailsBody.appendChild(row);
+            totalAmount += rowTotal;
+            totalWithDST += totalWithDSTFee;
+            totalStamps += doc.quantity;
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+        // Fallback to original hardcoded logic
+        requestData.documents.forEach(doc => {
+          const price = 100;
+          const rowTotal = price * doc.quantity;
+          const dstFee = 30 * doc.quantity;
+          const totalWithDSTFee = rowTotal + dstFee;
+          
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td style="padding: 8px; border: 1px solid #ddd;">${doc.type || '-'}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${doc.purpose || '-'}</td>
+            <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${doc.quantity || 1}</td>
+            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${price.toFixed(2)}</td>
+            <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">₱${rowTotal.toFixed(2)}</td>
+          `;
+          detailsBody.appendChild(row);
+          totalAmount += rowTotal;
+          totalWithDST += totalWithDSTFee;
+          totalStamps += doc.quantity;
+        });
+      }
       // Append Documentary Stamp Tax row (presentation only)
       if (totalStamps > 0) {
         const stampPrice = 30;
@@ -329,12 +401,16 @@
       const documentTypeMap = {
         'Certificate of Enrollment': 'COE',
         'Certificate of Grades': 'COG',
-        'Transcript of Records': 'TOR',
         'Certificate of Registration': 'COR',
+        'Certificate of Graduation': 'COG2',
+        'Certificate of GWA': 'COGWA',
+        'Certificate of English as Medium of Instruction': 'COEMI',
+        'Transcript of Records': 'TOR',
+        'Transcript of Records - For Board Examination': 'TOR_BE',
+        'Honorable Dismissal': 'HD',
         'Diploma/Degree Certificate': 'DDC',
         'Good Moral Certificate': 'CGM',
         'Certificate of Good Moral': 'CGM',
-        'Honorable Dismissal': 'HD',
         'Course Description': 'CD',
         'Certification of Units Earned': 'CUE'
       };

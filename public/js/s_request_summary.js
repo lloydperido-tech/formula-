@@ -61,7 +61,9 @@ function populateRequestDetails(request) {
     document.getElementById('documentType').textContent = request.template_name || 'Unknown';
     document.getElementById('quantity').textContent = request.quantity || '1';
     document.getElementById('purpose').textContent = request.purpose || 'No purpose specified';
-    document.getElementById('totalAmount').textContent = `₱${(request.total_amount || 0).toFixed(2)}`;
+    // Add ₱30 documentary stamp tax per quantity
+    const totalWithDST = (request.total_amount || 0) + (30 * (request.quantity || 1));
+    document.getElementById('totalAmount').textContent = `₱${totalWithDST.toFixed(2)}`;
     document.getElementById('dateRequested').textContent = formatDate(request.created_at);
     
     // Current Status

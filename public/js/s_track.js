@@ -190,12 +190,14 @@ function renderRequestsTable() {
         // Get document name from the nested object
         const documentName = request.document_templates?.document_name || 'Unknown';
         const statusClass = `status-${request.status.toLowerCase().replace(/\s+/g, '-')}`;
+        // Add ₱30 documentary stamp tax per quantity
+        const totalWithDST = (request.total_amount || 0) + (30 * (request.quantity || 1));
         
         return `
         <tr class="${statusClass}" onclick="showRequestDetails('${request.id}')">
             <td>${request.reference_number}</td>
             <td>${documentName}</td>
-            <td>₱${(request.total_amount || 0).toFixed(2)}</td>
+            <td>₱${totalWithDST.toFixed(2)}</td>
             <td><span class="${statusClass}">${request.status}</span></td>
             <td>
                 <button class="action-btn" aria-label="View details" onclick="event.stopPropagation(); viewRequestSummary('${request.id}');">
@@ -225,11 +227,13 @@ function filterRequests() {
     tbody.innerHTML = filtered.map(request => {
         const documentName = request.document_templates?.document_name || 'Unknown';
         const statusClass = `status-${request.status.toLowerCase().replace(/\s+/g, '-')}`;
+        // Add ₱30 documentary stamp tax per quantity
+        const totalWithDST = (request.total_amount || 0) + (30 * (request.quantity || 1));
         return `
         <tr class="${statusClass}" onclick="showRequestDetails('${request.id}')">
             <td>${request.reference_number}</td>
             <td>${documentName}</td>
-            <td>₱${(request.total_amount || 0).toFixed(2)}</td>
+            <td>₱${totalWithDST.toFixed(2)}</td>
             <td><span class="${statusClass}">${request.status}</span></td>
             <td>
                 <button class="action-btn" aria-label="View details" onclick="event.stopPropagation(); viewRequestSummary('${request.id}');">
@@ -268,7 +272,9 @@ async function showRequestDetails(requestId) {
         document.querySelector('.detail-ref').textContent = currentSelectedRequest.reference_number;
         document.querySelector('.detail-student').textContent = studentName;
         document.querySelector('.detail-type').textContent = templateName;
-        document.querySelector('.detail-amount').textContent = `₱${(currentSelectedRequest.total_amount || 0).toFixed(2)}`;
+        // Add ₱30 documentary stamp tax per quantity
+        const totalWithDST = (currentSelectedRequest.total_amount || 0) + (30 * (currentSelectedRequest.quantity || 1));
+        document.querySelector('.detail-amount').textContent = `₱${totalWithDST.toFixed(2)}`;
         document.querySelector('.detail-date').textContent = formatDate(currentSelectedRequest.created_at);
         document.querySelector('.detail-notes').textContent = currentSelectedRequest.purpose || 'No notes';
 
