@@ -165,7 +165,7 @@
 
     <script>
       // Load user info on page load
-      document.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener('DOMContentLoaded', async () => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
         
@@ -184,7 +184,8 @@
         document.getElementById('contactNumber').value = userInfo.contactNumber || user.contactNumber || '';
         document.getElementById('userName').textContent = displayName;
         
-        // Create default first document row
+        // Load templates first, then create default first document row
+        await loadTemplates();
         createDocRow(true);
       });
       
@@ -236,25 +237,44 @@
       const confirmBtn = document.getElementById("confirmBtn");
       const goBackBtn = document.getElementById("goBack");
       const understandBtn = document.getElementById("understand");
+      
+      let activeTemplates = [];
+
+      // Load templates from API
+      async function loadTemplates() {
+        try {
+          const response = await fetch('/api/templates/active?t=' + new Date().getTime(), {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          });
+          
+          if (!response.ok) throw new Error('Failed to load templates');
+          
+          const data = await response.json();
+          activeTemplates = (data.templates || []).sort((a, b) => a.document_name.localeCompare(b.document_name));
+        } catch (error) {
+          console.error('Error loading templates:', error);
+        }
+      }
 
       function createDocRow(isInitial = false) {
         const row = document.createElement("div");
         row.className = "doc-row";
 
+        let optionsHTML = '<option value="">-- Select Document Type --</option>';
+        activeTemplates.forEach(template => {
+          optionsHTML += `<option value="${template.document_name}">${template.document_name}</option>`;
+        });
+
         row.innerHTML = `
           <div class="doc-field">
             <label>Document Type:</label>
             <select>
-              <option value="">-- Select Document Type --</option>
-              <option value="Certificate of Enrollment">Certificate of Enrollment</option>
-              <option value="Certificate of Grades">Certificate of Grades</option>
-              <option value="Transcript of Records">Transcript of Records</option>
-              <option value="Certificate of Registration">Certificate of Registration</option>
-              <option value="Diploma/Degree Certificate">Diploma/Degree Certificate</option>
-              <option value="Good Moral Certificate">Good Moral Certificate</option>
-              <option value="Honorable Dismissal">Honorable Dismissal</option>
-              <option value="Course Description">Course Description</option>
-              <option value="Certification of Units Earned">Certification of Units Earned</option>
+              ${optionsHTML}
             </select>
           </div>
 

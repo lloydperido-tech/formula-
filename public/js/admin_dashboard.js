@@ -365,7 +365,16 @@ function renderTrend(container, requests) {
         .map((c, idx) => {
             const h = Math.max(8, Math.round((c / max) * 120));
             const dayKey = days[idx];
-            return `<div class="bar" style="height: ${h}px" data-day="${dayKey}" data-count="${c}" title="${c} requests"></div>`;
+            const dayDate = new Date(dayKey).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const labelDisplay = c === 0 ? '' : c;
+            return `
+              <div class="bar-wrapper">
+                <div class="bar" style="height: ${h}px" data-day="${dayKey}" data-count="${c}" title="${c} requests">
+                  ${labelDisplay ? `<span class="bar-label">${labelDisplay}</span>` : ''}
+                </div>
+                <div class="bar-date">${dayDate}</div>
+              </div>
+            `;
         })
         .join('');
     
@@ -1015,12 +1024,12 @@ function renderCalendarInfo(dateStr, summary, state = 'ready') {
     if (!summary || summary.count === 0) {
         infoEl.innerHTML = `
             <div class="calendar-info__header">
-                <span class="calendar-info__label">Selected Day</span>
+                <span class="calendar-info__label"><strong>Selected Day:</strong></span>
                 <span class="calendar-info__date">${friendlyDate}</span>
             </div>
             <div class="calendar-info__body empty">
-                <div class="calendar-info__pill muted">No requests</div>
-                <p class="calendar-info__note">No requests recorded for this day.</p>
+                <div class="calendar-info__pill"><strong>Total Requests:</strong> 0</div>
+                <div class="calendar-info__pill accent"><strong>Top Requested Document:</strong> N/A</div>
             </div>
         `;
         return;
@@ -1028,16 +1037,16 @@ function renderCalendarInfo(dateStr, summary, state = 'ready') {
 
     const { count, topDoc } = summary;
     const topDocMarkup = topDoc
-        ? `<div class="calendar-info__pill accent">Top: ${topDoc.name} (${topDoc.count})</div>`
+        ? `<div class="calendar-info__pill accent"><strong>Top Requested Document:</strong> ${topDoc.name} (${topDoc.count})</div>`
         : '';
 
     infoEl.innerHTML = `
         <div class="calendar-info__header">
-            <span class="calendar-info__label">Selected Day</span>
+            <span class="calendar-info__label"><strong>Selected Day:</strong></span>
             <span class="calendar-info__date">${friendlyDate}</span>
         </div>
         <div class="calendar-info__body">
-            <div class="calendar-info__pill">${count} request${count === 1 ? '' : 's'}</div>
+            <div class="calendar-info__pill"><strong>Total Requests:</strong> ${count}</div>
             ${topDocMarkup}
         </div>
     `;

@@ -488,20 +488,62 @@ h3 {
 .bar-chart {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    align-items: end;
-    gap: 6px;
-    height: 140px;
-    padding: 6px 4px 2px;
+    gap: 8px;
+    height: 160px;
+    padding: 10px 6px;
     background: #ebe8e3;
     border: 1px solid #d5cfc1;
     border-radius: 4px;
 }
 
+.bar-chart .bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    height: 100%;
+}
+
 .bar-chart .bar {
     background: #75af75;
-    border-radius: 2px 2px 0 0;
+    border-radius: 3px 3px 0 0;
     cursor: pointer;
     transition: opacity 0.2s ease, filter 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 22px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.bar-chart .bar:hover {
+    opacity: 0.85;
+    filter: brightness(1.15);
+}
+
+.bar-chart .bar.active {
+    opacity: 1;
+    filter: brightness(1.25);
+    box-shadow: 0 2px 6px rgba(117, 175, 117, 0.4);
+}
+
+.bar-chart .bar .bar-label {
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    line-height: 1;
+}
+
+.bar-chart .bar-date {
+    font-size: 10px;
+    color: #666;
+    text-align: center;
+    white-space: nowrap;
+    font-weight: 500;
 }
 
 .bar-chart .bar:hover {

@@ -87,9 +87,9 @@
                             <thead>
                                 <tr>
                                     <th>Document Type</th>
-                                    <th>First Copy</th>
-                                    <th>Additional Copies</th>
+                                    <th>Price</th>
                                     <th>Processing Time</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody id="feesTableBody">
@@ -136,6 +136,38 @@
                 </aside>
             </div>
         </main>
+    </div>
+
+    <!-- Edit Fee Modal -->
+    <div id="editFeeModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Document Fee</h2>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form id="editFeeForm" onsubmit="saveEditedFee(event)">
+                <div class="form-group">
+                    <label for="editDocName">Document Name</label>
+                    <input type="text" id="editDocName" readonly class="input-field">
+                </div>
+                <div class="form-group">
+                    <label for="editBasePrice">Price (₱)</label>
+                    <input type="number" id="editBasePrice" step="0.01" min="0" required class="input-field">
+                </div>
+                <div class="form-group">
+                    <label for="editMinDays">Minimum Processing Days</label>
+                    <input type="number" id="editMinDays" min="1" required class="input-field">
+                </div>
+                <div class="form-group">
+                    <label for="editMaxDays">Maximum Processing Days</label>
+                    <input type="number" id="editMaxDays" min="1" required class="input-field">
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-save">Save Changes</button>
+                    <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="public/js/admin_fees.js"></script>

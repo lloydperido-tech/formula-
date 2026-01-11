@@ -23,9 +23,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Fetch active templates from API
 async function loadActiveTemplates() {
   try {
-    const response = await fetch('/api/templates/active', {
+    const response = await fetch('/api/templates/active?t=' + new Date().getTime(), {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       }
     });
 

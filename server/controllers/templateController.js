@@ -69,7 +69,7 @@ exports.createTemplate = async (req, res) => {
         field_config: parsedFieldConfig,
         base_price: parseFloat(basePrice),
         price_per_copy: parseFloat(pricePerCopy),
-        processing_days: parseInt(processingDays),
+        processing_days: processingDays,
         is_active: true,
         version: 1
       }])
@@ -275,7 +275,8 @@ exports.updateTemplate = async (req, res) => {
     }
 
     if (processingDays !== undefined) {
-      updates.processing_days = parseInt(processingDays);
+      // Keep as string if it's a range (e.g., "4-6"), otherwise parse as integer
+      updates.processing_days = processingDays;
     }
 
     if (fieldConfig) {

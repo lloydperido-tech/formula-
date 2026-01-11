@@ -374,11 +374,19 @@ main {
   border-bottom: 2px solid #eee;
 }
 
+.fees-table th:nth-child(3) {
+  text-align: center;
+}
+
 .fees-table td {
   padding: 1.2rem 1rem;
   border-bottom: 1px solid #f0f0f0;
   color: #333;
   font-size: 0.95rem;
+}
+
+.fees-table td:nth-child(3) {
+  text-align: center;
 }
 
 .fees-table tbody tr:hover {

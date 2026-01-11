@@ -104,8 +104,7 @@
                 <thead>
                   <tr>
                     <th>Document Type</th>
-                    <th>First Copy</th>
-                    <th>Additional Copies</th>
+                    <th>Price</th>
                     <th>Processing Time</th>
                   </tr>
                 </thead>
@@ -271,14 +270,12 @@
           // Build table rows
           feesTableBody.innerHTML = templates.map(template => {
             const basePrice = parseFloat(template.base_price || 0).toFixed(2);
-            const additionalPrice = parseFloat(template.price_per_copy || 0).toFixed(2);
             const processingDays = formatProcessingDays(template.processing_days);
 
             return `
               <tr>
                 <td>${template.document_name}</td>
                 <td>&#8369;${basePrice}</td>
-                <td>&#8369;${additionalPrice} each</td>
                 <td>${processingDays}</td>
               </tr>
             `;
@@ -294,19 +291,16 @@
       function formatProcessingDays(days) {
         if (!days) return 'N/A';
         
-        // If it's already formatted like "3-5 days", return as is
+        // If it's already formatted like "3-5", add "days"
         if (typeof days === 'string' && days.includes('-')) {
-          return days;
+          return `${days} days`;
         }
 
         // If it's a number, format it
         const daysNum = parseInt(days);
         if (isNaN(daysNum)) return 'N/A';
 
-        // Return range based on number (e.g., 3 days = "2-3 days")
-        const minDays = Math.max(1, daysNum - 1);
-        const maxDays = daysNum + 1;
-        return `${minDays}-${maxDays} days`;
+        return `${daysNum} days`;
       }
       
       // Notification functions

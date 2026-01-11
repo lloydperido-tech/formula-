@@ -7,6 +7,8 @@ const adminNameEl = document.getElementById('adminName');
 let notificationPollInterval = null;
 let lastNotificationCount = 0;
 let currentNotificationCount = 0;
+let currentEditingTemplateId = null;
+let currentTemplates = [];
 
 // Init
 window.addEventListener('DOMContentLoaded', () => {
@@ -31,8 +33,13 @@ async function loadDocumentFees() {
   if (!feesTableBody) return;
   try {
     const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-    const resp = await fetch(`${API_BASE}/templates/active`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    const resp = await fetch(`${API_BASE}/templates/active?t=` + new Date().getTime(), {
+      headers: token ? { 
+        'Authorization': `Bearer ${token}`,
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      } : {}
     });
     if (!resp.ok) throw new Error('Failed to load document fees');
     const data = await resp.json();
@@ -47,31 +54,30 @@ async function loadDocumentFees() {
 
     feesTableBody.innerHTML = templates.map(t => {
       const base = formatMoney(t.base_price);
-      const extra = formatMoney(t.price_per_copy);
       const leadTime = formatProcessingDays(t.processing_days);
       return `
         <tr>
           <td>${t.document_name || 'Document'}</td>
           <td>₱${base}</td>
-          <td>₱${extra} each</td>
           <td>${leadTime}</td>
+          <td><button class="btn-edit" onclick="openEditModal('${t.id}', '${t.document_name}', ${t.base_price}, '${t.processing_days}')">Edit</button></td>
         </tr>
       `;
     }).join('');
   } catch (err) {
     console.error('Error loading document fees:', err);
-    feesTableBody.innerHTML = '<tr><td colspan="4" class="loading-row" style="color:#d32f2f;">Failed to load document fees. Please refresh.</td></tr>';
+    feesTableBody.innerHTML = '<tr><td colspan="5" class="loading-row" style="color:#d32f2f;">Failed to load document fees. Please refresh.</td></tr>';
   }
 }
 
 function formatProcessingDays(days) {
   if (!days) return 'N/A';
-  if (typeof days === 'string' && days.includes('-')) return days;
+  if (typeof days === 'string' && days.includes('-')) {
+    return `${days} days`;
+  }
   const num = parseInt(days, 10);
   if (Number.isNaN(num)) return 'N/A';
-  const min = Math.max(1, num - 1);
-  const max = num + 1;
-  return `${min}-${max} days`;
+  return `${num} days`;
 }
 
 function formatMoney(value) {
@@ -244,3 +250,94 @@ function logout() {
   localStorage.removeItem('token');
   window.location.href = 'login.html';
 }
+
+// ===== EDIT FEE MODAL FUNCTIONS =====
+
+function openEditModal(templateId, docName, basePrice, processingDays) {
+  currentEditingTemplateId = templateId;
+  document.getElementById('editDocName').value = docName;
+  document.getElementById('editBasePrice').value = basePrice;
+  
+  // Parse processing days - if it's a single number, use it for both min and max
+  let minDays = processingDays;
+  let maxDays = processingDays;
+  
+  // If processingDays is stored as a range string like "1-2", parse it
+  if (typeof processingDays === 'string' && processingDays.includes('-')) {
+    const parts = processingDays.split('-');
+    minDays = parseInt(parts[0]);
+    maxDays = parseInt(parts[1]);
+  }
+  
+  document.getElementById('editMinDays').value = minDays;
+  document.getElementById('editMaxDays').value = maxDays;
+  document.getElementById('editFeeModal').style.display = 'flex';
+}
+
+function closeEditModal() {
+  document.getElementById('editFeeModal').style.display = 'none';
+  currentEditingTemplateId = null;
+}
+
+async function saveEditedFee(event) {
+  event.preventDefault();
+
+  if (!currentEditingTemplateId) {
+    alert('Error: No template selected');
+    return;
+  }
+
+  const basePrice = document.getElementById('editBasePrice').value;
+  const minDays = document.getElementById('editMinDays').value;
+  const maxDays = document.getElementById('editMaxDays').value;
+
+  if (!basePrice || !minDays || !maxDays) {
+    alert('Please fill in all fields');
+    return;
+  }
+  
+  const minDaysNum = parseInt(minDays);
+  const maxDaysNum = parseInt(maxDays);
+  
+  if (minDaysNum > maxDaysNum) {
+    alert('Minimum days cannot be greater than maximum days');
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+    const response = await fetch(`${API_BASE}/templates/${currentEditingTemplateId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        basePrice: parseFloat(basePrice),
+        pricePerCopy: 0,
+        processingDays: minDaysNum === maxDaysNum ? `${minDaysNum}` : `${minDaysNum}-${maxDaysNum}`
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      alert('Error updating fee: ' + (error.message || 'Unknown error'));
+      return;
+    }
+
+    alert('Fee updated successfully!');
+    closeEditModal();
+    loadDocumentFees();
+  } catch (error) {
+    console.error('Error saving fee:', error);
+    alert('Error updating fee. Please try again.');
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', (e) => {
+  const modal = document.getElementById('editFeeModal');
+  if (e.target === modal) {
+    closeEditModal();
+  }
+});
