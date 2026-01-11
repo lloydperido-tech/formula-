@@ -41,6 +41,25 @@ h3 {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  position: relative;
+}
+
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1300;
+  background: #27512b;
+  border: 2px solid #f9f4e3;
+  color: #f9f4e3;
+  font-size: 22px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
 }
 
 /* --- Logo Section in Sidebar --- */
@@ -203,6 +222,7 @@ h3 {
   top: 60px;
   right: 20px;
   width: 360px;
+  max-width: calc(100vw - 40px);
   max-height: 480px;
   background: #ffffff;
   border-radius: 12px;
@@ -710,4 +730,215 @@ main {
   width: 18px;
   text-align: center;
   color: #6b6558;
+}
+
+/* ------------------- MOBILE RESPONSIVE ------------------- */
+@media (max-width: 1024px) {
+  .leftnav {
+    width: 240px;
+  }
+  
+  .page-content {
+    padding: 20px 25px;
+  }
+  
+  .container-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .sidebar-column {
+    padding-top: 0;
+  }
+  
+  .card-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+    overflow-y: auto;
+    height: auto;
+  }
+  
+  .mobile-menu-toggle {
+    display: block;
+  }
+  
+  .leftnav {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    padding: 1rem;
+    z-index: 1250;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+  }
+  
+  .leftnav.active {
+    left: 0;
+  }
+  
+  .leftnav-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
+  }
+  
+  .leftnav-overlay.active {
+    display: block;
+  }
+  
+  .leftnav .logo {
+    margin-bottom: 1rem;
+  }
+  
+  .leftnav .logo img {
+    max-width: 60px;
+  }
+  
+  .leftnav .logo-text strong {
+    font-size: 1rem;
+  }
+  
+  .leftnav .logo-text span {
+    font-size: 0.75rem;
+  }
+  
+  .nav-logout {
+    margin-top: 1rem;
+  }
+  
+  .page-content {
+    height: auto;
+    padding: 100px 20px 15px;
+    margin-left: 0;
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 0;
+  }
+  
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    padding-top: 10px;
+  }
+  
+  .topbar h1 {
+    font-size: 1.5rem;
+  }
+  
+  .user-profile {
+    align-self: flex-end;
+  }
+  
+  main {
+    padding: 1rem;
+  }
+  
+  .container-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card {
+    padding: 1.25rem;
+  }
+  
+  .card-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .recent-requests table {
+    font-size: 0.8rem;
+  }
+  
+  .recent-requests th,
+  .recent-requests td {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .tracker-steps {
+    width: 95%;
+  }
+  
+  .tracker-steps li {
+    font-size: 0.65rem;
+  }
+  
+  .tracker-steps li::before {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .notifications-dropdown {
+    width: calc(100vw - 40px);
+    right: 20px;
+  }
+  
+  .profile-menu-dropdown {
+    right: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-content {
+    padding: 10px 15px;
+  }
+  
+  .topbar h1 {
+    font-size: 1.25rem;
+  }
+  
+  .user-profile .username {
+    font-size: 0.9rem;
+  }
+  
+  main {
+    padding: 0.5rem;
+  }
+  
+  .card {
+    padding: 1rem;
+  }
+  
+  h3 {
+    font-size: 1rem;
+  }
+  
+  .recent-requests table {
+    font-size: 0.75rem;
+  }
+  
+  .recent-requests th,
+  .recent-requests td {
+    padding: 0.5rem 0.3rem;
+  }
+  
+  .status-badge {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
+  
+  .calendar-day {
+    font-size: 11px;
+  }
+  
+  .tracker-steps li {
+    font-size: 0.6rem;
+  }
+  
+  .tracker-steps li span {
+    margin-top: 0.5rem;
+  }
 }

@@ -45,6 +45,23 @@ h3 {
   z-index: 1100; /* Ensure sidebar stays above dropdown overlays */
 }
 
+/* Mobile Menu Toggle Button */
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1200;
+  background: #27512b;
+  border: none;
+  color: #f9f4e3;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
 /* --- Logo Section in Sidebar --- */
 
 .leftnav .logo {
@@ -206,6 +223,7 @@ h3 {
   top: 70px;
   right: 40px;
   width: 360px;
+  max-width: calc(100vw - 40px);
   background: white;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -555,6 +573,53 @@ small {
 }
 
 @media (max-width: 768px) {
+  body {
+    flex-direction: column;
+    overflow-y: auto;
+    height: auto;
+  }
+  
+  .mobile-menu-toggle {
+    display: block;
+  }
+  
+  .leftnav {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 280px;
+    height: 100vh;
+    padding: 1rem;
+    z-index: 1100;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+  }
+  
+  .leftnav.active {
+    left: 0;
+  }
+  
+  .leftnav-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1050;
+  }
+  
+  .leftnav-overlay.active {
+    display: block;
+  }
+  
+  .page-content {
+    height: auto;
+    padding: 70px 20px 15px;
+    margin-left: 0;
+  }
+  
   .info-grid,
   .contact-grid {
     grid-template-columns: 1fr;
