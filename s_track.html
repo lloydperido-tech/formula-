@@ -1,4 +1,4 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -133,31 +133,31 @@
                 <div class="details-header">
                   <h3>Request Details</h3>
                   <button class="close-details" aria-label="Close details">
-                    âœ•
+                    ?
                   </button>
                 </div>
 
                 <div class="details-body">
                   <p>
                     <strong>Reference ID:</strong>
-                    <span class="detail-ref">â€”</span>
+                    <span class="detail-ref">—</span>
                   </p>
                   <p>
                     <strong>Student:</strong>
-                    <span class="detail-student">â€”</span>
+                    <span class="detail-student">—</span>
                   </p>
                   <p>
-                    <strong>Document:</strong> <span class="detail-type">â€”</span>
+                    <strong>Document:</strong> <span class="detail-type">—</span>
                   </p>
                   <p>
-                    <strong>Amount:</strong> <span class="detail-amount">â€”</span>
+                    <strong>Amount:</strong> <span class="detail-amount">—</span>
                   </p>
                   <p>
                     <strong>Date Requested:</strong>
-                    <span class="detail-date">â€”</span>
+                    <span class="detail-date">—</span>
                   </p>
                   <p>
-                    <strong>Notes:</strong> <span class="detail-notes">â€”</span>
+                    <strong>Notes:</strong> <span class="detail-notes">—</span>
                   </p>
 
                   <h4>Status Progress</h4>
@@ -181,7 +181,7 @@
                           <input type="file" id="receiptFile" accept="image/jpg,image/jpeg,image/png,application/pdf" style="display: none;">
                           <span class="upload-btn">Choose Receipt Image</span>
                         </label>
-                        <p class="upload-hint">JPG, PNG, or PDF â€¢ Max 5MB</p>
+                        <p class="upload-hint">JPG, PNG, or PDF • Max 5MB</p>
                         <button id="submitReceiptBtn" class="btn-primary" style="margin-top: 1rem; width: 100%; display: none;">Submit Receipt</button>
                       </div>
                     </div>
@@ -206,9 +206,9 @@
           console.log('Testing function availability...');
           console.log('showRequestDetails exists?', typeof showRequestDetails);
           if (typeof showRequestDetails === 'function') {
-            console.log('âœ“ Function is available!');
+            console.log('? Function is available!');
           } else {
-            console.error('âœ— Function NOT available!');
+            console.error('? Function NOT available!');
           }
         }, 1000);
       </script>
@@ -271,6 +271,8 @@
       }
     </script>
     <script src="public/js/student_notifications.js"></script>
+    <script src="public/js/sidebar-menu.js"></script>
+
   </body>
 </html>
 

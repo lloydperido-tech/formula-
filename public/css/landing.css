@@ -14,6 +14,9 @@ body {
   background-color: #f8f5e9; /* soft beige background */
   color: #333;
   line-height: 1.6;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 h1 {
@@ -42,7 +45,7 @@ h4 {
   align-items: center;
   background-color: #0f5d27;
   padding: 0 80px;
-  height: 110px;
+  height: 96px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
@@ -52,9 +55,11 @@ h4 {
 }
 
 .navbar .logo img {
-  height: 110px;
-  margin-top: 10px;
+  height: 78px;
+  max-height: 78px;
   width: auto;
+  padding: 8px 0;
+  margin-right: 14px;
   object-fit: contain;
 }
 
@@ -96,6 +101,17 @@ h4 {
   color: #fff;
   text-decoration: none;
   font-weight: 600;
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 5px;
 }
 
 /* ------------------- MAIN LANDING ------------------- */
@@ -314,13 +330,53 @@ h4 {
 
 /* ------------------- RESPONSIVE ------------------- */
 @media (max-width: 900px) {
+  .navbar {
+    padding: 0 30px;
+    flex-wrap: wrap;
+  }
+  
+  .mobile-menu-toggle {
+    display: block;
+  }
+  
+  .navbar ul {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    gap: 0;
+    padding: 15px 0;
+  }
+  
+  .navbar ul.active {
+    display: flex;
+  }
+  
+  .navbar ul li {
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+  }
+  
+  .navbar ul button {
+    width: 90%;
+    margin: 10px auto;
+  }
+  
   .mainlanding {
     flex-direction: column;
     text-align: center;
+    padding: 40px 30px;
   }
 
   .mainlanding img {
     margin-top: 40px;
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+  }
+
+  .howitworks {
+    padding: 40px 30px;
   }
 
   .howitworks .content {
@@ -329,5 +385,71 @@ h4 {
 
   .footer {
     padding: 40px 30px;
+  }
+  
+  .whatiscvsu {
+    padding: 40px 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    padding: 0 20px;
+    height: auto;
+    min-height: 80px;
+  }
+  
+  .navbar .logo img {
+    height: 60px;
+    max-height: 60px;
+  }
+  
+  .mainlanding {
+    padding: 30px 20px;
+  }
+  
+  .mainlanding h1 {
+    font-size: 32px;
+  }
+  
+  .mainlanding p {
+    font-size: 14px;
+  }
+  
+  .whatiscvsu {
+    padding: 30px 20px;
+  }
+  
+  .whatiscvsu h2 {
+    font-size: 24px;
+  }
+  
+  .whatiscvsu img {
+    width: 100%;
+    height: auto;
+  }
+  
+  .howitworks {
+    padding: 30px 20px;
+    margin-bottom: 60px;
+  }
+  
+  .howitworks .header1 h1 {
+    font-size: 24px;
+  }
+  
+  .howitworks .card {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .footer {
+    padding: 30px 20px;
+  }
+  
+  .footer2 {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
   }
 }
