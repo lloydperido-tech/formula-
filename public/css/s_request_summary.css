@@ -660,6 +660,11 @@ main {
   margin: 0;
 }
 
+.history-notes.removal-note {
+  color: #b23b3b;
+  font-weight: 600;
+}
+
 .history-empty {
   text-align: center;
   padding: 30px;

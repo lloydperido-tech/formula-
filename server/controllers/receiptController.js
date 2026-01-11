@@ -288,21 +288,34 @@ exports.deleteReceipt = async (req, res) => {
     const { requestId } = req.params;
     const { reason } = req.body;
 
-    // Get receipt and request details
+    console.log('🗑️ Attempting to delete receipt for requestId:', requestId);
+
+    // Get receipt details first
     const { data: receipt, error: receiptError } = await db.supabase
       .from('payment_receipts')
-      .select('file_path')
+      .select('*')
       .eq('request_id', requestId)
       .single();
 
-    if (receiptError || !receipt) {
+    if (receiptError) {
+      console.error('❌ Receipt fetch error:', receiptError);
+      return res.status(404).json({
+        success: false,
+        message: 'Receipt not found: ' + receiptError.message
+      });
+    }
+
+    if (!receipt) {
+      console.error('❌ Receipt not found for requestId:', requestId);
       return res.status(404).json({
         success: false,
         message: 'Receipt not found'
       });
     }
 
-    // Get request and student info
+    console.log('✅ Found receipt:', receipt.id);
+
+    // Get request details to notify student later
     const { data: request, error: requestError } = await db.supabase
       .from('requests')
       .select('student_id, reference_number, status')
@@ -310,42 +323,59 @@ exports.deleteReceipt = async (req, res) => {
       .single();
 
     if (requestError || !request) {
+      console.error('❌ Request fetch error:', requestError);
       return res.status(404).json({
         success: false,
-        message: 'Request not found'
+        message: 'Request not found: ' + (requestError?.message || 'Unknown error')
       });
     }
 
-    // Delete file from disk
-    try {
-      await fs.unlink(receipt.file_path);
-    } catch (error) {
-      console.error('Error deleting receipt file:', error);
-      // Continue even if file deletion fails
+    console.log('✅ Found request:', request.reference_number);
+
+    // Delete file from disk (non-critical, continue if fails)
+    if (receipt.file_path) {
+      try {
+        await fs.unlink(receipt.file_path);
+        console.log('✅ File deleted from disk:', receipt.file_path);
+      } catch (fileError) {
+        console.warn('⚠️ Could not delete file from disk:', fileError.message);
+        // Continue even if file deletion fails
+      }
     }
 
     // Delete receipt record from database
+    console.log('🗑️ Deleting receipt record from database...');
     const { error: deleteError } = await db.supabase
       .from('payment_receipts')
       .delete()
       .eq('request_id', requestId);
 
     if (deleteError) {
-      console.error('Delete receipt error:', deleteError);
+      console.error('❌ Delete error:', deleteError);
       return res.status(500).json({
         success: false,
-        message: 'Failed to delete receipt'
+        message: 'Failed to delete receipt from database: ' + (deleteError.message || JSON.stringify(deleteError))
       });
     }
 
+    console.log('✅ Receipt deleted successfully');
+
     // Update request status back to Requested
-    await db.supabase
+    console.log('📝 Updating request status to "Requested"...');
+    const { error: updateError } = await db.supabase
       .from('requests')
       .update({ status: 'Requested' })
       .eq('id', requestId);
 
+    if (updateError) {
+      console.error('⚠️ Status update error:', updateError);
+      // Don't fail the whole operation, just log it
+    } else {
+      console.log('✅ Request status updated');
+    }
+
     // Log status change
-    await db.supabase
+    const { error: historyError } = await db.supabase
       .from('request_status_history')
       .insert([{
         request_id: requestId,
@@ -353,15 +383,19 @@ exports.deleteReceipt = async (req, res) => {
         new_status: 'Requested',
         changed_by: req.user.id,
         notes: `Receipt removed by admin. Reason: ${reason || 'No reason provided'}`
-      }])
-      .catch(err => console.error('Error logging status:', err));
+      }]);
+
+    if (historyError) {
+      console.error('⚠️ Error logging status change:', historyError.message);
+    }
 
     // Create notification for student
     const notificationMessage = reason 
       ? `Your payment receipt for request ${request.reference_number} has been removed. Reason: ${reason}. Please upload a new receipt.`
       : `Your payment receipt for request ${request.reference_number} has been removed. Please upload a new receipt.`;
 
-    await db.supabase
+    console.log('📧 Creating notification for student...');
+    const { error: notificationError } = await db.supabase
       .from('notifications')
       .insert([{
         user_id: request.student_id,
@@ -370,19 +404,24 @@ exports.deleteReceipt = async (req, res) => {
         message: notificationMessage,
         reference_id: requestId,
         is_read: false
-      }])
-      .catch(err => console.error('Error creating notification:', err));
+      }]);
+
+    if (notificationError) {
+      console.error('⚠️ Error creating notification:', notificationError.message);
+    }
+
+    console.log('✅ Notification created');
 
     res.json({
       success: true,
-      message: 'Receipt deleted successfully'
+      message: 'Receipt deleted successfully and student has been notified'
     });
 
   } catch (error) {
-    console.error('Delete receipt error:', error);
+    console.error('❌ Unexpected error in deleteReceipt:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete receipt'
+      message: 'Failed to delete receipt: ' + (error.message || String(error))
     });
   }
 };

@@ -778,6 +778,15 @@ input[readonly] {
   height: 40px;
 }
 
+/* Hide number input spinner arrows */
+.qty-box input[type="number"]::-webkit-outer-spin-button,
+.qty-box input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+  margin: 0;
+}
+
 .quantity-btn {
   background-color: #fafaf8;
   border: 1px solid #d8d0b8;
@@ -895,6 +904,13 @@ input[readonly] {
   box-sizing: border-box;
   line-height: 24px;
   vertical-align: middle;
+}
+
+.doc-field select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 12px;
 }
 
 .doc-field select:focus,

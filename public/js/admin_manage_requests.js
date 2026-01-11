@@ -312,7 +312,8 @@ async function openDetailsModal(requestId, event) {
 
     populateDetailsModal(request);
     lastRequestStatus = request.status || null;
-    await loadReceiptPreview(request.id || requestId, { requestStatus: lastRequestStatus });
+    console.log('openDetailsModal - request status:', lastRequestStatus);
+    await loadReceiptPreview(request.id || requestId, { requestStatus: request.status });
     modal.style.display = 'block';
   } catch (err) {
     console.error('Open details error:', err);
@@ -350,8 +351,11 @@ function resetReceiptSection(message = 'No receipt uploaded yet.') {
   const notesEl = document.getElementById('receiptNotes');
   const viewLink = document.getElementById('viewReceiptLink');
 
+  // Store the request status before resetting
+  const savedRequestStatus = lastRequestStatus;
+  
   lastReceiptStatus = null;
-  lastRequestStatus = null;
+  lastRequestStatus = savedRequestStatus;
 
   if (receiptObjectUrl) {
     URL.revokeObjectURL(receiptObjectUrl);
@@ -417,7 +421,11 @@ function resolveReceiptStatus(metaStatus, requestStatus) {
 
 async function loadReceiptPreview(requestId, options = {}) {
   const { preserveStatus = false, requestStatus = null } = options;
-  lastRequestStatus = requestStatus || lastRequestStatus;
+  
+  // Always update lastRequestStatus if provided
+  if (requestStatus) {
+    lastRequestStatus = requestStatus;
+  }
 
   if (!preserveStatus) {
     resetReceiptSection('No receipt uploaded yet.');
@@ -426,7 +434,8 @@ async function loadReceiptPreview(requestId, options = {}) {
     if (placeholder) placeholder.textContent = 'Reloading receipt...';
   }
 
-  // Initialize the status pill after reset so it reflects the latest request status
+  // Set the initial status display with the current request status
+  console.log('loadReceiptPreview - setting status to:', lastRequestStatus);
   setReceiptStatusLabel(lastRequestStatus || 'Pending');
 
   if (!requestId) return;
@@ -459,7 +468,8 @@ async function loadReceiptPreview(requestId, options = {}) {
     if (notesEl) notesEl.textContent = notes;
 
     lastReceiptStatus = resolveReceiptStatus(receipt.verification_status, lastRequestStatus);
-    setReceiptStatusLabel(lastReceiptStatus);
+    // Display the current request status, not the receipt verification status
+    setReceiptStatusLabel(lastRequestStatus || 'Pending');
 
     const fileResponse = await fetch(`${API_BASE}/receipts/${requestId}/receipt/file`, {
       headers: { Authorization: `Bearer ${token}` },

@@ -119,15 +119,24 @@ function renderStatusTimeline(currentStatus) {
 function renderPaymentInfo(request) {
     const paymentCard = document.getElementById('paymentCard');
     const paymentContent = document.getElementById('paymentContent');
+    const verificationMessageCard = document.getElementById('verificationMessageCard');
 
     const needsPayment = ['Requested', 'Verifying'].includes(request.status);
 
     if (!needsPayment) {
         paymentCard.style.display = 'none';
+        verificationMessageCard.style.display = 'none';
         return;
     }
 
     paymentCard.style.display = 'block';
+
+    // Show verification message if status is Verifying
+    if (request.status === 'Verifying') {
+        verificationMessageCard.style.display = 'block';
+    } else {
+        verificationMessageCard.style.display = 'none';
+    }
 
     let html = '';
 
@@ -388,7 +397,14 @@ function renderStatusHistory(history) {
         const changeLabel = item.old_status
             ? `${item.old_status} -> ${item.new_status}`
             : item.new_status;
-        const changeDate = formatDate(item.changed_at, true);
+
+        // Supabase stores timestamps as created_at; keep changed_at as a fallback
+        const changeDate = formatDate(item.created_at || item.changed_at, true);
+
+        const isReceiptRemoved = (item.notes || '').toLowerCase().includes('receipt removed');
+        const notesHtml = item.notes
+            ? `<p class="history-notes${isReceiptRemoved ? ' removal-note' : ''}">${item.notes}</p>`
+            : '';
 
         return `
             <div class="history-item">
@@ -398,7 +414,7 @@ function renderStatusHistory(history) {
                 <div class="history-content">
                     <div class="history-status">${changeLabel}</div>
                     <div class="history-date">Changed: ${changeDate}</div>
-                    ${item.notes ? `<p class="history-notes">${item.notes}</p>` : ''}
+                    ${notesHtml}
                 </div>
             </div>
         `;

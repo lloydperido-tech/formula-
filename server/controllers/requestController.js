@@ -304,9 +304,9 @@ exports.getRequestDetails = async (req, res) => {
       // Fetch status history for this request
       const { data: history, error: historyError } = await db.supabase
         .from('request_status_history')
-        .select('id, old_status, new_status, notes, changed_at, changed_by')
+        .select('id, old_status, new_status, notes, created_at, changed_by')
         .eq('request_id', id)
-        .order('changed_at', { ascending: true });
+        .order('created_at', { ascending: true });
 
       if (historyError) {
         console.error('Error fetching status history:', historyError);
@@ -359,9 +359,9 @@ exports.getRequestDetails = async (req, res) => {
     // Fetch status history for this request
     const { data: history, error: historyError } = await db.supabase
       .from('request_status_history')
-      .select('id, old_status, new_status, notes, changed_at, changed_by')
+      .select('id, old_status, new_status, notes, created_at, changed_by')
       .eq('request_id', id)
-      .order('changed_at', { ascending: true });
+      .order('created_at', { ascending: true });
 
     if (historyError) {
       console.error('Error fetching status history:', historyError);

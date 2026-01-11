@@ -134,7 +134,7 @@
             </div>
             <div>
               <label for="contactNumber">Contact Number</label>
-              <input type="tel" id="contactNumber" name="contactNumber" placeholder="Enter your contact number" />
+              <input type="tel" id="contactNumber" name="contactNumber" readonly />
             </div>
           </div>
 
@@ -175,15 +175,14 @@
         const displayName = user.name || `${firstName} ${lastName}`.trim() || 'User';
         
         document.getElementById('firstName').value = firstName;
-        document.getElementById('middleName').value = userInfo.middleName || '';
+        document.getElementById('middleName').value = userInfo.middleName || user.middleName || '';
         document.getElementById('lastName').value = lastName;
-        document.getElementById('program').value = userInfo.program || '';
+        document.getElementById('program').value = userInfo.program || user.program || '';
         document.getElementById('cvsuEmail').value = userInfo.email || user.email || '';
         document.getElementById('studentNumber').value = userInfo.studentNumber || user.studentNumber || '';
-        document.getElementById('completeAddress').value = userInfo.completeAddress || '';
-        document.getElementById('contactNumber').value = userInfo.contactNumber || '';
+        document.getElementById('completeAddress').value = userInfo.completeAddress || user.address || '';
+        document.getElementById('contactNumber').value = userInfo.contactNumber || user.contactNumber || '';
         document.getElementById('userName').textContent = displayName;
-        
         
         // Create default first document row
         createDocRow(true);

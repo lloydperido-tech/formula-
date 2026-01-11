@@ -68,6 +68,7 @@
           <p class="muted note">Demo accounts</p>
           <ul>
             <li><strong>Student</strong>: student@cvsu.edu.ph / StudentPass123</li>
+            <li><strong>Student2</strong>: student2@cvsu.edu.ph / StudentPass123</li>
             <li><strong>Admin</strong>: admin@cvsu.edu.ph / AdminPass123 + secret code DRS-ADMIN-2025</li>
           </ul>
         </div>
@@ -136,12 +137,12 @@
           const userInfo = {
             firstName: data.user.firstName,
             lastName: data.user.lastName,
-            middleName: '',
+            middleName: data.user.middleName || '',
             email: data.user.email,
             studentNumber: data.user.studentNumber,
             program: data.user.program,
             yearLevel: data.user.yearLevel,
-            contactNumber: '',
+            contactNumber: data.user.contactNumber || '',
             completeAddress: data.user.address || ''
           };
           localStorage.setItem('userInfo', JSON.stringify(userInfo));
